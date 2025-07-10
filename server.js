@@ -2,25 +2,25 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const meldingenRoutes = require('./api/meldingen');
-const unitsRoutes = require('./api/units');
-const luchtalarmRoutes = require('./api/luchtalarm/palen');
-const postenRoutes = require('./api/posten');
+const meldingenRoutes = require('./web/api/meldingen');
+const unitsRoutes = require('./web/api/units');
+const luchtalarmRoutes = require('./web/api/luchtalarm/palen');
+const postenRoutes = require('./web/api/posten');
 const luchtalarmactie = require('./api/luchtalarm/luchtalarm');
-const postalarmactie = require('./api/posten')
-const nlalertactie = require('./api/nlalert')
-const ameberalertacties = require('./api/amber')
+const postalarmactie = require('./web/api/posten')
+const nlalertactie = require('./web/api/nlalert')
+const ameberalertacties = require('./web/api/amber')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'webdeel')));
+app.use(express.static(path.join(__dirname, 'web')));
 
 // Statische root
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'webdeel', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // API-routes
