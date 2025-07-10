@@ -2,13 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const meldingenRoutes = require('./web/api/meldingen');
-const unitsRoutes = require('./web/api/units');
+const meldingenRoutes = require('./public/api/meldingen');
+const unitsRoutes = require('./public/api/units');
 const luchtalarmRoutes = require('./public/api/luchtalarm/palen');
-const postenRoutes = require('./web/api/posten');
+const postenRoutes = require('./public/api/posten');
 const luchtalarmactie = require('./api/luchtalarm/luchtalarm');
-const postalarmactie = require('./web/api/posten')
-const nlalertactie = require('./web/api/nlalert')
+const postalarmactie = require('./public/api/posten')
+const nlalertactie = require('./public/api/nlalert')
 const ameberalertacties = require('./public/api/amber')
 
 const app = express();
