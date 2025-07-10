@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const meldingenRoutes = require('../pages/api/apimeldingen/meldingen.js');
+const meldingenRoutes = require('../pages/api/meldingen/meldingen.js');
 const unitsRoutes = require('../pages/api/apiuntis/units.js');
 const luchtalarmRoutes = require('../pages/api/apiluchtalarm/palen.js');
 const postenRoutes = require('../pages/api/apiposten/posten.js');
