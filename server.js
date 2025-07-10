@@ -4,7 +4,7 @@ const path = require('path');
 
 const meldingenRoutes = require('./web/api/meldingen');
 const unitsRoutes = require('./web/api/units');
-const luchtalarmRoutes = require('./web/api/luchtalarm/palen');
+const luchtalarmRoutes = require('./public/api/luchtalarm/palen');
 const postenRoutes = require('./web/api/posten');
 const luchtalarmactie = require('./api/luchtalarm/luchtalarm');
 const postalarmactie = require('./web/api/posten')
