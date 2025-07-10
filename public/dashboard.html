@@ -834,10 +834,10 @@ auth.onAuthStateChanged(user => {
         console.log('🌐 Start fetchEmergencyReports()');
         // API Configuration
         // https://gmsnederland-production.up.railway.app
-        const API_URL = 'https://gmsnederlandprojecteindencodebase-gmsnederlands-projects.vercel.app';
+        const API_URL = 'https://gmsnederlandprojecteindencodebase.vercel.app';
         const serverId = localStorage.getItem("serverId");
         console.log("✅ Gekozen serverId:", serverId);
-        const API_BASE_URL = 'https://gmsnederlandprojecteindencodebase-gmsnederlands-projects.vercel.app'; // Wijzig dit naar je backend URL
+        const API_BASE_URL = 'https://gmsnederlandprojecteindencodebase.vercel.app'; // Wijzig dit naar je backend URL
         const API_KEY = 'UVg7JOX9vcOHRAQjm1KoxCB6'; // vervang dit met de juiste sleutel
         let currentCallId = null;
         let currentApiKey = localStorage.getItem('apiKey') || '';
