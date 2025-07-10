@@ -9,7 +9,7 @@ const postenRoutes = require('./api/posten');
 const luchtalarmactie = require('./api/luchtalarm/luchtalarm');
 const postalarmactie = require('./api/posten')
 const nlalertactie = require('./api/nlalert')
-const ameberalertacties = require('./api/amber')
+const ameberalertacties = require('./api/apiamber/amber')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
