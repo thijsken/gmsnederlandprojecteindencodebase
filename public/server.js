@@ -2,15 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const meldingenRoutes = require('../api/meldingen');
-const unitsRoutes = require('../api/units');
-const luchtalarmRoutes = require('../api/luchtalarm/palen');
-const postenRoutes = require('../api/posten');
-const luchtalarmactie = require('../api/luchtalarm/luchtalarm');
-const postalarmactie = require('../api/posten')
-const nlalertactie = require('../api/nlalert')
-const ameberalertacties = require('../api/amber')
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
