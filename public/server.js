@@ -2,14 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const meldingenRoutes = require('../pages/api/meldingen/meldingen.js');
-const unitsRoutes = require('../pages/api/apiuntis/units.js');
-const luchtalarmRoutes = require('../pages/api/apiluchtalarm/palen.js');
-const postenRoutes = require('../pages/api/apiposten/posten.js');
-const luchtalarmactie = require('../pages/api/apiluchtalarm/apiluchtalarmacties/actie.js');
-const postalarmactie = require('../pages/api/apiposten/apialarmposten/alarm.js')
-const nlalertactie = require('../pages/api/apinlalert/nlalert.js')
-const ameberalertacties = require('../pages/api/apiamber/amber.js')
+const meldingenRoutes = require('./api/meldingen');
+const unitsRoutes = require('./api/units');
+const luchtalarmRoutes = require('./api/luchtalarm/palen');
+const postenRoutes = require('./api/posten');
+const luchtalarmactie = require('./api/luchtalarm/luchtalarm');
+const postalarmactie = require('./api/posten')
+const nlalertactie = require('./api/nlalert')
+const ameberalertacties = require('./api/amber')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,13 +25,13 @@ app.get('/', (req, res) => {
 
 // API-routes
 app.use('/api/meldingen', meldingenRoutes);
-app.use('/api/apiuntis/units', unitsRoutes);
-app.use('/api/apiluchtalarm/palen', luchtalarmRoutes);
-app.use('/api/apiposten/posten', postenRoutes);
-app.use('/api/apiluchtalarm/apiluchtalarmacties/actie', luchtalarmactie);
-app.use('/api/apiposten/apialarmposten/alarm', postalarmactie);
-app.use('/api/apinlalert/nlalert', nlalertactie);
-app.use('/api/apiamber/amber', ameberalertacties);
+app.use('/api/units', unitsRoutes);
+app.use('/api/luchtalarm/palen', luchtalarmRoutes);
+app.use('/api/posten', postenRoutes);
+app.use('/api/luchtalarm/luchtalarm.js', luchtalarmactie);
+app.use('/api/posten/alarm.js', postalarmactie);
+app.use('/api/nlalert.js', nlalertactie);
+app.use('/api/amber.js', ameberalertacties);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server draait op http://localhost:${PORT}`);
