@@ -2,14 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const meldingenRoutes = require('./api/apimeldingen/meldingen.js');
-const unitsRoutes = require('./api/apiuntis/units.js');
-const luchtalarmRoutes = require('./api/apiluchtalarm/palen.js');
-const postenRoutes = require('./api/apiposten/posten.js');
-const luchtalarmactie = require('./api/apiluchtalarm/apiluchtalarmacties/actie.js');
-const postalarmactie = require('./api/apiposten/apialarmposten/alarm.js')
-const nlalertactie = require('./api/apinlalert/nlalert.js')
-const ameberalertacties = require('./api/apiamber/amber.js')
+const meldingenRoutes = require('../api/apimeldingen/meldingen.js');
+const unitsRoutes = require('../api/apiuntis/units.js');
+const luchtalarmRoutes = require('../api/apiluchtalarm/palen.js');
+const postenRoutes = require('../api/apiposten/posten.js');
+const luchtalarmactie = require('../api/apiluchtalarm/apiluchtalarmacties/actie.js');
+const postalarmactie = require('../api/apiposten/apialarmposten/alarm.js')
+const nlalertactie = require('../api/apinlalert/nlalert.js')
+const ameberalertacties = require('../api/apiamber/amber.js')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
