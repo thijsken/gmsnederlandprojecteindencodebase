@@ -1,4 +1,4 @@
-const { db } = require("../../firebase/firebaseAdmin");
+const { db } = require("../../../web/firebase/firebaseAdmin");
 
 export default async function handler(req, res) {
   const { serverId } = req.query;
