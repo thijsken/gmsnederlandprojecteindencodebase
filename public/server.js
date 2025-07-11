@@ -25,13 +25,13 @@ app.get('/', (req, res) => {
 
 // API-routes
 app.use('/api/apimeldingen/meldingen', meldingenRoutes);
-app.use('/api/units', unitsRoutes);
-app.use('/api/luchtalarm/palen', luchtalarmRoutes);
+app.use('/api/apiuntis/units', unitsRoutes);
+app.use('/api/apiluchtalarm/palen', luchtalarmRoutes);
 app.use('/api/apiposten/posten', postenRoutes);
-app.use('/api/luchtalarm/luchtalarm', luchtalarmactie);
-app.use('/api/posten/alarm', postalarmactie);
+app.use('/api/apiluchtalarm/apiluchtalarmacties/actie', luchtalarmactie);
+app.use('/api/apiposten/apialarmposten/alarm', postalarmactie);
 app.use('/api/apinlalert/nlalert', nlalertactie);
-app.use('/api/amber', ameberalertacties);
+app.use('/api/apiamber/amber', ameberalertacties);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server draait op http://localhost:${PORT}`);
