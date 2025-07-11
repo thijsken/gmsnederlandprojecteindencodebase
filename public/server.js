@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 app.use('/api/meldingen', meldingenRoutes);
 app.use('/api/units', unitsRoutes);
 app.use('/api/luchtalarm/palen', luchtalarmRoutes);
-app.use('/api/posten', postenRoutes);
+app.use('/api/apiposten/posten', postenRoutes);
 app.use('/api/luchtalarm/luchtalarm', luchtalarmactie);
 app.use('/api/posten/alarm', postalarmactie);
 app.use('/api/apinlalert/nlalert', nlalertactie);
