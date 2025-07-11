@@ -1,5 +1,4 @@
-// Gebruik import (ES module style voor Vercel)
-import { db } from "../../public/firebase/firebaseAdmin.js";
+const { db } = require("../../../web/firebase/firebaseAdmin");
 
 export default async function handler(req, res) {
   const { serverId } = req.query;
@@ -9,7 +8,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Controleer of de server bestaat
+    // Controleer of de server bestaat voordat iets wordt gedaan
     const serverSnapshot = await db.ref(`servers/${serverId}`).once('value');
     if (!serverSnapshot.exists()) {
       return res.status(404).json({ error: `Server met id ${serverId} bestaat niet` });
@@ -49,9 +48,7 @@ export default async function handler(req, res) {
         res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
         return res.status(405).json({ error: `Method ${req.method} not allowed` });
     }
-
   } catch (error) {
-    console.error("❌ Fout bij palendata:", error);
     return res.status(500).json({ error: 'Er is iets misgegaan', details: error.message });
   }
 }
