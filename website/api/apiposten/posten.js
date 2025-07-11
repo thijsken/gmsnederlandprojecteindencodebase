@@ -1,4 +1,4 @@
-import { db } from "../../../web/firebase/firebaseAdmin.js";
+import { db } from "../../firebase/firebaseAdmin.js";
 
 function deduplicatePosten(posten) {
   const map = new Map();
