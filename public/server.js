@@ -30,7 +30,7 @@ app.use('/api/luchtalarm/palen', luchtalarmRoutes);
 app.use('/api/posten', postenRoutes);
 app.use('/api/luchtalarm/luchtalarm', luchtalarmactie);
 app.use('/api/posten/alarm', postalarmactie);
-app.use('/api/nlalert', nlalertactie);
+app.use('/api/apinlalert/nlalert', nlalertactie);
 app.use('/api/amber', ameberalertacties);
 
 app.listen(PORT, () => {
