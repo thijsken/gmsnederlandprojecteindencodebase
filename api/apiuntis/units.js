@@ -1,4 +1,4 @@
-import { db } from '../../firebase/firebaseAdmin.js';
+import { db } from '../../public/firebase/firebaseAdmin.js';
 
 export default async function handler(req, res) {
   const { serverId } = req.query;
