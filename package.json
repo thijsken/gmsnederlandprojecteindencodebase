@@ -1,5 +1,5 @@
 {
-  "name": "112system",
+  "name": "gmssystemnederlandv1eindeel",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thijsken/gmsnederlandprojecteindencodebase.git"
+    "url": "git+https://github.com/thijsken/gmsnederlandseindeel.git"
   },
   "keywords": [],
   "author": "",

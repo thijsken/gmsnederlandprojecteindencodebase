@@ -1,3 +1,0 @@
-node_modules
-echo web/serviceAccountKey.json >> .gitignore
-config/firebase-service-account.json
