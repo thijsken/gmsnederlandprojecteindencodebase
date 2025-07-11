@@ -28,10 +28,10 @@ app.use('/api/meldingen', meldingenRoutes);
 app.use('/api/units', unitsRoutes);
 app.use('/api/luchtalarm/palen', luchtalarmRoutes);
 app.use('/api/posten', postenRoutes);
-app.use('/api/luchtalarm/luchtalarm.js', luchtalarmactie);
-app.use('/api/posten/alarm.js', postalarmactie);
-app.use('/api/nlalert.js', nlalertactie);
-app.use('/api/amber.js', ameberalertacties);
+app.use('/api/luchtalarm/luchtalarm', luchtalarmactie);
+app.use('/api/posten/alarm', postalarmactie);
+app.use('/api/nlalert', nlalertactie);
+app.use('/api/amber', ameberalertacties);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server draait op http://localhost:${PORT}`);
