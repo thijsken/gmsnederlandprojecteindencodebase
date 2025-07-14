@@ -28,4 +28,8 @@ if (!admin.apps.length) {
   console.log("[firebaseAdmin] Firebase Admin succesvol geïnitialiseerd.");
 }
 
-export default admin.database();
+const db = admin.database();
+
+console.log("[firebaseAdmin.js] Firebase database object aangemaakt");
+
+export { db };
