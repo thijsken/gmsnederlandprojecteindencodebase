@@ -40,7 +40,7 @@ if (!admin.apps.length) {
   try {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      databaseURL: 'https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app',
+      databaseURL: 'https://gmsnederlandatabase-default-rtdb.europe-west1.firebasedatabase.app',
     });
     console.log('✅ Firebase admin initialized successfully.');
   } catch (error) {
