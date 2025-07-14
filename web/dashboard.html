@@ -258,7 +258,7 @@
                                           <h3 class="text-xl font-semibold mb-4">Helicopter Systeem</h3>
                       <p class="mb-8">roep de helicopter op via dit panel</p>
                       <button
-                        onclick="openHelicopterModal()"
+                        onclick="öpenHelicopterpopup()"
                         class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
                       >
                         Open
@@ -772,26 +772,33 @@
 
   </div>
 </div>
-<div id="helicopterModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden" style="z-index: 9999;">
-  <div class="bg-gray-800 rounded-lg w-full max-w-xl p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-white">Stuur Politiehelikopter</h2>
-      <button onclick="closeHelicopterModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+<div id="helicopterModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
+  <div class="bg-gray-900 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 text-gray-300 flex flex-col">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold">Helicopter Systeem</h2>
+      <button onclick="closehelicopterpopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
     </div>
 
-    <label class="block text-sm font-medium text-white mb-1">Kies Speler</label>
-    <select id="playerSelect" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-4">
-      <option value="">-- Selecteer speler --</option>
+    <!-- Spelerselectie -->
+    <label class="text-sm font-semibold mb-1">Selecteer speler</label>
+    <select id="helicopterPlayerSelect" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 mb-4">
+      <option value="">-- Kies een speler --</option>
     </select>
 
-    <label class="block text-sm font-medium text-white mb-1">Reden (optioneel)</label>
-    <textarea id="helicopterReason" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-4" rows="3" placeholder="Bijvoorbeeld: verdachte vlucht..."></textarea>
+    <!-- Reden invoer -->
+    <label class="text-sm font-semibold mb-1">Reden (optioneel)</label>
+    <textarea id="helicopterReason" rows="3" placeholder="Bijv. verdachte op de vlucht..." class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 mb-4"></textarea>
 
+    <!-- Actieknoppen -->
     <div class="flex justify-end space-x-2">
-      <button onclick="closeHelicopterModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
+      <button onclick="closehelicopterpopup()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">Annuleer</button>
       <button onclick="sendHelicopterCommand()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Stuur Helikopter</button>
     </div>
+
   </div>
+</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -985,38 +992,12 @@ function copyCommunityId() {
     // database funtions
 
     // helicopter popup
-// Voorbeeld-functies voor openen/sluiten popup
-function openHelicopterModal(players) {
-  document.getElementById('helicopterModal').classList.remove('hidden');
-
-  const select = document.getElementById('playerSelect');
-  select.innerHTML = '<option value="">-- Selecteer speler --</option>';
-  players.forEach(player => {
-    const option = document.createElement('option');
-    option.value = player.id;  // unieker dan naam
-    option.textContent = player.name;
-    select.appendChild(option);
-  });
-}
-
-function closeHelicopterModal() {
-  document.getElementById('helicopterModal').classList.add('hidden');
-}
-
-function sendHelicopterCommand() {
-  const playerId = document.getElementById('playerSelect').value;
-  const reason = document.getElementById('helicopterReason').value;
-
-  if (!playerId) {
-    alert("Selecteer een speler.");
-    return;
-  }
-
-  // Hier kun je een webhook, API-call of WebSocket sturen naar je backend of Roblox-server
-  console.log(`Stuur politiehelikopter naar speler ID ${playerId} met reden: ${reason}`);
-
-  closeHelicopterModal();
-}
+    function öpenHelicopterpopup() {
+      document.getElementById('helicopterModal').classList.remove('hidden');
+    }
+    function closehelicopterpopup() {
+      document.getElementById('helicopterModal').classList.add('hidden');
+    }
     
     // RDW Popups
   function openRDW() {
