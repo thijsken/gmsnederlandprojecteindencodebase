@@ -161,6 +161,42 @@
       </div>
     </section>
   </div>
+
+  <!-- Bewerken Popup -->
+<div id="editServerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative">
+    <h2 class="text-xl font-semibold mb-4">Server Bewerken</h2>
+    <form id="editServerForm" class="space-y-4">
+      <input type="hidden" id="editServerId" />
+      <div>
+        <label class="block mb-1 text-sm">Servernaam</label>
+        <input id="editServernaam" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+      </div>
+      <div>
+        <label class="block mb-1 text-sm">Pakkettype</label>
+        <select id="editPakket" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+          <option value="basic">Basis</option>
+          <option value="pro">Professioneel</option>
+          <option value="enterprise">Enterprise</option>
+          <option value="custom">Aangepast</option>
+        </select>
+      </div>
+      <div>
+        <label class="block mb-1 text-sm">Status</label>
+        <select id="editStatus" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+          <option value="actief">Actief</option>
+          <option value="onderhoud">Onderhoud</option>
+          <option value="gesuspendeerd">Gesuspendeerd</option>
+          <option value="uitgeschakeld">Uitgeschakeld</option>
+        </select>
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 rounded-lg">Annuleren</button>
+        <button type="submit" class="px-4 py-2 btn-primary text-white rounded-lg">Opslaan</button>
+      </div>
+    </form>
+  </div>
+</div>
 </main>
 
   <script>
@@ -363,6 +399,38 @@ db.ref('servers').on('value', snapshot => {
         db.ref('servers/' + id).remove();
       }
     }
+
+    function editServer(id) {
+  db.ref('servers/' + id).once('value').then(snapshot => {
+    const data = snapshot.val();
+    document.getElementById('editServerId').value = id;
+    document.getElementById('editServernaam').value = data.servernaam || '';
+    document.getElementById('editPakket').value = data.pakket || 'basic';
+    document.getElementById('editStatus').value = data.status || 'actief';
+    document.getElementById('editServerModal').classList.remove('hidden');
+  });
+}
+
+function closeEditModal() {
+  document.getElementById('editServerModal').classList.add('hidden');
+}
+
+document.getElementById('editServerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('editServerId').value;
+  const updates = {
+    servernaam: document.getElementById('editServernaam').value,
+    pakket: document.getElementById('editPakket').value,
+    status: document.getElementById('editStatus').value
+  };
+  db.ref('servers/' + id).update(updates).then(() => {
+    closeEditModal();
+    loadServers();
+    telActieveServers();
+    telonderhoudactive();
+    teluitgeschakeldServers();
+  });
+});
   </script>
 </body>
 </html>
