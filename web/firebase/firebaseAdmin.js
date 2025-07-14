@@ -1,14 +1,20 @@
 import admin from 'firebase-admin';
 
 if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+
+  if (!serviceAccountJson) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is niet ingesteld.');
+  }
+
+  const serviceAccount = JSON.parse(serviceAccountJson);
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: 'https://gmsnederlandatabase-default-rtdb.europe-west1.firebasedatabase.app'
+    databaseURL: 'https://gmsnederlandatabase-default-rtdb.europe-west1.firebasedatabase.app',
   });
 
-  console.log('✅ Firebase Admin SDK initialized.');
+  console.log('✅ Firebase Admin SDK succesvol geladen.');
 }
 
 const db = admin.database();
