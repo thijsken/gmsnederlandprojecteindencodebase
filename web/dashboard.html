@@ -985,12 +985,38 @@ function copyCommunityId() {
     // database funtions
 
     // helicopter popup
-    function öpenHelicopterpopup() {
-      document.getElementById('helicopterModal').classList.remove('hidden');
-    }
-    function closehelicopterpopup() {
-      document.getElementById('helicopterModal').classList.add('hidden');
-    }
+// Voorbeeld-functies voor openen/sluiten popup
+function openHelicopterModal(players) {
+  document.getElementById('helicopterModal').classList.remove('hidden');
+
+  const select = document.getElementById('playerSelect');
+  select.innerHTML = '<option value="">-- Selecteer speler --</option>';
+  players.forEach(player => {
+    const option = document.createElement('option');
+    option.value = player.id;  // unieker dan naam
+    option.textContent = player.name;
+    select.appendChild(option);
+  });
+}
+
+function closeHelicopterModal() {
+  document.getElementById('helicopterModal').classList.add('hidden');
+}
+
+function sendHelicopterCommand() {
+  const playerId = document.getElementById('playerSelect').value;
+  const reason = document.getElementById('helicopterReason').value;
+
+  if (!playerId) {
+    alert("Selecteer een speler.");
+    return;
+  }
+
+  // Hier kun je een webhook, API-call of WebSocket sturen naar je backend of Roblox-server
+  console.log(`Stuur politiehelikopter naar speler ID ${playerId} met reden: ${reason}`);
+
+  closeHelicopterModal();
+}
     
     // RDW Popups
   function openRDW() {
