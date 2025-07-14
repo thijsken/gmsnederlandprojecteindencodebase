@@ -98,32 +98,92 @@
             <!-- Content Area -->
             <div class="flex-1 overflow-hidden">
                 <!-- Dashboard View -->
-                <div id="dashboardView" class="h-full p-4 flex flex-col">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div class="bg-gray-800 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold mb-2">Actieve meldingen</h3>
-                            <div id="activeCallsCount" class="text-3xl font-bold text-red-500">0</div>
-                        </div>
-                        <div class="bg-gray-800 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold mb-2">Ingeschakelde eenheden</h3>
-                            <div id="activeUnitsCount" class="text-3xl font-bold text-blue-500">0</div>
-                        </div>
-                    </div>
+<!-- Dashboard Meldkamer -->
+<div id="dashboardView" class="h-full p-6 bg-gray-900 text-gray-100 flex flex-col space-y-6">
 
-                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden">
-                        <div class="bg-gray-800 rounded-lg p-4 overflow-hidden flex flex-col">
-                            <h3 class="text-lg font-semibold mb-2">Recente meldingen</h3>
-                            <div id="recentCalls" class="overflow-y-auto sidebar flex-1">
-                                <!-- Dynamisch ingeladen meldingen -->
-                            </div>
-                        </div>
+    <!-- Statistieken Overzicht -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gray-800 rounded-lg p-5 shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300 mb-2">📞 Binnenkomende Telefoontjes</h3>
+            <div id="incomingCallsCount" class="text-4xl font-bold text-yellow-400">0</div>
+            <p class="text-sm text-gray-400 mt-1">Actieve 112-lijnen</p>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-5 shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300 mb-2">🚨 Actieve Meldingen</h3>
+            <div id="activeCallsCount" class="text-4xl font-bold text-red-500">0</div>
+            <p class="text-sm text-gray-400 mt-1">Openstaande incidenten</p>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-5 shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300 mb-2">🚓 Ingezette Eenheden</h3>
+            <div id="activeUnitsCount" class="text-4xl font-bold text-blue-500">0</div>
+            <p class="text-sm text-gray-400 mt-1">Hulpdiensten onderweg</p>
+        </div>
+    </div>
 
-                        <div class="bg-gray-800 rounded-lg p-4 overflow-hidden flex flex-col lg:col-span-2">
-                            <h3 class="text-lg font-semibold mb-2">Live Kaart</h3>
-                            <div id="dashboardMap" class="flex-1 rounded-lg"></div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Hoofdsectie -->
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Recente Meldingen -->
+        <div class="bg-gray-800 rounded-lg p-5 shadow-lg flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-white">📝 Recente Meldingen</h3>
+                <button onclick="openIncidentPopup()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold text-white">
+                    ➕ Nieuwe Melding
+                </button>
+            </div>
+            <div id="recentCalls" class="flex-1 overflow-y-auto space-y-3 pr-2">
+                <p class="text-gray-500 text-sm italic">Nog geen meldingen ontvangen...</p>
+            </div>
+        </div>
+
+        <!-- Live Kaart -->
+        <div class="bg-gray-800 rounded-lg p-5 shadow-lg lg:col-span-2 flex flex-col">
+            <h3 class="text-xl font-semibold text-white mb-4">🗺️ Live Locaties</h3>
+            <div id="dashboardMap" class="flex-1 rounded-lg bg-gray-700">
+                <!-- Kaart wordt hier geladen -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Popup: Nieuwe Melding Aanmaken -->
+<div id="incidentPopup" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
+  <div class="bg-gray-800 rounded-xl shadow-xl w-full max-w-lg p-6 text-gray-300 flex flex-col space-y-4">
+
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-white">Nieuwe Melding Aanmaken</h2>
+      <button onclick="closeIncidentPopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+    </div>
+
+    <label class="text-sm font-semibold">Meldingstype</label>
+    <select id="incidentType" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-2">
+        <option value="">-- Kies type melding --</option>
+        <option value="Brand">🔥 Brand</option>
+        <option value="Ongeval">🚗 Ongeval</option>
+        <option value="Overval">🔫 Overval</option>
+        <option value="Vermissing">🧒 Vermissing</option>
+        <option value="Medisch">🚑 Medische Noodsituatie</option>
+        <option value="Overig">❓ Overig</option>
+    </select>
+
+    <label class="text-sm font-semibold">Locatie van incident</label>
+    <input type="text" id="incidentLocation" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-2" placeholder="Bijv. Stationsplein 5, Utrecht">
+
+    <label class="text-sm font-semibold">Beschrijving</label>
+    <textarea id="incidentDescription" rows="3" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-2" placeholder="Typ aanvullende informatie..."></textarea>
+
+    <div class="flex justify-end space-x-2">
+        <button onclick="closeIncidentPopup()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
+        <button onclick="createIncident()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Melding Aanmaken</button>
+    </div>
+
+    <div id="incidentFeedback" class="text-green-400 text-sm hidden">✅ Melding succesvol aangemaakt!</div>
+
+  </div>
+</div>
+
 
             <!-- Map View -->
             <div id="mapView" class="h-full hidden">
@@ -798,6 +858,39 @@
     </div>
 
   </div>
+</div>
+<!-- Aannamenpunt: Nieuwe Melding Aanmaken -->
+<div id="manualIncidentEntry" class="bg-gray-800 rounded-xl p-6 shadow-lg text-gray-300 flex flex-col space-y-4">
+
+    <h2 class="text-2xl font-bold text-white mb-4">🛎️ Nieuwe Melding Aanmaken</h2>
+
+    <!-- Meldingstype -->
+    <label class="text-sm font-semibold">Meldingstype</label>
+    <select id="incidentType" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-2">
+        <option value="">-- Kies type melding --</option>
+        <option value="Brand">🔥 Brand</option>
+        <option value="Ongeval">🚗 Ongeval</option>
+        <option value="Overval">🔫 Overval</option>
+        <option value="Vermissing">🧒 Vermissing</option>
+        <option value="Medisch">🚑 Medische Noodsituatie</option>
+        <option value="Overig">❓ Overig</option>
+    </select>
+
+    <!-- Locatie -->
+    <label class="text-sm font-semibold">Locatie van het incident</label>
+    <input type="text" id="incidentLocation" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-2" placeholder="Bijv. Stationsplein 5, Utrecht">
+
+    <!-- Beschrijving -->
+    <label class="text-sm font-semibold">Beschrijving</label>
+    <textarea id="incidentDescription" rows="3" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-2" placeholder="Typ hier aanvullende informatie over het incident..."></textarea>
+
+    <!-- Aanmaken-knop -->
+    <button onclick="createIncident()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
+        ➕ Melding Aanmaken
+    </button>
+
+    <!-- Feedback -->
+    <div id="incidentFeedback" class="text-green-400 text-sm hidden">✅ Melding succesvol aangemaakt!</div>
 </div>
 </div>
 
