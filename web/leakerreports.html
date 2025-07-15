@@ -2,10 +2,13 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Leaker Reports | GMS Nederland</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body class="bg-gray-100">
 
@@ -20,12 +23,12 @@
       </div>
     </div>
     <nav class="flex-1 p-4 space-y-2">
-      <a href="admindeel.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg"><i class="fas fa-home mr-3"></i> Dashboard</a>
+      <a href="dashboard.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg"><i class="fas fa-home mr-3"></i> Dashboard</a>
       <a href="support.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg"><i class="fas fa-comments mr-3"></i> SupportChat</a>
       <a href="#" class="flex items-center px-3 py-2 bg-blue-700 rounded-lg"><i class="fas fa-flag mr-3"></i> Leaker Reports</a>
     </nav>
     <div class="p-4 border-t border-blue-700">
-      <button class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
+      <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
         <i class="fas fa-sign-out-alt mr-2"></i> Uitloggen
       </button>
     </div>
@@ -33,11 +36,12 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-6 overflow-y-auto">
-    <h1 class="text-2xl font-bold mb-6">Leaker Reports</h1>
+    <h1 class="text-2xl font-bold mb-4">Leaker Reports</h1>
 
-    <!-- Zoekfunctie -->
-    <div class="mb-6">
-      <input id="zoekInput" type="text" placeholder="Zoek gebruiker of eerdere meldingen..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full" onkeyup="zoekMeldingen()">
+    <!-- Zoekgeschiedenis -->
+    <div class="bg-white rounded-xl shadow p-4 mb-6">
+      <input id="searchHistory" type="text" placeholder="Zoek gebruiker of e-mail..." class="px-4 py-2 border border-gray-300 rounded-lg w-full">
+      <p class="text-xs text-gray-500 mt-2">Tip: controleer ook handmatig in Discord kanaal <strong>#gebruiker-lookup</strong> voor aanvullende details.</p>
     </div>
 
     <!-- Tabel -->
@@ -60,139 +64,126 @@
 </div>
 
 <!-- Popup -->
-<div id="detailPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg">
-    <h2 class="text-xl font-bold mb-4">Melding Details</h2>
-    <div id="popupContent" class="text-sm text-gray-700 mb-4">
-      <!-- Dynamisch gevuld -->
+<div id="popup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">Rapport Details</h2>
+    <div id="popupContent" class="space-y-2 text-sm">
+      <!-- Gevuld via JS -->
     </div>
-    <div class="flex justify-end space-x-2">
-      <button id="actieBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm">Actie Ondernemen</button>
-      <button onclick="sluitPopup()" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg font-semibold text-sm">Sluiten</button>
+    <div class="flex justify-end mt-6 space-x-2">
+      <button onclick="closePopup()" class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg">Sluiten</button>
     </div>
   </div>
 </div>
 
 <script>
-const webhookUrl = "https://discord.com/api/webhooks/1394635081242513418/8pE1tGfd3X4_zedQ9V_ixX_ILZ_xdJTHHO5zCpHBn39-lWrg54YIltMaC0nZp1OCNt_3";
-
-const meldingen = [
-  { gebruiker: 'User123', beschrijving: 'Gegevens gedeeld', status: 'Open', bezwaar: 'Geen', reden: 'Illegaal delen', behandelaar: 'AdminTom' },
-  { gebruiker: 'User456', beschrijving: 'Illegale upload', status: 'In Behandeling', bezwaar: 'Ja', reden: 'Foutmelding - herupload', behandelaar: 'SupportEva' },
-  { gebruiker: 'User789', beschrijving: 'Gevoelige info gelekt', status: 'Open', bezwaar: 'Geen', reden: 'Gelekte screenshots', behandelaar: 'AdminTom' }
-];
-
-let huidigeIndex = null;
-
-function vulTabel() {
-  const tbody = document.getElementById('reportsList');
-  tbody.innerHTML = '';
-  meldingen.forEach((melding, index) => {
-    const statusColor = melding.status === 'Open' ? 'bg-red-100 text-red-600' :
-                        melding.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
-                        'bg-green-100 text-green-600';
-
-    tbody.innerHTML += `
-      <tr>
-        <td class="p-3 font-medium">${melding.gebruiker}</td>
-        <td class="p-3">${melding.beschrijving}</td>
-        <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${melding.status}</span></td>
-        <td class="p-3 text-center">
-          <button onclick="toonPopup(${index})"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
-            Bekijk & Actie
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-function toonPopup(index) {
-  huidigeIndex = index;
-  const melding = meldingen[index];
-  document.getElementById('popupContent').innerHTML = `
-    <p><strong>Gebruiker:</strong> ${melding.gebruiker}</p>
-    <p><strong>Beschrijving:</strong> ${melding.beschrijving}</p>
-    <p><strong>Status:</strong> ${melding.status}</p>
-    <p><strong>Behandelaar:</strong> ${melding.behandelaar}</p>
-    <p><strong>Bezwaar:</strong> ${melding.bezwaar}</p>
-    <p><strong>Reden:</strong> ${melding.reden}</p>
-    <p class="mt-4 text-xs text-gray-500">Voor uitgebreide info: Zoek in Discord kanaal #leaker-lookup op gebruikersnaam.</p>
-  `;
-  document.getElementById('detailPopup').classList.remove('hidden');
-}
-
-function sluitPopup() {
-  document.getElementById('detailPopup').classList.add('hidden');
-}
-
-function zoekMeldingen() {
-  const zoekTerm = document.getElementById('zoekInput').value.toLowerCase();
-  const gefilterd = meldingen.filter(m =>
-    m.gebruiker.toLowerCase().includes(zoekTerm) ||
-    m.beschrijving.toLowerCase().includes(zoekTerm)
-  );
-  const tbody = document.getElementById('reportsList');
-  tbody.innerHTML = '';
-  gefilterd.forEach((melding, index) => {
-    const statusColor = melding.status === 'Open' ? 'bg-red-100 text-red-600' :
-                        melding.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
-                        'bg-green-100 text-green-600';
-
-    tbody.innerHTML += `
-      <tr>
-        <td class="p-3 font-medium">${melding.gebruiker}</td>
-        <td class="p-3">${melding.beschrijving}</td>
-        <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${melding.status}</span></td>
-        <td class="p-3 text-center">
-          <button onclick="toonPopup(${index})"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
-            Bekijk & Actie
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-document.getElementById('actieBtn').addEventListener('click', () => {
-  if (huidigeIndex !== null) {
-    const melding = meldingen[huidigeIndex];
-    melding.status = 'Opgevolgd';
-    stuurDiscordLog(melding);
-    sluitPopup();
-    vulTabel();
-  }
-});
-
-function stuurDiscordLog(melding) {
-  const data = {
-    username: "Leaker Logger",
-    embeds: [{
-      title: "Leaker Report Afgehandeld",
-      color: 16711680,
-      fields: [
-        { name: "Gebruiker", value: melding.gebruiker, inline: true },
-        { name: "Beschrijving", value: melding.beschrijving, inline: false },
-        { name: "Behandelaar", value: melding.behandelaar, inline: true },
-        { name: "Bezwaar", value: melding.bezwaar, inline: true },
-        { name: "Reden", value: melding.reden, inline: false },
-        { name: "Status", value: melding.status, inline: true }
-      ],
-      footer: { text: "Actie direct vanuit het dashboard uitgevoerd." },
-      timestamp: new Date().toISOString()
-    }]
+  // Firebase Config (pas aan)
+  const firebaseConfig = {
+      apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+      authDomain: "gmsnederland.firebaseapp.com",
+      projectId: "gmsnederland",
+      databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
   };
+  firebase.initializeApp(firebaseConfig);
 
-  fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-}
+  const meldingen = [
+    { gebruiker: 'User123', email: 'user123@example.com', pakket: 'Pro', datum: '2024-11-10', reden: 'Gegevens gedeeld', status: 'Open', bezwaar: 'Nee', behandeldDoor: 'Nog niemand' },
+    { gebruiker: 'User456', email: 'user456@example.com', pakket: 'Basic', datum: '2025-02-01', reden: 'Illegale upload', status: 'In Behandeling', bezwaar: 'Ja - Foutmelding', behandeldDoor: 'AdminMike' }
+  ];
 
-vulTabel();
+  const reportsList = document.getElementById('reportsList');
+
+  function updateTable() {
+    reportsList.innerHTML = '';
+    meldingen.forEach((m, index) => {
+      const statusColor = m.status === 'Open' ? 'bg-red-100 text-red-600' :
+                          m.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
+                          'bg-green-100 text-green-600';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="p-3 font-medium">${m.gebruiker}</td>
+        <td class="p-3">${m.reden}</td>
+        <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${m.status}</span></td>
+        <td class="p-3 text-center">
+          <button onclick="openPopup(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
+            Details & Actie
+          </button>
+        </td>
+      `;
+      reportsList.appendChild(tr);
+    });
+  }
+
+  function openPopup(index) {
+    const m = meldingen[index];
+    const popupContent = document.getElementById('popupContent');
+    popupContent.innerHTML = `
+      <p><strong>Gebruiker:</strong> ${m.gebruiker}</p>
+      <p><strong>E-mail:</strong> ${m.email}</p>
+      <p><strong>Pakket:</strong> ${m.pakket}</p>
+      <p><strong>Aankoopdatum:</strong> ${m.datum}</p>
+      <p><strong>Reden Rapport:</strong> ${m.reden}</p>
+      <p><strong>Status:</strong> ${m.status}</p>
+      <p><strong>Bezwaar:</strong> ${m.bezwaar}</p>
+      <p><strong>Behandeld door:</strong> ${m.behandeldDoor}</p>
+      <p><strong>Aantal servers:</strong> <span id="serverCount">Laden...</span></p>
+      <div class="flex justify-end mt-4 space-x-2">
+        <button onclick="confirmActie('blokkeren', ${index})" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Blokkeren</button>
+        <button onclick="confirmActie('afgehandeld', ${index})" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Markeer Afgehandeld</button>
+      </div>
+    `;
+    fetchServerCount(m.gebruiker);
+    document.getElementById('popup').classList.remove('hidden');
+  }
+
+  function fetchServerCount(gebruiker) {
+    firebase.database().ref(`servers/${gebruiker}`).once('value', snapshot => {
+      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      document.getElementById('serverCount').textContent = count;
+    });
+  }
+
+  function closePopup() {
+    document.getElementById('popup').classList.add('hidden');
+  }
+
+  function confirmActie(type, index) {
+    const m = meldingen[index];
+    const bevestiging = confirm(`Weet je zeker dat je wilt ${type} uitvoeren voor ${m.gebruiker}?`);
+    if (!bevestiging) return;
+
+    if (type === 'blokkeren') {
+      m.status = 'Geblokkeerd';
+    } else if (type === 'afgehandeld') {
+      m.status = 'Afgehandeld';
+    }
+    logNaarDiscord(m, type);
+    closePopup();
+    updateTable();
+  }
+
+  function logNaarDiscord(melding, actie) {
+    fetch('https://discord.com/api/webhooks/1394635081242513418/8pE1tGfd3X4_zedQ9V_ixX_ILZ_xdJTHHO5zCpHBn39-lWrg54YIltMaC0nZp1OCNt_3', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embeds: [{
+          title: `Leaker Report Actie: ${actie.toUpperCase()}`,
+          color: actie === 'blokkeren' ? 15158332 : 3066993,
+          fields: [
+            { name: 'Gebruiker', value: melding.gebruiker, inline: true },
+            { name: 'E-mail', value: melding.email, inline: true },
+            { name: 'Reden', value: melding.reden, inline: false },
+            { name: 'Actie uitgevoerd door', value: 'Admin', inline: false }
+          ],
+          timestamp: new Date()
+        }]
+      })
+    });
+  }
+
+  updateTable();
 </script>
 
 </body>
