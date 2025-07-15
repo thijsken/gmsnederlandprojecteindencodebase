@@ -12,7 +12,7 @@
 <div class="flex h-screen">
   <!-- Sidebar -->
   <aside class="w-64 bg-blue-900 text-white flex flex-col">
-    <div class="p-6 flex items-center space-x-3 border-b border-blue-700">
+    <div class="p-6 border-b border-blue-700 flex items-center space-x-3">
       <img src="logogmsnederland.png" class="w-10 h-10" alt="Logo">
       <div>
         <h2 class="text-xl font-bold">GMS Nederland</h2>
@@ -32,104 +32,66 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <h1 class="text-2xl font-bold mb-6">Leaker Reports Overzicht</h1>
-
-    <!-- Statistiek Kaarten -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-lg shadow flex items-center space-x-4">
-        <div class="bg-red-100 p-3 rounded-full">
-          <i class="fas fa-flag text-red-600"></i>
-        </div>
-        <div>
-          <p class="text-gray-600">Totaal Reports</p>
-          <p class="text-2xl font-bold"><span id="totaalReports">0</span></p>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-lg shadow flex items-center space-x-4">
-        <div class="bg-yellow-100 p-3 rounded-full">
-          <i class="fas fa-user-secret text-yellow-600"></i>
-        </div>
-        <div>
-          <p class="text-gray-600">Leakers Gerapporteerd</p>
-          <p class="text-2xl font-bold"><span id="totaalLeakers">0</span></p>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-lg shadow flex items-center space-x-4">
-        <div class="bg-green-100 p-3 rounded-full">
-          <i class="fas fa-check-circle text-green-600"></i>
-        </div>
-        <div>
-          <p class="text-gray-600">Opgevolgd</p>
-          <p class="text-2xl font-bold"><span id="totaalOpgevolgd">0</span></p>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-lg shadow flex items-center space-x-4">
-        <div class="bg-gray-200 p-3 rounded-full">
-          <i class="fas fa-clock text-gray-500"></i>
-        </div>
-        <div>
-          <p class="text-gray-600">In Behandeling</p>
-          <p class="text-2xl font-bold"><span id="totaalInBehandeling">0</span></p>
-        </div>
-      </div>
-    </div>
+  <main class="flex-1 p-6 overflow-y-auto">
+    <h1 class="text-2xl font-bold mb-4">Leaker Reports</h1>
 
     <!-- Tabel -->
-    <section class="bg-white p-6 rounded-xl shadow">
-      <h2 class="text-xl font-semibold mb-4">Meldingenlijst</h2>
-      <div class="relative mb-4">
-        <input type="text" placeholder="Zoek reports of leakers..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full">
-        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full table-auto border">
-          <thead class="bg-gray-100 text-left">
-            <tr>
-              <th class="px-4 py-2 border">Type</th>
-              <th class="px-4 py-2 border">Gebruiker</th>
-              <th class="px-4 py-2 border">Beschrijving</th>
-              <th class="px-4 py-2 border">Datum</th>
-              <th class="px-4 py-2 border">Status</th>
-              <th class="px-4 py-2 border">Actie</th>
-            </tr>
-          </thead>
-          <tbody id="reportsLeakersList">
-            <!-- Dynamisch gevuld via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
+    <div class="bg-white rounded-xl shadow p-4">
+      <table class="w-full table-auto text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3 text-left">Gebruiker</th>
+            <th class="p-3 text-left">Beschrijving</th>
+            <th class="p-3 text-left">Status</th>
+            <th class="p-3 text-center">Actie</th>
+          </tr>
+        </thead>
+        <tbody id="reportsList">
+          <!-- Dynamisch gevuld -->
+        </tbody>
+      </table>
+    </div>
   </main>
 </div>
 
 <script>
-  // Dummy statistieken
-  document.getElementById('totaalReports').innerText = 42;
-  document.getElementById('totaalLeakers').innerText = 17;
-  document.getElementById('totaalOpgevolgd').innerText = 25;
-  document.getElementById('totaalInBehandeling').innerText = 10;
-
-  // Dummy lijst (vervang dit met echte data)
-  const dummyData = [
-    { type: 'Leaker', gebruiker: 'User123', beschrijving: 'Gegevens gelekt', datum: '2025-07-15', status: 'Open' },
-    { type: 'Report', gebruiker: 'Admin45', beschrijving: 'Verdacht gedrag', datum: '2025-07-14', status: 'In Behandeling' }
+  const meldingen = [
+    { gebruiker: 'User123', beschrijving: 'Gegevens gedeeld', status: 'Open' },
+    { gebruiker: 'User456', beschrijving: 'Illegale upload', status: 'In Behandeling' },
+    { gebruiker: 'User789', beschrijving: 'Gevoelige info gelekt', status: 'Open' }
   ];
 
-  const tbody = document.getElementById('reportsLeakersList');
-  dummyData.forEach(item => {
+  const tbody = document.getElementById('reportsList');
+
+  meldingen.forEach((melding, index) => {
     const tr = document.createElement('tr');
+
+    const statusColor = melding.status === 'Open' ? 'bg-red-100 text-red-600' :
+                        melding.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-green-100 text-green-600';
+
     tr.innerHTML = `
-      <td class="px-4 py-2 border">${item.type}</td>
-      <td class="px-4 py-2 border">${item.gebruiker}</td>
-      <td class="px-4 py-2 border">${item.beschrijving}</td>
-      <td class="px-4 py-2 border">${item.datum}</td>
-      <td class="px-4 py-2 border">${item.status}</td>
-      <td class="px-4 py-2 border"><button class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">Bekijk</button></td>
+      <td class="p-3 font-medium">${melding.gebruiker}</td>
+      <td class="p-3">${melding.beschrijving}</td>
+      <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${melding.status}</span></td>
+      <td class="p-3 text-center">
+        <button onclick="neemActie(${index})"
+          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
+          Actie Ondernemen
+        </button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
+
+  function neemActie(index) {
+    const gebruiker = meldingen[index].gebruiker;
+    if (confirm(`Wil je direct actie ondernemen tegen ${gebruiker}?`)) {
+      alert(`Actie uitgevoerd voor ${gebruiker}.`);
+      meldingen[index].status = 'Opgevolgd';
+      location.reload();
+    }
+  }
 </script>
 
 </body>
