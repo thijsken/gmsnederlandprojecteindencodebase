@@ -129,7 +129,7 @@
             <div class="flex-1 overflow-hidden">
 
                 <!-- Helicopter Dashboard View -->
-                <div id="helicopterDashboardView" class="h-full p-6 flex flex-col space-y-6 bg-gray-900">
+                <div id="helicopterDashboardView" class="h-full p-4 flex flex-col hidden">
 
                     <!-- Statistieken -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1638,6 +1638,7 @@ function uploadMapImage() {
             document.getElementById('mapView').classList.add('hidden');
             document.getElementById('unitsView').classList.add('hidden');
             document.getElementById('settingsView').classList.add('hidden');
+            document.getElementById('helicopterDashboardView').classList.add('hidden');
             
             document.getElementById(viewId).classList.remove('hidden');
             
