@@ -124,10 +124,10 @@
       <p><strong>Bezwaar:</strong> ${m.bezwaar}</p>
       <p><strong>Behandeld door:</strong> ${m.behandeldDoor}</p>
       <p><strong>Aantal servers:</strong> <span id="serverCount">Laden...</span></p>
-      <div class="flex justify-end mt-4 space-x-2">
-        <button onclick="confirmActie('blokkeren', ${index})" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Blokkeren</button>
-        <button onclick="confirmActie('afgehandeld', ${index})" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Markeer Afgehandeld</button>
-      </div>
+    <div class="flex flex-wrap justify-center mt-4 gap-3">
+      <button onclick="confirmActie('blokkeren', ${index})" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl font-semibold transition">Blokkeren</button>
+      <button onclick="confirmActie('afgehandeld', ${index})" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl font-semibold transition">Markeer Afgehandeld</button>
+    </div>
     `;
     fetchServerCount(m.gebruiker);
     document.getElementById('popup').classList.remove('hidden');
