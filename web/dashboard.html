@@ -58,7 +58,7 @@
             <button id="settingsBtn" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
                 <i class="fas fa-cog"></i>
             </button>
-            <button id="helicopterBtn" onclick="öpenHelicopterpopup()" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
+            <button id="helicopterDashboardView" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
                 <i class="fas fa-cog"></i>
             </button>
             <div class="mt-auto">
@@ -125,6 +125,69 @@
                     </div>
                 </div>
 
+            <!-- Content Area -->
+                <div class="flex-1 overflow-hidden">
+
+                    <!-- Helicopter Dashboard View -->
+                    <div id="helicopterDashboardView" class="h-full p-4 flex flex-col">
+
+                        <!-- Statistieken -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold mb-2">Actieve Helikopters</h3>
+                                <div id="activeHelicoptersCount" class="text-3xl font-bold text-blue-400">0</div>
+                            </div>
+
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold mb-2">Lopende Missies</h3>
+                                <div id="activeMissionsCount" class="text-3xl font-bold text-red-400">0</div>
+                            </div>
+
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold mb-2">Doelwitten Gevolgd</h3>
+                                <div id="targetsTrackedCount" class="text-3xl font-bold text-yellow-400">0</div>
+                            </div>
+
+                        </div>
+
+                        <!-- Hoofdsectie -->
+                        <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden">
+
+                            <!-- Actieve Missies -->
+                            <div class="bg-gray-800 rounded-lg p-4 overflow-hidden flex flex-col">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-semibold">Actieve Missies</h3>
+                                    <button onclick="openHelicopterPopup()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white font-semibold">
+                                        ➕ Nieuwe Missie
+                                    </button>
+                                </div>
+                                <div id="activeMissionsList" class="overflow-y-auto sidebar flex-1">
+                                    <!-- Dynamisch geladen missies -->
+                                    <p class="text-gray-500 text-sm italic">Geen missies actief...</p>
+                                </div>
+                            </div>
+
+                            <!-- Live Kaart -->
+                            <div class="bg-gray-800 rounded-lg p-4 overflow-hidden flex flex-col lg:col-span-2">
+                                <h3 class="text-lg font-semibold mb-2">Live Surveillance Kaart</h3>
+                                <div id="helicopterMap" class="flex-1 rounded-lg bg-gray-700">
+                                    <!-- Hier komt je kaart -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Live Camerabeeld -->
+                        <div class="bg-gray-800 rounded-lg p-4 overflow-hidden flex flex-col mt-4">
+                            <h3 class="text-lg font-semibold mb-2">Live Camerabeeld Helikopter</h3>
+                            <div id="helicopterVideo" class="flex-1 bg-black rounded-lg flex items-center justify-center h-96">
+                                <p class="text-gray-500 italic">Live videobeeld niet beschikbaar...</p>
+                                <!-- Later een <video> of <img> stream invoegen -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <!-- Map View -->
             <div id="mapView" class="h-full hidden">
             <div class="h-full flex">
@@ -900,6 +963,7 @@ const mainMap = L.map('map', {
         document.getElementById('mapBtn').addEventListener('click', () => showView('mapView'));
         document.getElementById('unitsBtn').addEventListener('click', () => showView('unitsView'));
         document.getElementById('settingsBtn').addEventListener('click', () => showView('settingsView'));
+        document.getElementById('helicopterDashboardView').addEventListener('click', () => showView('helicopterDashboardView'));
         document.getElementById('logoutBtn').addEventListener('click', logout);
 
         // Settings view buttons
@@ -1589,6 +1653,8 @@ function uploadMapImage() {
                 document.getElementById('unitsBtn').classList.add('text-blue-400', 'bg-gray-700');
             } else if (viewId === 'settingsView') {
                 document.getElementById('settingsBtn').classList.add('text-blue-400', 'bg-gray-700');
+            } else if (viewId === 'helicopterDashboardView') {
+              document.getElementById('helicopterDashboardView').classList.add('text-blue-400', 'bg-gray-700');  
             }
         }
 
