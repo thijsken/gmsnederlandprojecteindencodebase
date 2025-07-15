@@ -55,9 +55,7 @@
             <th class="p-3 text-center">Actie</th>
           </tr>
         </thead>
-        <tbody id="reportsList">
-          <!-- Dynamisch gevuld -->
-        </tbody>
+        <tbody id="reportsList"></tbody>
       </table>
     </div>
   </main>
@@ -67,9 +65,7 @@
 <div id="popup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
   <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
     <h2 class="text-xl font-semibold mb-4">Rapport Details</h2>
-    <div id="popupContent" class="space-y-2 text-sm">
-      <!-- Gevuld via JS -->
-    </div>
+    <div id="popupContent" class="space-y-2 text-sm"></div>
     <div class="flex justify-end mt-6 space-x-2">
       <button onclick="closePopup()" class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg">Sluiten</button>
     </div>
@@ -77,7 +73,7 @@
 </div>
 
 <script>
-  // Firebase Config (pas aan)
+  // Firebase Config
   const firebaseConfig = {
       apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
       authDomain: "gmsnederland.firebaseapp.com",
