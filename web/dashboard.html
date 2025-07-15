@@ -58,13 +58,13 @@
             <button id="settingsBtn" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
                 <i class="fas fa-cog"></i>
             </button>
-            <button id="helicopterbutton" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
-                <i class="fas fa-helicopter"></i>
+            <button id="helicopterBtn" onclick="öpenHelicopterpopup()" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
+                <i class="fas fa-cog"></i>
             </button>
             <div class="mt-auto">
-              <button id="logoutBtn" class="text-gray-400 hover:text-red-400 p-2 rounded-lg">
-                <i class="fas fa-sign-out-alt"></i>
-              </button>
+                <button id="logoutBtn" class="text-gray-400 hover:text-red-400 p-2 rounded-lg">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
 
@@ -125,69 +125,6 @@
                     </div>
                 </div>
 
-                <!-- Helicopter Dashboard View -->
-                <div id="helicopterDashboardView" class="h-full p-4 flex flex-col hidden">
-
-                    <!-- Statistieken -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                        <div class="bg-gray-800 rounded-lg p-4 text-center">
-                            <h3 class="text-lg font-semibold text-gray-300 mb-2">🚁 Actieve Helikopters</h3>
-                            <div id="activeHelicoptersCount" class="text-4xl font-bold text-blue-400">0</div>
-                        </div>
-
-                        <div class="bg-gray-800 rounded-lg p-4 text-center">
-                            <h3 class="text-lg font-semibold text-gray-300 mb-2">🎯 Lopende Missies</h3>
-                            <div id="activeMissionsCount" class="text-4xl font-bold text-red-400">0</div>
-                        </div>
-
-                        <div class="bg-gray-800 rounded-lg p-4 text-center">
-                            <h3 class="text-lg font-semibold text-gray-300 mb-2">📍 Gevolgde Targets</h3>
-                            <div id="targetsTrackedCount" class="text-4xl font-bold text-yellow-400">0</div>
-                        </div>
-
-                    </div>
-
-                    <!-- Hoofdsectie -->
-                    <div class="flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6 overflow-hidden">
-
-                        <!-- Missies -->
-                        <div class="bg-gray-800 rounded-lg p-5 shadow flex flex-col overflow-hidden xl:col-span-1">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-xl font-semibold text-white">🚨 Actieve Missies</h3>
-                                <button onclick="openHelicopterpopup()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white font-semibold">
-                                    ➕ Start Missie
-                                </button>
-                            </div>
-                            <div id="activeMissionsList" class="flex-1 overflow-y-auto pr-2">
-                                <p class="text-gray-500 text-sm italic">Nog geen actieve missies...</p>
-                            </div>
-                        </div>
-
-                        <!-- Kaart + Live Beeld -->
-                        <div class="flex flex-col xl:col-span-3 space-y-6">
-
-                            <!-- Grote Kaart -->
-                            <div class="bg-gray-800 rounded-lg p-5 flex flex-col h-[450px] xl:h-[550px] shadow">
-                                <h3 class="text-xl font-semibold text-white mb-3">🗺️ Live Surveillance Kaart</h3>
-                                <div id="helicopterMap" class="flex-1 rounded-lg bg-gray-700">
-                                    <!-- Hier komt de kaart -->
-                                </div>
-                            </div>
-
-                            <!-- Live Camerabeeld -->
-                            <div class="bg-gray-800 rounded-lg p-5 flex flex-col h-[300px] xl:h-[400px] shadow">
-                                <h3 class="text-xl font-semibold text-white mb-3">📡 Live Camerabeeld Helikopter</h3>
-                                <div id="helicopterVideo" class="flex-1 bg-black rounded-lg flex items-center justify-center">
-                                    <p class="text-gray-500 italic">Wachten op livestream...</p>
-                                    <!-- Hier later <video> of <img> invoegen -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-                </div>
             <!-- Map View -->
             <div id="mapView" class="h-full hidden">
             <div class="h-full flex">
@@ -963,7 +900,6 @@ const mainMap = L.map('map', {
         document.getElementById('mapBtn').addEventListener('click', () => showView('mapView'));
         document.getElementById('unitsBtn').addEventListener('click', () => showView('unitsView'));
         document.getElementById('settingsBtn').addEventListener('click', () => showView('settingsView'));
-        document.getElementById('helicopterbutton').addEventListener('click', () => showView('helicopterDashboardView'));
         document.getElementById('logoutBtn').addEventListener('click', logout);
 
         // Settings view buttons
@@ -1635,11 +1571,10 @@ function uploadMapImage() {
             document.getElementById('mapView').classList.add('hidden');
             document.getElementById('unitsView').classList.add('hidden');
             document.getElementById('settingsView').classList.add('hidden');
-            document.getElementById('helicopterDashboardView').classList.add('hidden');
             
             document.getElementById(viewId).classList.remove('hidden');
             
-            const buttons = document.querySelectorAll('#dashboardBtn, #mapBtn, #unitsBtn, #settingsBtn, #helicopterbutton');
+            const buttons = document.querySelectorAll('#dashboardBtn, #mapBtn, #unitsBtn, #settingsBtn');
             buttons.forEach(btn => {
                 btn.classList.remove('text-blue-400', 'bg-gray-700');
                 btn.classList.add('text-gray-400', 'hover:text-blue-400');
@@ -1654,8 +1589,6 @@ function uploadMapImage() {
                 document.getElementById('unitsBtn').classList.add('text-blue-400', 'bg-gray-700');
             } else if (viewId === 'settingsView') {
                 document.getElementById('settingsBtn').classList.add('text-blue-400', 'bg-gray-700');
-            } else if (viewId === 'helicopterDashboardView') {
-              document.getElementById('helicopterbutton').classList.add('text-blue-400', 'bg-gray-700');  
             }
         }
 
