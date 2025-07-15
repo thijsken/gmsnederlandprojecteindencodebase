@@ -58,13 +58,13 @@
             <button id="settingsBtn" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
                 <i class="fas fa-cog"></i>
             </button>
-            <button id="helicopterDashboardView" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
-                <i class="fas fa-cog"></i>
+            <button id="helicopterbutton" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
+                <i class="fas fa-helicopter"></i>
             </button>
             <div class="mt-auto">
-                <button id="logoutBtn" class="text-gray-400 hover:text-red-400 p-2 rounded-lg">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
+              <button id="logoutBtn" class="text-gray-400 hover:text-red-400 p-2 rounded-lg">
+                <i class="fas fa-sign-out-alt"></i>
+              </button>
             </div>
         </div>
 
@@ -966,7 +966,7 @@ const mainMap = L.map('map', {
         document.getElementById('mapBtn').addEventListener('click', () => showView('mapView'));
         document.getElementById('unitsBtn').addEventListener('click', () => showView('unitsView'));
         document.getElementById('settingsBtn').addEventListener('click', () => showView('settingsView'));
-        document.getElementById('helicopterDashboardView').addEventListener('click', () => showView('helicopterDashboardView'));
+        document.getElementById('helicopterbutton').addEventListener('click', () => showView('helicopterDashboardView'));
         document.getElementById('logoutBtn').addEventListener('click', logout);
 
         // Settings view buttons
@@ -1641,7 +1641,7 @@ function uploadMapImage() {
             
             document.getElementById(viewId).classList.remove('hidden');
             
-            const buttons = document.querySelectorAll('#dashboardBtn, #mapBtn, #unitsBtn, #settingsBtn');
+            const buttons = document.querySelectorAll('#dashboardBtn, #mapBtn, #unitsBtn, #settingsBtn #helicopterbutton');
             buttons.forEach(btn => {
                 btn.classList.remove('text-blue-400', 'bg-gray-700');
                 btn.classList.add('text-gray-400', 'hover:text-blue-400');
@@ -1657,7 +1657,7 @@ function uploadMapImage() {
             } else if (viewId === 'settingsView') {
                 document.getElementById('settingsBtn').classList.add('text-blue-400', 'bg-gray-700');
             } else if (viewId === 'helicopterDashboardView') {
-              document.getElementById('helicopterDashboardView').classList.add('text-blue-400', 'bg-gray-700');  
+              document.getElementById('helicopterbutton').classList.add('text-blue-400', 'bg-gray-700');  
             }
         }
 
