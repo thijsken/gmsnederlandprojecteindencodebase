@@ -409,6 +409,7 @@ db.ref('servers').on('value', snapshot => {
         const data = snapshot.val();
         document.getElementById('editServerId').value = id;
         document.getElementById('editServernaam').value = data.servernaam || '';
+        document.getElementById('editgebruikersnaam').value = data.gebruiker || '';
         document.getElementById('editPakket').value = data.pakket || 'basic';
         document.getElementById('editStatus').value = data.status || 'actief';
         document.getElementById('editServerModal').classList.remove('hidden');
@@ -424,6 +425,7 @@ document.getElementById('editServerForm').addEventListener('submit', function(e)
   const id = document.getElementById('editServerId').value;
   const updates = {
     servernaam: document.getElementById('editServernaam').value,
+    gebruiker: document.getElementById('editgebruikersnaam').value,
     pakket: document.getElementById('editPakket').value,
     status: document.getElementById('editStatus').value
   };
