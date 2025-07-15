@@ -125,149 +125,138 @@
                     </div>
                 </div>
 
-            <!-- Map View -->
-            <div id="mapView" class="h-full hidden">
-            <div class="h-full flex">
+                  <!-- Map View -->
+                  <div id="mapView" class="h-full hidden">
+                  <div class="h-full flex">
 
-                <!-- Kaart -->
-                <div class="flex-1 p-4">
-                <div id="map" class="h-full rounded-lg"></div>
-                </div>
-
-                <!-- Sidebar -->
-                <div class="w-80 bg-gray-800 p-4 overflow-y-auto sidebar flex flex-col space-y-4">
-
-                <!-- Titel -->
-                <div>
-                    <h3 class="text-lg font-semibold text-white mb-2">🚨 Acties</h3>
-
-                    <!-- Knoppen -->
-                    <div class="flex flex-col space-y-2">
-                    <button onclick="openAmberModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded w-full">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>Start Amber Alert
-                    </button>
-                    <button onclick="openP2000Modal()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded w-full">
-                        <i class="fas fa-bullhorn mr-2"></i>P2000 Alarm
-                    </button>
-                    <button onclick="openNLAlertModal()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded w-full">
-                        <i class="fas fa-bullhorn mr-2"></i>Start NL-Alert
-                    </button>
-                    <div id="amberTable" class="space-y-2">
-                    <!-- Dynamisch gevulde Amber Alerts -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Meldingenlijst -->
-                <div>
-                    <h3 class="text-lg font-semibold text-white mt-4 mb-2">📋 Meldingen</h3>
-                    <div id="callList" class="space-y-2">
-                    <!-- Dynamisch ingeladen meldingen -->
-                    </div>
-                </div>
-
-                </div>
-            </div>
-            </div>
-
-                <!-- database View -->
-              <div id="unitsView" class="h-full p-6 overflow-y-auto max-w-6xl mx-auto">
-
-                <h2 class="text-2xl font-bold mb-8 text-white text-center">📚 Database & Systemen</h2>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  
-                  <!-- ANPR kaart -->
-                  <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
-                    <h3 class="text-xl font-semibold mb-4">🚔 ANPR – Kentekenherkenning</h3>
-                    <p class="mb-4">Scan en controleer kentekens automatisch.</p>
-                    <input 
-                      type="text" 
-                      id="anprKentekenInput" 
-                      placeholder="Voer kenteken in..." 
-                      class="mb-4 px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    />
-                    <button 
-                      onclick="scanKenteken()" 
-                      class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-                    >
-                      Scan & Controleer
-                    </button>
-                      <p id="anprResult" class="text-sm min-h-[1.5rem]"></p>
-                  </div>
-
-                  <!-- C2000 kaart -->
-                  <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
-                    <h3 class="text-xl font-semibold mb-4">📡 C2000 – Communicatiesysteem</h3>
-                    <p class="mb-8">Landelijk communicatienetwerk voor hulpdiensten.</p>
-                    <button 
-                      onclick="alert('C2000 systeem openen')" 
-                      class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-                    >
-                      Open
-                    </button>
-                  </div>
-
-                  <!-- BVH kaart -->
-                  <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
-                    <h3 class="text-xl font-semibold mb-4">🗃️ BVH – Basis Voorziening Handhaving</h3>
-                    <p class="mb-8">Politie-incidentregistratie en processen-verbaal.</p>
-                    <button 
-                      onclick="alert('BVH systeem openen')" 
-                      class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-                    >
-                      Open
-                    </button>
-                  </div>
-
-                  <!-- RDW kaart -->
-                  <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
-                    <h3 class="text-xl font-semibold mb-4">🚗 RDW Voertuiginformatie</h3>
-                    <p class="mb-8">Controle van voertuiggegevens, APK en eigendom.</p>
-                    <button 
-                      onclick="openRDW()" 
-                      class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-                    >
-                      Open
-                    </button>
-                  </div>
-                  <!--🔍 CIOT – Onderzoek Telecommunicatie-->
-                      <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
-                        <h3 class="text-xl font-semibold mb-4">🔍 CIOT – Onderzoek Telecommunicatie</h3>
-                        <p class="mb-8">Toegang tot NAW-gegevens van telecomaanbieders.</p>
-                        <button
-                          onclick="openCIOT()"
-                          class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-                        >
-                          Open
-                        </button>
+                      <!-- Kaart -->
+                      <div class="flex-1 p-4">
+                      <div id="map" class="h-full rounded-lg"></div>
                       </div>
-                  <!--Liveopx voor systemen-ipat-->
-                  <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
-                    <h3 class="text-xl font-semibold mb-4">Liveopx Systeem</h3>
-                    <p class="mb-8">de info voor all hulpdiensten bij meldingen bijwerken</p>
-                    <button 
-                      onclick="openliveopxpopup()" 
-                      class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-                    >
-                      Open
-                    </button>
-                  </div>  
-                  <!--ai helicopter-->
-                  <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
-                                          <h3 class="text-xl font-semibold mb-4">Helicopter Systeem</h3>
-                      <p class="mb-8">roep de helicopter op via dit panel</p>
-                      <button
-                        onclick="openHelicopterpopup()"
-                        class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-                      >
-                        Open
-                      </button>
+
+                      <!-- Sidebar -->
+                      <div class="w-80 bg-gray-800 p-4 overflow-y-auto sidebar flex flex-col space-y-4">
+
+                      <!-- Titel -->
+                      <div>
+                          <h3 class="text-lg font-semibold text-white mb-2">🚨 Acties</h3>
+
+                          <!-- Knoppen -->
+                          <div class="flex flex-col space-y-2">
+                          <button onclick="openAmberModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded w-full">
+                              <i class="fas fa-exclamation-triangle mr-2"></i>Start Amber Alert
+                          </button>
+                          <button onclick="openP2000Modal()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded w-full">
+                              <i class="fas fa-bullhorn mr-2"></i>P2000 Alarm
+                          </button>
+                          <button onclick="openNLAlertModal()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded w-full">
+                              <i class="fas fa-bullhorn mr-2"></i>Start NL-Alert
+                          </button>
+                          <div id="amberTable" class="space-y-2">
+                          <!-- Dynamisch gevulde Amber Alerts -->
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- Meldingenlijst -->
+                      <div>
+                          <h3 class="text-lg font-semibold text-white mt-4 mb-2">📋 Meldingen</h3>
+                          <div id="callList" class="space-y-2">
+                          <!-- Dynamisch ingeladen meldingen -->
+                          </div>
+                      </div>
+
+                      </div>
+                  </div>
+                  </div>
+
+                      <!-- database View -->
+                    <div id="unitsView" class="h-full p-6 overflow-y-auto max-w-6xl mx-auto">
+
+                      <h2 class="text-2xl font-bold mb-8 text-white text-center">📚 Database & Systemen</h2>
+
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        
+                        <!-- ANPR kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">🚔 ANPR – Kentekenherkenning</h3>
+                          <p class="mb-4">Scan en controleer kentekens automatisch.</p>
+                          <input 
+                            type="text" 
+                            id="anprKentekenInput" 
+                            placeholder="Voer kenteken in..." 
+                            class="mb-4 px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                          />
+                          <button 
+                            onclick="scanKenteken()" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Scan & Controleer
+                          </button>
+                            <p id="anprResult" class="text-sm min-h-[1.5rem]"></p>
+                        </div>
+
+                        <!-- C2000 kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">📡 C2000 – Communicatiesysteem</h3>
+                          <p class="mb-8">Landelijk communicatienetwerk voor hulpdiensten.</p>
+                          <button 
+                            onclick="alert('C2000 systeem openen')" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
+                        </div>
+
+                        <!-- BVH kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">🗃️ BVH – Basis Voorziening Handhaving</h3>
+                          <p class="mb-8">Politie-incidentregistratie en processen-verbaal.</p>
+                          <button 
+                            onclick="alert('BVH systeem openen')" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
+                        </div>
+
+                        <!-- RDW kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">🚗 RDW Voertuiginformatie</h3>
+                          <p class="mb-8">Controle van voertuiggegevens, APK en eigendom.</p>
+                          <button 
+                            onclick="openRDW()" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
+                        </div>
+                        <!--🔍 CIOT – Onderzoek Telecommunicatie-->
+                            <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                              <h3 class="text-xl font-semibold mb-4">🔍 CIOT – Onderzoek Telecommunicatie</h3>
+                              <p class="mb-8">Toegang tot NAW-gegevens van telecomaanbieders.</p>
+                              <button
+                                onclick="openCIOT()"
+                                class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                              >
+                                Open
+                              </button>
+                            </div>
+                        <!--Liveopx voor systemen-ipat-->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">Liveopx Systeem</h3>
+                          <p class="mb-8">de info voor all hulpdiensten bij meldingen bijwerken</p>
+                          <button 
+                            onclick="openliveopxpopup()" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
                     </div>  
                   </div>
               </div>
             </div>
-                             <!-- Settings View -->
+                  <!-- Settings View -->
                   <div id="settingsView" class="h-full hidden p-6 overflow-y-auto bg-gray-900 text-gray-200 font-sans">
                     <div class="max-w-5xl mx-auto space-y-10">
                       <h2 class="text-4xl font-bold tracking-tight text-white border-b border-gray-700 pb-4">
@@ -393,7 +382,69 @@
                         </div>
                       </div>
                     </div>
+            </div>
+                  <!-- Helicopter Dashboard View -->
+                  <div id="helicopterDashboardView" class="h-full hidden p-6 flex flex-col space-y-6 bg-gray-900">
+
+                      <!-- Statistieken -->
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                          <div class="bg-gray-800 rounded-lg p-4 text-center">
+                              <h3 class="text-lg font-semibold text-gray-300 mb-2">🚁 Actieve Helikopters</h3>
+                              <div id="activeHelicoptersCount" class="text-4xl font-bold text-blue-400">0</div>
+                          </div>
+
+                          <div class="bg-gray-800 rounded-lg p-4 text-center">
+                              <h3 class="text-lg font-semibold text-gray-300 mb-2">🎯 Lopende Missies</h3>
+                              <div id="activeMissionsCount" class="text-4xl font-bold text-red-400">0</div>
+                          </div>
+
+                          <div class="bg-gray-800 rounded-lg p-4 text-center">
+                              <h3 class="text-lg font-semibold text-gray-300 mb-2">📍 Gevolgde Targets</h3>
+                              <div id="targetsTrackedCount" class="text-4xl font-bold text-yellow-400">0</div>
+                          </div>
+
+                      </div>
+
+                      <!-- Hoofdsectie -->
+                      <div class="flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6 overflow-hidden">
+
+                          <!-- Missies -->
+                          <div class="bg-gray-800 rounded-lg p-5 shadow flex flex-col overflow-hidden xl:col-span-1">
+                              <div class="flex justify-between items-center mb-4">
+                                  <h3 class="text-xl font-semibold text-white">🚨 Actieve Missies</h3>
+                                  <button onclick="openHelicopterPopup()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white font-semibold">
+                                      ➕ Start Missie
+                                  </button>
+                              </div>
+                              <div id="activeMissionsList" class="flex-1 overflow-y-auto pr-2">
+                                  <p class="text-gray-500 text-sm italic">Nog geen actieve missies...</p>
+                              </div>
+                          </div>
+
+                          <!-- Kaart + Live Beeld -->
+                          <div class="flex flex-col xl:col-span-3 space-y-6">
+
+                              <!-- Grote Kaart -->
+                              <div class="bg-gray-800 rounded-lg p-5 flex flex-col h-[450px] xl:h-[550px] shadow">
+                                  <h3 class="text-xl font-semibold text-white mb-3">🗺️ Live Surveillance Kaart</h3>
+                                  <div id="helicopterMap" class="flex-1 rounded-lg bg-gray-700">
+                                      <!-- Hier komt de kaart -->
+                                  </div>
+                              </div>
+
+                              <!-- Live Camerabeeld -->
+                              <div class="bg-gray-800 rounded-lg p-5 flex flex-col h-[300px] xl:h-[400px] shadow">
+                                  <h3 class="text-xl font-semibold text-white mb-3">📡 Live Camerabeeld Helikopter</h3>
+                                  <div id="helicopterVideo" class="flex-1 bg-black rounded-lg flex items-center justify-center">
+                                      <p class="text-gray-500 italic">Wachten op livestream...</p>
+                                      <!-- Hier later <video> of <img> invoegen -->
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
                   </div>
+              </div>
         </div>
     </div>
 
@@ -1574,7 +1625,7 @@ function uploadMapImage() {
             
             document.getElementById(viewId).classList.remove('hidden');
             
-            const buttons = document.querySelectorAll('#dashboardBtn, #mapBtn, #unitsBtn, #settingsBtn');
+            const buttons = document.querySelectorAll('#dashboardBtn, #mapBtn, #unitsBtn, #settingsBtn, #helicopterBtn');
             buttons.forEach(btn => {
                 btn.classList.remove('text-blue-400', 'bg-gray-700');
                 btn.classList.add('text-gray-400', 'hover:text-blue-400');
@@ -1589,6 +1640,8 @@ function uploadMapImage() {
                 document.getElementById('unitsBtn').classList.add('text-blue-400', 'bg-gray-700');
             } else if (viewId === 'settingsView') {
                 document.getElementById('settingsBtn').classList.add('text-blue-400', 'bg-gray-700');
+            } else if (viewId === 'helicopterDashboardView') {
+                document.getElementById('helicopterBtn').classList.add('text-blue-400', 'bg-gray-700');
             }
         }
 
