@@ -4,14 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Leaker Reports | GMS Nederland</title>
-  <link rel="icon" href="favicon.ico.png" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
 
 <div class="flex h-screen">
-  
   <!-- Sidebar -->
   <aside class="w-64 bg-blue-900 text-white flex flex-col">
     <div class="p-6 border-b border-blue-700 flex items-center space-x-3">
@@ -22,15 +20,9 @@
       </div>
     </div>
     <nav class="flex-1 p-4 space-y-2">
-      <a href="dashboard.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg">
-        <i class="fas fa-home mr-3"></i> Dashboard
-      </a>
-      <a href="support.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg">
-        <i class="fas fa-comments mr-3"></i> SupportChat
-      </a>
-      <a href="#" class="flex items-center px-3 py-2 bg-blue-700 rounded-lg">
-        <i class="fas fa-flag mr-3"></i> Leaker Reports
-      </a>
+      <a href="admindeel.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg"><i class="fas fa-home mr-3"></i> Dashboard</a>
+      <a href="support.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg"><i class="fas fa-comments mr-3"></i> SupportChat</a>
+      <a href="#" class="flex items-center px-3 py-2 bg-blue-700 rounded-lg"><i class="fas fa-flag mr-3"></i> Leaker Reports</a>
     </nav>
     <div class="p-4 border-t border-blue-700">
       <button class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
@@ -41,35 +33,20 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-6 overflow-y-auto">
-    <h1 class="text-2xl font-bold mb-6">Leaker Reports Dashboard</h1>
+    <h1 class="text-2xl font-bold mb-6">Leaker Reports</h1>
 
-    <!-- Dashboard Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white p-4 rounded-xl shadow text-center">
-        <p class="text-gray-600">Actieve Meldingen</p>
-        <p id="openCount" class="text-2xl font-bold text-blue-600">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl shadow text-center">
-        <p class="text-gray-600">In Behandeling</p>
-        <p id="processingCount" class="text-2xl font-bold text-yellow-500">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl shadow text-center">
-        <p class="text-gray-600">Bezwaar</p>
-        <p id="appealCount" class="text-2xl font-bold text-orange-500">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl shadow text-center">
-        <p class="text-gray-600">Afgehandeld</p>
-        <p id="handledCount" class="text-2xl font-bold text-green-500">0</p>
-      </div>
+    <!-- Zoekfunctie -->
+    <div class="mb-6">
+      <input id="zoekInput" type="text" placeholder="Zoek gebruiker of eerdere meldingen..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full" onkeyup="zoekMeldingen()">
     </div>
 
-    <!-- Reports Table -->
+    <!-- Tabel -->
     <div class="bg-white rounded-xl shadow p-4">
       <table class="w-full table-auto text-sm">
         <thead class="bg-gray-100">
           <tr>
             <th class="p-3 text-left">Gebruiker</th>
-            <th class="p-3 text-left">Reden</th>
+            <th class="p-3 text-left">Beschrijving</th>
             <th class="p-3 text-left">Status</th>
             <th class="p-3 text-center">Actie</th>
           </tr>
@@ -82,98 +59,140 @@
   </main>
 </div>
 
-<!-- Popup Modal -->
-<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white rounded-xl p-6 w-96">
-    <h2 id="modalUser" class="text-xl font-bold mb-2"></h2>
-    <p id="modalReason" class="mb-2 text-gray-700"></p>
-    <p id="modalAppeal" class="mb-4 text-sm text-orange-600"></p>
+<!-- Popup -->
+<div id="detailPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg">
+    <h2 class="text-xl font-bold mb-4">Melding Details</h2>
+    <div id="popupContent" class="text-sm text-gray-700 mb-4">
+      <!-- Dynamisch gevuld -->
+    </div>
     <div class="flex justify-end space-x-2">
-      <button onclick="updateStatus('Geblokkeerd')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs">Blokkeer</button>
-      <button onclick="updateStatus('Afgehandeld')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs">Markeer Afgehandeld</button>
-      <button onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg text-xs">Sluiten</button>
+      <button id="actieBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm">Actie Ondernemen</button>
+      <button onclick="sluitPopup()" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg font-semibold text-sm">Sluiten</button>
     </div>
   </div>
 </div>
 
 <script>
-  const meldingen = [
-    { gebruiker: 'User123', reden: 'Gegevens gedeeld.', status: 'Open', bezwaar: 'Ik wist niet dat dit geheim was.' },
-    { gebruiker: 'User456', reden: 'Illegale upload.', status: 'In Behandeling', bezwaar: '' },
-    { gebruiker: 'User789', reden: 'Gevoelige info gelekt.', status: 'Open', bezwaar: 'Ik vraag bezwaar wegens vergissing.' }
-  ];
+const webhookUrl = "https://discord.com/api/webhooks/JOUW-WEBHOOK-HIER";
 
-  let selectedReport = null;
+const meldingen = [
+  { gebruiker: 'User123', beschrijving: 'Gegevens gedeeld', status: 'Open', bezwaar: 'Geen', reden: 'Illegaal delen', behandelaar: 'AdminTom' },
+  { gebruiker: 'User456', beschrijving: 'Illegale upload', status: 'In Behandeling', bezwaar: 'Ja', reden: 'Foutmelding - herupload', behandelaar: 'SupportEva' },
+  { gebruiker: 'User789', beschrijving: 'Gevoelige info gelekt', status: 'Open', bezwaar: 'Geen', reden: 'Gelekte screenshots', behandelaar: 'AdminTom' }
+];
 
-  function renderTable() {
-    const tbody = document.getElementById('reportsList');
-    tbody.innerHTML = '';
+let huidigeIndex = null;
 
-    let counts = { Open: 0, 'In Behandeling': 0, Bezwaar: 0, Afgehandeld: 0 };
+function vulTabel() {
+  const tbody = document.getElementById('reportsList');
+  tbody.innerHTML = '';
+  meldingen.forEach((melding, index) => {
+    const statusColor = melding.status === 'Open' ? 'bg-red-100 text-red-600' :
+                        melding.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-green-100 text-green-600';
 
-    meldingen.forEach((melding, index) => {
-      const tr = document.createElement('tr');
-      const statusColor =
-        melding.status === 'Open' ? 'bg-red-100 text-red-600' :
-        melding.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
-        melding.status === 'Afgehandeld' ? 'bg-green-100 text-green-600' :
-        'bg-gray-100 text-gray-600';
-
-      if (melding.bezwaar) counts.Bezwaar++;
-      counts[melding.status] = (counts[melding.status] || 0) + 1;
-
-      tr.innerHTML = `
+    tbody.innerHTML += `
+      <tr>
         <td class="p-3 font-medium">${melding.gebruiker}</td>
-        <td class="p-3">${melding.reden}</td>
+        <td class="p-3">${melding.beschrijving}</td>
         <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${melding.status}</span></td>
         <td class="p-3 text-center">
-          <button onclick="openModal(${index})"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold">
-            Details & Actie
+          <button onclick="toonPopup(${index})"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
+            Bekijk & Actie
           </button>
         </td>
-      `;
-      tbody.appendChild(tr);
-    });
+      </tr>
+    `;
+  });
+}
 
-    document.getElementById('openCount').innerText = counts.Open || 0;
-    document.getElementById('processingCount').innerText = counts['In Behandeling'] || 0;
-    document.getElementById('appealCount').innerText = counts.Bezwaar || 0;
-    document.getElementById('handledCount').innerText = counts.Afgehandeld || 0;
+function toonPopup(index) {
+  huidigeIndex = index;
+  const melding = meldingen[index];
+  document.getElementById('popupContent').innerHTML = `
+    <p><strong>Gebruiker:</strong> ${melding.gebruiker}</p>
+    <p><strong>Beschrijving:</strong> ${melding.beschrijving}</p>
+    <p><strong>Status:</strong> ${melding.status}</p>
+    <p><strong>Behandelaar:</strong> ${melding.behandelaar}</p>
+    <p><strong>Bezwaar:</strong> ${melding.bezwaar}</p>
+    <p><strong>Reden:</strong> ${melding.reden}</p>
+    <p class="mt-4 text-xs text-gray-500">Voor uitgebreide info: Zoek in Discord kanaal #leaker-lookup op gebruikersnaam.</p>
+  `;
+  document.getElementById('detailPopup').classList.remove('hidden');
+}
+
+function sluitPopup() {
+  document.getElementById('detailPopup').classList.add('hidden');
+}
+
+function zoekMeldingen() {
+  const zoekTerm = document.getElementById('zoekInput').value.toLowerCase();
+  const gefilterd = meldingen.filter(m =>
+    m.gebruiker.toLowerCase().includes(zoekTerm) ||
+    m.beschrijving.toLowerCase().includes(zoekTerm)
+  );
+  const tbody = document.getElementById('reportsList');
+  tbody.innerHTML = '';
+  gefilterd.forEach((melding, index) => {
+    const statusColor = melding.status === 'Open' ? 'bg-red-100 text-red-600' :
+                        melding.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-green-100 text-green-600';
+
+    tbody.innerHTML += `
+      <tr>
+        <td class="p-3 font-medium">${melding.gebruiker}</td>
+        <td class="p-3">${melding.beschrijving}</td>
+        <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${melding.status}</span></td>
+        <td class="p-3 text-center">
+          <button onclick="toonPopup(${index})"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
+            Bekijk & Actie
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+document.getElementById('actieBtn').addEventListener('click', () => {
+  if (huidigeIndex !== null) {
+    const melding = meldingen[huidigeIndex];
+    melding.status = 'Opgevolgd';
+    stuurDiscordLog(melding);
+    sluitPopup();
+    vulTabel();
   }
+});
 
-  function openModal(index) {
-    selectedReport = index;
-    const melding = meldingen[index];
-    document.getElementById('modalUser').innerText = melding.gebruiker;
-    document.getElementById('modalReason').innerText = 'Reden: ' + melding.reden;
-    document.getElementById('modalAppeal').innerText = melding.bezwaar ? 'Bezwaar: ' + melding.bezwaar : 'Geen bezwaar ingediend.';
-    document.getElementById('modal').classList.remove('hidden');
-  }
+function stuurDiscordLog(melding) {
+  const data = {
+    username: "Leaker Logger",
+    embeds: [{
+      title: "Leaker Report Afgehandeld",
+      color: 16711680,
+      fields: [
+        { name: "Gebruiker", value: melding.gebruiker, inline: true },
+        { name: "Beschrijving", value: melding.beschrijving, inline: false },
+        { name: "Behandelaar", value: melding.behandelaar, inline: true },
+        { name: "Bezwaar", value: melding.bezwaar, inline: true },
+        { name: "Reden", value: melding.reden, inline: false },
+        { name: "Status", value: melding.status, inline: true }
+      ],
+      footer: { text: "Actie direct vanuit het dashboard uitgevoerd." },
+      timestamp: new Date().toISOString()
+    }]
+  };
 
-  function closeModal() {
-    document.getElementById('modal').classList.add('hidden');
-  }
+  fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+}
 
-  function updateStatus(newStatus) {
-    if (selectedReport !== null) {
-      const melding = meldingen[selectedReport];
-      melding.status = newStatus;
-      closeModal();
-      renderTable();
-      logAction(melding.gebruiker, newStatus);
-    }
-  }
-
-  function logAction(user, action) {
-    fetch('https://discord-webhook-url-hier', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: `:shield: Actie uitgevoerd voor **${user}**: ${action}` })
-    });
-  }
-
-  renderTable();
+vulTabel();
 </script>
 
 </body>
