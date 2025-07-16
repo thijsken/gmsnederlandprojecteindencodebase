@@ -292,7 +292,7 @@
         adminServer: gebruiker,
         units: 'nog geen',
         Communityid: document.getElementById('communityid').value,
-        ownerdiscordid: document.getElementById('ownerdiscordid')
+        ownerdiscordid: document.getElementById('ownerdiscordid').value
     };
 
     await db.ref('servers').push(server);
