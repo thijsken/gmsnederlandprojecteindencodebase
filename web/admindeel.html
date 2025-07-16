@@ -112,9 +112,13 @@
           <label class="block mb-1 text-sm">Servernaam</label>
           <input id="servernaam" type="text" placeholder="Voer servernaam in" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
         </div>
-              <div>
+        <div>
         <label class="block mb-1 text-sm">Community ID</label>
         <input id="communityid" type="text" placeholder="Voer Community ID in" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+      </div>
+       <div>
+        <label class="block mb-1 text-sm">Discord ID</label>
+        <input id="ownerdiscordid" type="text" placeholder="Voer Discord ID User in (Verplicht.)" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
       </div>
         <div>
           <label class="block mb-1 text-sm">Pakkettype</label>
@@ -175,6 +179,10 @@
       <div>
         <label class="block mb-1 text-sm">Ownernaam</label>
         <input id="editgebruikersnaam" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+      </div>
+            <div>
+        <label class="block mb-1 text-sm">Discord ID</label>
+        <input id="ownerdiscordid" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
       </div>
       <div>
         <label class="block mb-1 text-sm">Pakkettype</label>
@@ -283,7 +291,8 @@
         status: 'actief',
         adminServer: gebruiker,
         units: 'nog geen',
-        Communityid: document.getElementById('communityid').value
+        Communityid: document.getElementById('communityid').value,
+        ownerdiscordid: document.getElementById('ownerdiscordid')
     };
 
     await db.ref('servers').push(server);
@@ -428,7 +437,8 @@ document.getElementById('editServerForm').addEventListener('submit', function(e)
     servernaam: document.getElementById('editServernaam').value,
     gebruiker: document.getElementById('editgebruikersnaam').value,
     pakket: document.getElementById('editPakket').value,
-    status: document.getElementById('editStatus').value
+    status: document.getElementById('editStatus').value,
+    ownerdiscordid: document.getElementById('editDiscordid').value
   };
   db.ref('servers/' + id).update(updates).then(() => {
     closeEditModal();
