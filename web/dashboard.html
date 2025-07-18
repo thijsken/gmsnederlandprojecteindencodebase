@@ -915,7 +915,7 @@ auth.onAuthStateChanged(user => {
         const dashboardMap = L.map('dashboardMap', {
     crs: L.CRS.Simple,
     minZoom: -5,
-    maxZoom: 5,
+    maxZoom: 2,
     zoomSnap: 0.1
 }).setView([0, 0], 0);
 const mainMap = L.map('map', {
