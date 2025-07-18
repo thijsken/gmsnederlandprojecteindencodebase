@@ -143,12 +143,12 @@
     document.getElementById('popup').classList.remove('hidden');
   }
 
-  function fetchServerCount(gebruiker) {
-    firebase.database().ref(`servers/${gebruiker}`).once('value', snapshot => {
-      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      document.getElementById('serverCount').textContent = count;
-    });
-  }
+  // function fetchServerCount(gebruiker) {
+  //   firebase.database().ref(`servers/${gebruiker}`).once('value', snapshot => {
+  //     const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+  //     document.getElementById('serverCount').textContent = count;
+  //   });
+  // }
 
   function closePopup() {
     document.getElementById('popup').classList.add('hidden');
