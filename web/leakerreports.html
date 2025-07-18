@@ -12,7 +12,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body class="bg-gray-100">
   <div class="flex h-screen">
@@ -101,16 +100,6 @@
         "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app",
     };
     firebase.initializeApp(firebaseConfig);
-
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        // Niet ingelogd, direct naar login pagina
-        window.location.href = "admindeel.xml"; // pas aan als je login pagina anders heet
-      } else {
-        // Ingelogd, pagina kan geladen worden
-        fetchReports(); // start pas hier met het ophalen van data als ingelogd
-      }
-    });
 
     const db = firebase.database();
     const reportsList = document.getElementById("reportsList");
