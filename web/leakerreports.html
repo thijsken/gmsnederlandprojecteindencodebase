@@ -117,6 +117,16 @@
     let allReports = {};
     let filteredReports = [];
 
+        // Format timestamp naar leesbare datum
+    function formatTimestamp(ts) {
+      if (!ts) return "-";
+      const d = new Date(ts);
+      return d.toLocaleString("nl-NL", {
+        dateStyle: "short",
+        timeStyle: "short",
+      });
+    }
+
     // Zoekfunctie input event
     searchInput.addEventListener("input", () => {
       const query = searchInput.value.toLowerCase();
