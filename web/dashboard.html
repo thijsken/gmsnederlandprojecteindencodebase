@@ -1041,6 +1041,12 @@ function copyCommunityId() {
     document.body.removeChild(tempInput);
     }
 
+    // ✅ Roblox naar kaart-omrekening
+    function robloxToMapCoords(robloxX, robloxZ, wereldMaxX, wereldMaxZ, kaartBreedte, kaartHoogte) {
+    const xPos = (robloxX / wereldMaxX) * kaartBreedte;
+    const yPos = kaartHoogte - (robloxZ / wereldMaxZ) * kaartHoogte;  // Z mogelijk spiegelen
+    return [yPos, xPos];
+}
     // database funtions
 
     // helicopter popup
@@ -2855,10 +2861,16 @@ fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
           `).join("")}
         </div>
       `;
+      
+      const [markerY, markerX] = robloxToMapCoords(
+    robloxX, robloxZ,
+    4000, 4000,        // Roblox wereldgrootte
+    2000, 1000         // Afbeelding breedte en hoogte
+);
 
-      const marker = L.marker([x, y], { icon })
-        .addTo(mainMap)
-        .bindPopup(popup);
+const marker = L.marker([markerY, markerX], { icon })
+  .addTo(mainMap)
+  .bindPopup(popup);
 
       marker.on('popupopen', () => {
         setTimeout(() => {
