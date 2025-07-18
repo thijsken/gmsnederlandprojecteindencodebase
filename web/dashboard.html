@@ -1811,13 +1811,12 @@ function latLngToMapXY(lat, lng) {
             }
         }
        
-        function addUnitMarker(unit) {
+function addUnitMarker(unit) {
     if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
 
     let iconClass = 'fa-car text-blue-500';
     if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
     else if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
-    else if (unit.type === 'police') iconClass = 'fa-police-car text-blue-700';
 
     const customIcon = L.divIcon({
         html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
@@ -1828,27 +1827,18 @@ function latLngToMapXY(lat, lng) {
 
     const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
 
-    const markerMain = L.marker([y, x], { icon: customIcon }).addTo(mainMap);
+    // Belangrijk: pixel-coördinaten omzetten naar 'map coordinates'
+    const latLng = mainMap.unproject([x, y], mainMap.getMaxZoom());
 
-    if (unit.type === 'police') {
-        const markerDashboard = L.marker([y, x], { icon: customIcon }).addTo(dashboardMap);
-        if (!window.unitMarkersDashboard) window.unitMarkersDashboard = {};
-        window.unitMarkersDashboard[unit.id] = markerDashboard;
+    const marker = L.marker(latLng, { icon: customIcon }).addTo(mainMap);
 
-        markerDashboard.bindPopup(`
-            <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
-            Bestuurder: ${unit.driver}<br>
-            Status: ${getStatusName(unit.status)}
-        `);
-    }
-
-    markerMain.bindPopup(`
+    marker.bindPopup(`
         <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
         Bestuurder: ${unit.driver}<br>
         Status: ${getStatusName(unit.status)}
     `);
 
-    unitMarkers[unit.id] = markerMain;
+    unitMarkers[unit.id] = marker;
 }
 
 function updateCalls() {
