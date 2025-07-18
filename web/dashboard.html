@@ -1812,38 +1812,55 @@ function latLngToMapXY(lat, lng) {
             }
         }
 
-        function addUnitMarker(unit) {
-            if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
+function addUnitMarker(unit) {
+    if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
 
-            let iconClass = 'fa-car text-blue-500';
-            if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
-            if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
+    // Kies icon class afhankelijk van unit type
+    let iconClass = 'fa-car text-blue-500';
+    if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
+    else if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
+    else if (unit.type === 'police') iconClass = 'fa-police-car text-blue-700';
 
-            const customIcon = L.divIcon({
-                html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
-                className: '', // geen Leaflet standaard stijl
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
-            });
+    // Maak custom divIcon met FontAwesome icoon
+    const customIcon = L.divIcon({
+        html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
+        className: '', // geen standaard Leaflet styling
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
 
-            const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
+    // Haal kaartafmetingen op (stel default in indien nog niet bekend)
+    const { width, height } = window.customMapSize || { width: 1000, height: 1000 };
 
-            const marker = L.marker([y, x], {
-                icon: customIcon
-            }).addTo(mainMap);
+    // Zet locatie om: draai y-as om omdat pixel (0,0) linksboven is, maar Leaflet linksbeneden verwacht
+    const [rawY, rawX] = latLngToMapXY(unit.location.lat, unit.location.lng);
+    const y = height - rawY;
+    const x = rawX;
 
-            if (unit.type === 'police') {
-                marker.addTo(dashboardMap);
-            }
+    // Maak marker voor mainMap en voeg toe
+    const markerMain = L.marker([y, x], { icon: customIcon }).addTo(mainMap);
+    unitMarkers[unit.id] = markerMain;
 
-            unitMarkers[unit.id] = marker;
+    // Maak marker voor dashboardMap alleen als type 'police'
+    if (unit.type === 'police') {
+        const markerDashboard = L.marker([y, x], { icon: customIcon }).addTo(dashboardMap);
+        if (!window.unitMarkersDashboard) window.unitMarkersDashboard = {};
+        window.unitMarkersDashboard[unit.id] = markerDashboard;
 
-            marker.bindPopup(`
-                <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
-                Bestuurder: ${unit.driver}<br>
-                Status: ${getStatusName(unit.status)}
-            `);
-        }
+        markerDashboard.bindPopup(`
+            <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
+            Bestuurder: ${unit.driver}<br>
+            Status: ${getStatusName(unit.status)}
+        `);
+    }
+
+    // Popup voor mainMap marker
+    markerMain.bindPopup(`
+        <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
+        Bestuurder: ${unit.driver}<br>
+        Status: ${getStatusName(unit.status)}
+    `);
+}
 
 function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
