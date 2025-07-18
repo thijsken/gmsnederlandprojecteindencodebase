@@ -131,9 +131,16 @@
     searchInput.addEventListener("input", () => {
       const query = searchInput.value.toLowerCase();
       filteredReports = Object.entries(allReports).filter(([id, m]) => {
+        const gebruiker = (m.gebruiker ? m.gebruiker.toString().toLowerCase() : "");
+        const email = (m.email ? m.email.toString().toLowerCase() : "");
+        const discordId = (m.discordId ? m.discordId.toString().toLowerCase() : "");
+        const robloxNaam = (m.robloxNaam ? m.robloxNaam.toString().toLowerCase() : "");
+
         return (
-          (m.gebruiker && m.gebruiker.toLowerCase().includes(query)) ||
-          (m.email && m.email.toLowerCase().includes(query))
+          gebruiker.includes(query) ||
+          email.includes(query) ||
+          discordId.includes(query) ||
+          robloxNaam.includes(query)
         );
       });
       updateTable(filteredReports);
