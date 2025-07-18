@@ -1552,26 +1552,17 @@ function sluitKazerenModal() {
 }
 
 function latLngToMapXY(lat, lng) {
-    // Dezelfde oorsprong als Roblox-script gebruikt
     const originLat = 52.37;
     const originLng = 4.89;
-
-    // Afmetingen van de kaart
     const { width, height } = window.customMapSize;
 
-    // Roblox rekent: lat = originLat + Z/1000
-    //                lng = originLng + X/1000
-    // Dus:
     const deltaZ = (lat - originLat) * 1000;
     const deltaX = (lng - originLng) * 1000;
 
-    // Aannames:
-    // - de kaart representeert 1000 meter breed/hoog
-    // - x = rechts, y = omlaag
     const x = (deltaX / 1000) * width;
-    const y = height - ((deltaZ / 1000) * height); // omdraaien: Z omhoog = y omlaag
+    const y = height - ((deltaZ / 1000) * height);
 
-    return [y, x]; // Leaflet expects [y, x]!
+    return [y, x];  // Leaflet expects [lat, lng], maar hier is lat=y en lng=x omdat je pixels gebruikt
 }
 
         function showView(viewId) {
@@ -1815,33 +1806,22 @@ function latLngToMapXY(lat, lng) {
 function addUnitMarker(unit) {
     if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
 
-    // Kies icon class afhankelijk van unit type
     let iconClass = 'fa-car text-blue-500';
     if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
     else if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
     else if (unit.type === 'police') iconClass = 'fa-police-car text-blue-700';
 
-    // Maak custom divIcon met FontAwesome icoon
     const customIcon = L.divIcon({
         html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
-        className: '', // geen standaard Leaflet styling
+        className: '',
         iconSize: [24, 24],
         iconAnchor: [12, 12]
     });
 
-    // Haal kaartafmetingen op (stel default in indien nog niet bekend)
-    const { width, height } = window.customMapSize || { width: 1000, height: 1000 };
+    const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
 
-    // Zet locatie om: draai y-as om omdat pixel (0,0) linksboven is, maar Leaflet linksbeneden verwacht
-    const [rawY, rawX] = latLngToMapXY(unit.location.lat, unit.location.lng);
-    const y = height - rawY;
-    const x = rawX;
-
-    // Maak marker voor mainMap en voeg toe
     const markerMain = L.marker([y, x], { icon: customIcon }).addTo(mainMap);
-    unitMarkers[unit.id] = markerMain;
 
-    // Maak marker voor dashboardMap alleen als type 'police'
     if (unit.type === 'police') {
         const markerDashboard = L.marker([y, x], { icon: customIcon }).addTo(dashboardMap);
         if (!window.unitMarkersDashboard) window.unitMarkersDashboard = {};
@@ -1854,14 +1834,14 @@ function addUnitMarker(unit) {
         `);
     }
 
-    // Popup voor mainMap marker
     markerMain.bindPopup(`
         <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
         Bestuurder: ${unit.driver}<br>
         Status: ${getStatusName(unit.status)}
     `);
-}
 
+    unitMarkers[unit.id] = markerMain;
+}
 function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
     const callList = document.getElementById('callList');
@@ -2238,7 +2218,7 @@ if (call.coordinates) {
             const width = img.width;
             const height = img.height;
             const bounds = [[0, 0], [height, width]];
-              window.customMapSize = { width, height };
+            window.customMapSize = { width, height };
 
             if (customMapOverlay) {
                 mainMap.removeLayer(customMapOverlay);
@@ -2248,7 +2228,6 @@ if (call.coordinates) {
             customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
             L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
 
-            // Fit map to image
             mainMap.setMaxBounds(bounds);
             dashboardMap.setMaxBounds(bounds);
 
@@ -2263,7 +2242,6 @@ if (call.coordinates) {
 
     reader.readAsDataURL(file);
 }
-
 let vorigeMeldingenTimestamps = [];
 let bekendeMeldingen = new Set();
 
