@@ -1556,37 +1556,25 @@ function clamp(value, min, max) {
 }
 
 function latLngToMapXY(lat, lng) {
-    // Oorsprong (jouw referentiepunt in Roblox)
-    const originLat = 52.37;
-    const originLng = 4.89;
+    const originLat = 52.37000;  // Jouw Roblox-referentiepunt (precies bepalen!)
+    const originLng = 4.89000;
 
-    // Kaartafmetingen
     const { width, height } = window.customMapSize;
+    const pixelsPerMeter = width / 1000;   // Of anders, afhankelijk van je kaart
 
-    if (!width || !height) {
-        console.error('❌ Fout: customMapSize niet ingesteld!');
-        return [0, 0];
-    }
+    const deltaZ = (lat - originLat) * 1000;  // meters Noord-Zuid
+    const deltaX = (lng - originLng) * 1000;  // meters Oost-West
 
-    // Bereken verschil in meters t.o.v. oorsprong
-    const deltaZ = (lat - originLat) * 1000;   // Noord-Zuid afstand in meters
-    const deltaX = (lng - originLng) * 1000;   // Oost-West afstand in meters
+    const x = (deltaX * pixelsPerMeter) + width / 2;  // 0-punt naar midden verschuiven
+    const y = height - ((deltaZ * pixelsPerMeter) + height / 2);
 
-    // Projectie naar pixels (aannemende 1 pixel = 1 meter)
-    const x = (deltaX) + (width / 2);          // Midden afbeelding als 0-punt
-    const y = height - ((deltaZ) + (height / 2));  // Omklappen zodat Noord boven is
-
-    // Debug logs
-    console.log(`📍 [latLngToMapXY]
-        Invoer:     lat=${lat}, lng=${lng}
-        Oorsprong:  lat=${originLat}, lng=${originLng}
-        Verschil:   deltaX=${deltaX}m, deltaZ=${deltaZ}m
-        Afbeelding: ${width}px breed, ${height}px hoog
-        Resultaat:  x=${x}px, y=${y}px
-        Grenzen:    0 <= x <= ${width}, 0 <= y <= ${height}
+    console.log(`Debug:
+      Roblox coord: lat=${lat}, lng=${lng}
+      Delta: X=${deltaX}m, Z=${deltaZ}m
+      Naar pixels: X=${x}, Y=${y}
     `);
 
-    return [y, x];   // Let op: Leaflet verwacht [y, x]
+    return [y, x];
 }
 
         function showView(viewId) {
