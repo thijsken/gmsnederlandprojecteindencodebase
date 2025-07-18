@@ -2217,7 +2217,7 @@ if (call.coordinates) {
         img.onload = function() {
             const width = img.width;
             const height = img.height;
-            const bounds = [[0 - height / 2, 0], [height, width]];
+            const bounds = [[0, 0], [height, width]];
             window.customMapSize = { width, height };
 
             if (customMapOverlay) {
