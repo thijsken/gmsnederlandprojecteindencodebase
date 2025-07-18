@@ -1574,50 +1574,6 @@ function latLngToMapXY(lat, lng) {
     return [y, x]; // Leaflet expects [y, x]!
 }
 
-function uploadMapImage() {
-    const input = document.getElementById('mapImageInput');
-    const file = input.files[0];
-
-    if (!file || file.type !== 'image/png') {
-        showNotification('Upload een geldige PNG-afbeelding!', 'error');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const imageUrl = e.target.result;
-
-        const img = new Image();
-        img.onload = function() {
-            const width = img.width;
-            const height = img.height;
-            const bounds = [[0, 0], [height, width]];
-              window.customMapSize = { width, height };
-
-            if (customMapOverlay) {
-                mainMap.removeLayer(customMapOverlay);
-                dashboardMap.removeLayer(customMapOverlay);
-            }
-
-            customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
-            L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
-
-            // Fit map to image
-            mainMap.setMaxBounds(bounds);
-            dashboardMap.setMaxBounds(bounds);
-
-            mainMap.fitBounds(bounds);
-            dashboardMap.fitBounds(bounds);
-
-            showNotification('📌 Kaart geladen met volledige zoomcontrole en exacte locatie!', 'success');
-        };
-
-        img.src = imageUrl;
-    };
-
-    reader.readAsDataURL(file);
-}
-
         function showView(viewId) {
             document.getElementById('dashboardView').classList.add('hidden');
             document.getElementById('mapView').classList.add('hidden');
@@ -2246,6 +2202,50 @@ if (call.coordinates) {
             localStorage.removeItem('apiKey');
             window.location.href = 'index.html';
         }
+
+        function uploadMapImage() {
+    const input = document.getElementById('mapImageInput');
+    const file = input.files[0];
+
+    if (!file || file.type !== 'image/png') {
+        showNotification('Upload een geldige PNG-afbeelding!', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const imageUrl = e.target.result;
+
+        const img = new Image();
+        img.onload = function() {
+            const width = img.width;
+            const height = img.height;
+            const bounds = [[0, 0], [height, width]];
+              window.customMapSize = { width, height };
+
+            if (customMapOverlay) {
+                mainMap.removeLayer(customMapOverlay);
+                dashboardMap.removeLayer(customMapOverlay);
+            }
+
+            customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
+            L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
+
+            // Fit map to image
+            mainMap.setMaxBounds(bounds);
+            dashboardMap.setMaxBounds(bounds);
+
+            mainMap.fitBounds(bounds);
+            dashboardMap.fitBounds(bounds);
+
+            showNotification('📌 Kaart geladen met volledige zoomcontrole en exacte locatie!', 'success');
+        };
+
+        img.src = imageUrl;
+    };
+
+    reader.readAsDataURL(file);
+}
 
 let vorigeMeldingenTimestamps = [];
 let bekendeMeldingen = new Set();
