@@ -1810,8 +1810,8 @@ function latLngToMapXY(lat, lng) {
                 default: return status;
             }
         }
-
-function addUnitMarker(unit) {
+       
+        function addUnitMarker(unit) {
     if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
 
     let iconClass = 'fa-car text-blue-500';
@@ -1850,6 +1850,7 @@ function addUnitMarker(unit) {
 
     unitMarkers[unit.id] = markerMain;
 }
+
 function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
     const callList = document.getElementById('callList');
