@@ -150,9 +150,36 @@
   //   });
   // }
 
-  function closePopup() {
-    document.getElementById('popup').classList.add('hidden');
-  }
+  function openPopup(id) {
+  const m = allReports[id];
+  if (!m) return; // check of id geldig is
+
+  const popupContent = document.getElementById('popupContent');
+  popupContent.innerHTML = `
+    <p><strong>Gebruiker:</strong> ${m.gebruiker || 'Onbekend'}</p>
+    <p><strong>E-mail:</strong> ${m.email || '-'}</p>
+    <p><strong>Pakket:</strong> ${m.pakket || '-'}</p>
+    <p><strong>Aankoopdatum:</strong> ${m.datum || '-'}</p>
+    <p><strong>Reden Rapport:</strong> ${m.reden || '-'}</p>
+    <p><strong>Status:</strong> ${m.status || '-'}</p>
+    <p><strong>Bezwaar:</strong> ${m.bezwaar || '-'}</p>
+    <p><strong>Behandeld door:</strong> ${m.behandeldDoor || '-'}</p>
+    <div class="flex justify-end mt-4 space-x-2">
+      <button onclick="confirmActie('blokkeren', '${id}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Blokkeren</button>
+      <button onclick="confirmActie('afgehandeld', '${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Markeer Afgehandeld</button>
+    </div>
+  `;
+  
+  const popup = document.getElementById('popup');
+  popup.classList.remove('hidden');
+  popup.classList.add('flex');
+}
+
+function closePopup() {
+  const popup = document.getElementById('popup');
+  popup.classList.add('hidden');
+  popup.classList.remove('flex');
+}
 
   function confirmActie(type, id) {
     const melding = allReports[id];
