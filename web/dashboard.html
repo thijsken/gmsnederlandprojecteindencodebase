@@ -1811,12 +1811,24 @@ function latLngToMapXY(lat, lng) {
             }
         }
        
-function addUnitMarker(unit) {
-    if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
+        function addUnitMarker(unit) {
+    if (!unit.location || unit.location.lat == null || unit.location.lng == null) {
+        console.warn(`⚠️ Unit ${unit.id} heeft geen geldige locatie.`);
+        return;
+    }
 
+    // Stap 1: Coördinaten omzetten naar pixels
+    const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
+    console.log(`📊 [${unit.id}] Pixel-positie berekend: x=${x}, y=${y}`);
+
+    // Stap 2: Pixels omzetten naar Leaflet-positie (binnen CRS.Simple)
+    const latLng = mainMap.unproject([x, y], mainMap.getMaxZoom());
+    console.log(`📌 [${unit.id}] Map-positie (Leaflet): ${latLng.lat}, ${latLng.lng}`);
+
+    // Stap 3: Marker aanmaken
     let iconClass = 'fa-car text-blue-500';
     if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
-    else if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
+    if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
 
     const customIcon = L.divIcon({
         html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
@@ -1825,20 +1837,25 @@ function addUnitMarker(unit) {
         iconAnchor: [12, 12]
     });
 
-    const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
-
-    // Belangrijk: pixel-coördinaten omzetten naar 'map coordinates'
-    const latLng = mainMap.unproject([x, y], mainMap.getMaxZoom());
-
+    // Stap 4: Marker plaatsen op mainMap
     const marker = L.marker(latLng, { icon: customIcon }).addTo(mainMap);
+    console.log(`✅ Marker toegevoegd voor unit ${unit.id} op hoofdkaart.`);
 
+    // Indien gewenst ook op dashboardMap:
+    if (unit.type === 'police') {
+        L.marker(latLng, { icon: customIcon }).addTo(dashboardMap);
+        console.log(`📊 Marker van unit ${unit.id} ook toegevoegd op dashboardMap.`);
+    }
+
+    // Stap 5: Opslaan in marker-collectie
+    unitMarkers[unit.id] = marker;
+
+    // Stap 6: Popup toevoegen
     marker.bindPopup(`
         <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
         Bestuurder: ${unit.driver}<br>
         Status: ${getStatusName(unit.status)}
     `);
-
-    unitMarkers[unit.id] = marker;
 }
 
 function updateCalls() {
