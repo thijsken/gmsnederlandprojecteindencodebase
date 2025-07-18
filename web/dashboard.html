@@ -1555,26 +1555,20 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function latLngToMapXY(lat, lng) {
-    const originLat = 52.37000;  // Jouw Roblox-referentiepunt (precies bepalen!)
-    const originLng = 4.89000;
-
+function latLngToMapXY(x, z) {
     const { width, height } = window.customMapSize;
-    const pixelsPerMeter = width / 1000;   // Of anders, afhankelijk van je kaart
+    const kaartBreedteInMeters = 1000; // Pas dit aan naar jouw werkelijke kaartbreedte in meters
+    const kaartHoogteInMeters = 1000;  // Idem voor hoogte
 
-    const deltaZ = (lat - originLat) * 1000;  // meters Noord-Zuid
-    const deltaX = (lng - originLng) * 1000;  // meters Oost-West
+    const pixelsPerMeterX = width / kaartBreedteInMeters;
+    const pixelsPerMeterY = height / kaartHoogteInMeters;
 
-    const x = (deltaX * pixelsPerMeter) + width / 2;  // 0-punt naar midden verschuiven
-    const y = height - ((deltaZ * pixelsPerMeter) + height / 2);
+    const xPixel = (x * pixelsPerMeterX);
+    const yPixel = height - (z * pixelsPerMeterY);  // Omdraaien zodat bovenin 0 is
 
-    console.log(`Debug:
-      Roblox coord: lat=${lat}, lng=${lng}
-      Delta: X=${deltaX}m, Z=${deltaZ}m
-      Naar pixels: X=${x}, Y=${y}
-    `);
+    console.log(`🎯 Roblox XZ (${x}, ${z}) => Map XY (${xPixel}, ${yPixel})`);
 
-    return [y, x];
+    return [yPixel, xPixel];  // Leaflet expects [y, x]
 }
 
         function showView(viewId) {
@@ -1815,21 +1809,20 @@ function latLngToMapXY(lat, lng) {
             }
         }
        
-        function addUnitMarker(unit) {
-    if (!unit.location || unit.location.lat == null || unit.location.lng == null) {
+function addUnitMarker(unit) {
+    if (!unit.location || unit.location.x == null || unit.location.z == null) {
         console.warn(`⚠️ Unit ${unit.id} heeft geen geldige locatie.`);
         return;
     }
 
-    // Stap 1: Coördinaten omzetten naar pixels
-    const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
-    console.log(`📊 [${unit.id}] Pixel-positie berekend: x=${x}, y=${y}`);
+    // Gebruik de robloxXZtoMapXY i.p.v. latLngToMapXY
+    const [pixelX, pixelY] = robloxXZtoMapXY(unit.location.x, unit.location.z);
+    console.log(`📊 [${unit.id}] Pixel-positie berekend: x=${pixelX}, y=${pixelY}`);
 
-    // Stap 2: Pixels omzetten naar Leaflet-positie (binnen CRS.Simple)
-    const latLng = mainMap.unproject([x, y], mainMap.getMaxZoom());
-    console.log(`📌 [${unit.id}] Map-positie (Leaflet): ${latLng.lat}, ${latLng.lng}`);
+    // Zet pixel naar Leaflet LatLng (CRS.Simple)
+    const latLng = mainMap.unproject([pixelX, pixelY], mainMap.getMaxZoom());
+    console.log(`📌 [${unit.id}] Map-positie (Leaflet): lat=${latLng.lat}, lng=${latLng.lng}`);
 
-    // Stap 3: Marker aanmaken
     let iconClass = 'fa-car text-blue-500';
     if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
     if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
@@ -1841,20 +1834,16 @@ function latLngToMapXY(lat, lng) {
         iconAnchor: [12, 12]
     });
 
-    // Stap 4: Marker plaatsen op mainMap
     const marker = L.marker(latLng, { icon: customIcon }).addTo(mainMap);
     console.log(`✅ Marker toegevoegd voor unit ${unit.id} op hoofdkaart.`);
 
-    // Indien gewenst ook op dashboardMap:
     if (unit.type === 'police') {
         L.marker(latLng, { icon: customIcon }).addTo(dashboardMap);
         console.log(`📊 Marker van unit ${unit.id} ook toegevoegd op dashboardMap.`);
     }
 
-    // Stap 5: Opslaan in marker-collectie
     unitMarkers[unit.id] = marker;
 
-    // Stap 6: Popup toevoegen
     marker.bindPopup(`
         <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
         Bestuurder: ${unit.driver}<br>
