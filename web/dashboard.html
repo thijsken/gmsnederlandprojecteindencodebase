@@ -1555,21 +1555,18 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function latLngToMapXY(x, z) {
+function robloxXZtoMapXY(x, z) {
     const { width, height } = window.customMapSize;
-    const kaartBreedteInMeters = 1000; // Pas dit aan naar jouw werkelijke kaartbreedte in meters
-    const kaartHoogteInMeters = 1000;  // Idem voor hoogte
+    console.log('Kaartgrootte:', width, height);
+    console.log('Roblox coords:', x, z);
 
-    const pixelsPerMeterX = width / kaartBreedteInMeters;
-    const pixelsPerMeterY = height / kaartHoogteInMeters;
+    const pixelX = (x / 1000) * width;
+    const pixelY = height - (z / 1000) * height;
 
-    const xPixel = (x * pixelsPerMeterX);
-    const yPixel = height - (z * pixelsPerMeterY);  // Omdraaien zodat bovenin 0 is
-
-    console.log(`🎯 Roblox XZ (${x}, ${z}) => Map XY (${xPixel}, ${yPixel})`);
-
-    return [yPixel, xPixel];  // Leaflet expects [y, x]
+    console.log('Pixel coords:', pixelX, pixelY);
+    return [pixelX, pixelY];
 }
+
 
         function showView(viewId) {
             document.getElementById('dashboardView').classList.add('hidden');
@@ -1815,13 +1812,13 @@ function addUnitMarker(unit) {
         return;
     }
 
-    // Gebruik de robloxXZtoMapXY i.p.v. latLngToMapXY
     const [pixelX, pixelY] = robloxXZtoMapXY(unit.location.x, unit.location.z);
-    console.log(`📊 [${unit.id}] Pixel-positie berekend: x=${pixelX}, y=${pixelY}`);
 
-    // Zet pixel naar Leaflet LatLng (CRS.Simple)
+    console.log(`Pixel coords voor unit ${unit.id}: x=${pixelX}, y=${pixelY}`);
+
     const latLng = mainMap.unproject([pixelX, pixelY], mainMap.getMaxZoom());
-    console.log(`📌 [${unit.id}] Map-positie (Leaflet): lat=${latLng.lat}, lng=${latLng.lng}`);
+
+    console.log(`Map positie Leaflet voor unit ${unit.id}: lat=${latLng.lat}, lng=${latLng.lng}`);
 
     let iconClass = 'fa-car text-blue-500';
     if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
