@@ -13,7 +13,6 @@
 <body class="bg-gray-100">
 
 <div class="flex h-screen">
-  <!-- Sidebar -->
   <aside class="w-64 bg-blue-900 text-white flex flex-col">
     <div class="p-6 border-b border-blue-700 flex items-center space-x-3">
       <img src="logogmsnederland.png" class="w-10 h-10" alt="Logo">
@@ -34,17 +33,13 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="flex-1 p-6 overflow-y-auto">
     <h1 class="text-2xl font-bold mb-4">Leaker Reports</h1>
 
-    <!-- Zoekgeschiedenis -->
     <div class="bg-white rounded-xl shadow p-4 mb-6">
       <input id="searchHistory" type="text" placeholder="Zoek gebruiker of e-mail..." class="px-4 py-2 border border-gray-300 rounded-lg w-full">
-      <p class="text-xs text-gray-500 mt-2">Tip: controleer ook handmatig in Discord kanaal <strong>#gebruiker-lookup</strong> voor aanvullende details.</p>
     </div>
 
-    <!-- Tabel -->
     <div class="bg-white rounded-xl shadow p-4">
       <table class="w-full table-auto text-sm">
         <thead class="bg-gray-100">
@@ -73,36 +68,51 @@
 </div>
 
 <script>
-  // Firebase Config
   const firebaseConfig = {
-      apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
-      authDomain: "gmsnederland.firebaseapp.com",
-      projectId: "gmsnederland",
-      databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+    apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+    authDomain: "gmsnederland.firebaseapp.com",
+    projectId: "gmsnederland",
+    databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
   };
   firebase.initializeApp(firebaseConfig);
 
-  const meldingen = [
-    { gebruiker: 'User123', email: 'user123@example.com', pakket: 'Pro', datum: '2024-11-10', reden: 'Gegevens gedeeld', status: 'Open', bezwaar: 'Nee', behandeldDoor: 'Nog niemand' },
-    { gebruiker: 'User456', email: 'user456@example.com', pakket: 'Basic', datum: '2025-02-01', reden: 'Illegale upload', status: 'In Behandeling', bezwaar: 'Ja - Foutmelding', behandeldDoor: 'AdminMike' }
-  ];
-
+  const db = firebase.database();
   const reportsList = document.getElementById('reportsList');
+  const searchInput = document.getElementById('searchHistory');
 
-  function updateTable() {
+  let allReports = {}; // Firebase data opslaan
+  let filteredReports = [];
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+    filteredReports = Object.entries(allReports).filter(([id, m]) => {
+      return m.gebruiker?.toLowerCase().includes(query) || m.email?.toLowerCase().includes(query);
+    });
+    updateTable(filteredReports);
+  });
+
+  function fetchReports() {
+    db.ref('leakerreports').on('value', snapshot => {
+      allReports = snapshot.val() || {};
+      filteredReports = Object.entries(allReports);
+      updateTable(filteredReports);
+    });
+  }
+
+  function updateTable(reportsArray) {
     reportsList.innerHTML = '';
-    meldingen.forEach((m, index) => {
+    reportsArray.forEach(([id, m]) => {
       const statusColor = m.status === 'Open' ? 'bg-red-100 text-red-600' :
                           m.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
                           'bg-green-100 text-green-600';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="p-3 font-medium">${m.gebruiker}</td>
-        <td class="p-3">${m.reden}</td>
-        <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${m.status}</span></td>
+        <td class="p-3 font-medium">${m.gebruiker || 'Onbekend'}</td>
+        <td class="p-3">${m.reden || '-'}</td>
+        <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${m.status || '-'}</span></td>
         <td class="p-3 text-center">
-          <button onclick="openPopup(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
+          <button onclick="openPopup('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
             Details & Actie
           </button>
         </td>
@@ -111,22 +121,22 @@
     });
   }
 
-  function openPopup(index) {
-    const m = meldingen[index];
+  function openPopup(id) {
+    const m = allReports[id];
     const popupContent = document.getElementById('popupContent');
     popupContent.innerHTML = `
-      <p><strong>Gebruiker:</strong> ${m.gebruiker}</p>
-      <p><strong>E-mail:</strong> ${m.email}</p>
-      <p><strong>Pakket:</strong> ${m.pakket}</p>
-      <p><strong>Aankoopdatum:</strong> ${m.datum}</p>
-      <p><strong>Reden Rapport:</strong> ${m.reden}</p>
-      <p><strong>Status:</strong> ${m.status}</p>
-      <p><strong>Bezwaar:</strong> ${m.bezwaar}</p>
-      <p><strong>Behandeld door:</strong> ${m.behandeldDoor}</p>
+      <p><strong>Gebruiker:</strong> ${m.gebruiker || 'Onbekend'}</p>
+      <p><strong>E-mail:</strong> ${m.email || '-'}</p>
+      <p><strong>Pakket:</strong> ${m.pakket || '-'}</p>
+      <p><strong>Aankoopdatum:</strong> ${m.datum || '-'}</p>
+      <p><strong>Reden Rapport:</strong> ${m.reden || '-'}</p>
+      <p><strong>Status:</strong> ${m.status || '-'}</p>
+      <p><strong>Bezwaar:</strong> ${m.bezwaar || '-'}</p>
+      <p><strong>Behandeld door:</strong> ${m.behandeldDoor || '-'}</p>
       <p><strong>Aantal servers:</strong> <span id="serverCount">Laden...</span></p>
       <div class="flex justify-end mt-4 space-x-2">
-        <button onclick="confirmActie('blokkeren', ${index})" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Blokkeren</button>
-        <button onclick="confirmActie('afgehandeld', ${index})" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Markeer Afgehandeld</button>
+        <button onclick="confirmActie('blokkeren', '${id}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Blokkeren</button>
+        <button onclick="confirmActie('afgehandeld', '${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Markeer Afgehandeld</button>
       </div>
     `;
     fetchServerCount(m.gebruiker);
@@ -144,19 +154,22 @@
     document.getElementById('popup').classList.add('hidden');
   }
 
-  function confirmActie(type, index) {
-    const m = meldingen[index];
-    const bevestiging = confirm(`Weet je zeker dat je wilt ${type} uitvoeren voor ${m.gebruiker}?`);
+  function confirmActie(type, id) {
+    const melding = allReports[id];
+    if (!melding) return;
+
+    const bevestiging = confirm(`Weet je zeker dat je wilt ${type} uitvoeren voor ${melding.gebruiker}?`);
     if (!bevestiging) return;
 
-    if (type === 'blokkeren') {
-      m.status = 'Geblokkeerd';
-    } else if (type === 'afgehandeld') {
-      m.status = 'Afgehandeld';
-    }
-    logNaarDiscord(m, type);
+    const nieuweStatus = type === 'blokkeren' ? 'Geblokkeerd' : 'Afgehandeld';
+
+    db.ref(`leakerreports/${id}`).update({
+      status: nieuweStatus,
+      behandeldDoor: 'Admin'
+    });
+
+    logNaarDiscord(melding, type);
     closePopup();
-    updateTable();
   }
 
   function logNaarDiscord(melding, actie) {
@@ -169,8 +182,8 @@
           color: actie === 'blokkeren' ? 15158332 : 3066993,
           fields: [
             { name: 'Gebruiker', value: melding.gebruiker, inline: true },
-            { name: 'E-mail', value: melding.email, inline: true },
-            { name: 'Reden', value: melding.reden, inline: false },
+            { name: 'E-mail', value: melding.email || '-', inline: true },
+            { name: 'Reden', value: melding.reden || '-', inline: false },
             { name: 'Actie uitgevoerd door', value: 'Admin', inline: false }
           ],
           timestamp: new Date()
@@ -179,7 +192,7 @@
     });
   }
 
-  updateTable();
+  fetchReports();
 </script>
 
 </body>

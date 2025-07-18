@@ -1555,7 +1555,7 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function robloxXZtoMapXY(x, z) {
+        function robloxXZtoMapXY(x, z) {
     const { width, height } = window.customMapSize;
     console.log('Kaartgrootte:', width, height);
     console.log('Roblox coords:', x, z);
@@ -1566,7 +1566,6 @@ function robloxXZtoMapXY(x, z) {
     console.log('Pixel coords:', pixelX, pixelY);
     return [pixelX, pixelY];
 }
-
 
         function showView(viewId) {
             document.getElementById('dashboardView').classList.add('hidden');
