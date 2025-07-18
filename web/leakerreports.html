@@ -1,226 +1,277 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Leaker Reports | GMS Nederland</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="favicon.ico.png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico.png" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body class="bg-gray-100">
-
-<div class="flex h-screen">
-  <aside class="w-64 bg-blue-900 text-white flex flex-col">
-    <div class="p-6 border-b border-blue-700 flex items-center space-x-3">
-      <img src="logogmsnederland.png" class="w-10 h-10" alt="Logo">
-      <div>
-        <h2 class="text-xl font-bold">GMS Nederland</h2>
-        <span class="text-xs">Leaker Reports</span>
+  <div class="flex h-screen">
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+      <div
+        class="p-6 border-b border-blue-700 flex items-center space-x-3"
+      >
+        <img src="logogmsnederland.png" class="w-10 h-10" alt="Logo" />
+        <div>
+          <h2 class="text-xl font-bold">GMS Nederland</h2>
+          <span class="text-xs">Leaker Reports</span>
+        </div>
       </div>
-    </div>
-    <nav class="flex-1 p-4 space-y-2">
-      <a href="dashboard.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg"><i class="fas fa-home mr-3"></i> Dashboard</a>
-      <a href="support.html" class="flex items-center px-3 py-2 hover:bg-blue-800 rounded-lg"><i class="fas fa-comments mr-3"></i> SupportChat</a>
-      <a href="#" class="flex items-center px-3 py-2 bg-blue-700 rounded-lg"><i class="fas fa-flag mr-3"></i> Leaker Reports</a>
-    </nav>
-    <div class="p-4 border-t border-blue-700">
-      <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
-        <i class="fas fa-sign-out-alt mr-2"></i> Uitloggen
-      </button>
-    </div>
-  </aside>
+      <nav class="flex-1 p-4 space-y-2">
+        <a
+          href="#"
+          class="flex items-center px-3 py-2 bg-blue-700 rounded-lg"
+          ><i class="fas fa-flag mr-3"></i> Leaker Reports</a
+        >
+      </nav>
+      <div class="p-4 border-t border-blue-700">
+        <button
+          id="logoutBtn"
+          class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold"
+        >
+          <i class="fas fa-sign-out-alt mr-2"></i> Uitloggen
+        </button>
+      </div>
+    </aside>
 
-  <main class="flex-1 p-6 overflow-y-auto">
-    <h1 class="text-2xl font-bold mb-4">Leaker Reports</h1>
+    <main class="flex-1 p-6 overflow-y-auto">
+      <h1 class="text-2xl font-bold mb-4">Leaker Reports</h1>
 
-    <div class="bg-white rounded-xl shadow p-4 mb-6">
-      <input id="searchHistory" type="text" placeholder="Zoek gebruiker of e-mail..." class="px-4 py-2 border border-gray-300 rounded-lg w-full">
-    </div>
+      <div class="bg-white rounded-xl shadow p-4 mb-6">
+        <input
+          id="searchHistory"
+          type="text"
+          placeholder="Zoek gebruiker of e-mail..."
+          class="px-4 py-2 border border-gray-300 rounded-lg w-full"
+        />
+      </div>
 
-    <div class="bg-white rounded-xl shadow p-4">
-      <table class="w-full table-auto text-sm">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="p-3 text-left">Gebruiker</th>
-            <th class="p-3 text-left">Beschrijving</th>
-            <th class="p-3 text-left">Status</th>
-            <th class="p-3 text-center">Actie</th>
-          </tr>
-        </thead>
-        <tbody id="reportsList"></tbody>
-      </table>
-    </div>
-  </main>
-</div>
+      <div class="bg-white rounded-xl shadow p-4">
+        <table class="w-full table-auto text-sm">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 text-left">Gebruiker</th>
+              <th class="p-3 text-left">Beschrijving</th>
+              <th class="p-3 text-left">Status</th>
+              <th class="p-3 text-center">Actie</th>
+            </tr>
+          </thead>
+          <tbody id="reportsList"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
 
-<!-- Popup -->
-<div id="popup" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
-    <h2 class="text-xl font-semibold mb-4">Rapport Details</h2>
-    <div id="popupContent" class="space-y-2 text-sm"></div>
-    <div class="flex justify-end mt-6 space-x-2">
-      <button onclick="closePopup()" class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg">Sluiten</button>
+  <!-- Popup -->
+  <div
+    id="popup"
+    class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+  >
+    <div
+      class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 relative"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="popupTitle"
+    >
+      <h2
+        id="popupTitle"
+        class="text-xl font-semibold mb-4"
+      >
+        Rapport Details
+      </h2>
+      <div id="popupContent" class="space-y-2 text-sm"></div>
+      <div class="flex justify-end mt-6 space-x-2">
+        <button
+          onclick="closePopup()"
+          class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg"
+        >
+          Sluiten
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
-    authDomain: "gmsnederland.firebaseapp.com",
-    projectId: "gmsnederland",
-    databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
-  };
-  firebase.initializeApp(firebaseConfig);
+  <script>
+    // Firebase configuratie
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+      authDomain: "gmsnederland.firebaseapp.com",
+      projectId: "gmsnederland",
+      databaseURL:
+        "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app",
+    };
+    firebase.initializeApp(firebaseConfig);
 
-  const db = firebase.database();
-  const reportsList = document.getElementById('reportsList');
-  const searchInput = document.getElementById('searchHistory');
+    const db = firebase.database();
+    const reportsList = document.getElementById("reportsList");
+    const searchInput = document.getElementById("searchHistory");
 
-  let allReports = {}; // Firebase data opslaan
-  let filteredReports = [];
+    let allReports = {};
+    let filteredReports = [];
 
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.toLowerCase();
-    filteredReports = Object.entries(allReports).filter(([id, m]) => {
-      return m.gebruiker?.toLowerCase().includes(query) || m.email?.toLowerCase().includes(query);
-    });
-    updateTable(filteredReports);
-  });
-
-  function fetchReports() {
-    db.ref('leakerreports').on('value', snapshot => {
-      allReports = snapshot.val() || {};
-      filteredReports = Object.entries(allReports);
+    // Zoekfunctie input event
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.toLowerCase();
+      filteredReports = Object.entries(allReports).filter(([id, m]) => {
+        return (
+          (m.gebruiker && m.gebruiker.toLowerCase().includes(query)) ||
+          (m.email && m.email.toLowerCase().includes(query))
+        );
+      });
       updateTable(filteredReports);
     });
-  }
 
-  function updateTable(reportsArray) {
-    reportsList.innerHTML = '';
-    reportsArray.forEach(([id, m]) => {
-      const statusColor = m.status === 'Open' ? 'bg-red-100 text-red-600' :
-                          m.status === 'In Behandeling' ? 'bg-yellow-100 text-yellow-600' :
-                          'bg-green-100 text-green-600';
+    // Ophalen van rapporten realtime uit Firebase
+    function fetchReports() {
+      db.ref("leakerreports").on("value", (snapshot) => {
+        allReports = snapshot.val() || {};
+        filteredReports = Object.entries(allReports);
+        updateTable(filteredReports);
+      });
+    }
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="p-3 font-medium">${m.gebruiker || 'Onbekend'}</td>
-        <td class="p-3">${m.reden || '-'}</td>
-        <td class="p-3"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${m.status || '-'}</span></td>
-        <td class="p-3 text-center">
-          <button onclick="openPopup('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
-            Details & Actie
+    // Tabel updaten
+    function updateTable(reportsArray) {
+      reportsList.innerHTML = "";
+      if (reportsArray.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="4" class="p-3 text-center text-gray-500">Geen rapporten gevonden.</td>`;
+        reportsList.appendChild(tr);
+        return;
+      }
+
+      reportsArray.forEach(([id, m]) => {
+        const statusColor =
+          m.status === "Open"
+            ? "bg-red-100 text-red-600"
+            : m.status === "In Behandeling"
+            ? "bg-yellow-100 text-yellow-600"
+            : "bg-green-100 text-green-600";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-3 font-medium">${m.gebruiker || "Onbekend"}</td>
+          <td class="p-3 font-mono text-xs">${m.discordId || "-"}</td>
+          <td class="p-3 font-mono text-xs">${m.robloxNaam || "-"}</td>
+          <td class="p-3">${m.reden || "-"}</td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">
+              ${m.status || "-"}
+            </span>
+          </td>
+          <td class="p-3 text-center">
+            <button
+              onclick="openPopup('${id}')"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold"
+              aria-label="Bekijk details van rapport ${m.gebruiker || "Onbekend"}"
+            >
+              Details & Actie
+            </button>
+          </td>
+        `;
+        reportsList.appendChild(tr);
+      });
+    }
+
+    // Popup openen met details
+    function openPopup(id) {
+      const m = allReports[id];
+      if (!m) return;
+
+      const popupContent = document.getElementById("popupContent");
+      popupContent.innerHTML = `
+        <p><strong>Gebruiker:</strong> ${m.gebruiker || "Onbekend"}</p>
+        <p><strong>E-mail:</strong> ${m.email || "-"}</p>
+        <p><strong>Discord ID:</strong> ${m.discordId || "-"}</p>
+        <p><strong>Roblox Naam:</strong> ${m.robloxNaam || "-"}</p>
+        <p><strong>Server ID:</strong> ${m.serverId || "Onbekend"}</p>
+        <p><strong>Game Naam:</strong> ${m.gameName || "Onbekend"}</p>
+        <p><strong>Trello Card ID:</strong> ${m.trelloCardId || "-"}</p>
+        <p><strong>Trello Card Naam:</strong> ${m.trelloCardName || "-"}</p>
+        <p><strong>Aankoopdatum (timestamp):</strong> ${formatTimestamp(m.timestamp)}</p>
+        <p><strong>Reden Rapport:</strong> ${m.reden || "-"}</p>
+        <p><strong>Status:</strong> ${m.status || "-"}</p>
+        <p><strong>Bezwaar:</strong> ${m.bezwaar || "-"}</p>
+        <p><strong>Behandeld door:</strong> ${m.behandeldDoor || "-"}</p>
+          <button
+            onclick="confirmActie('blokkeren', '${id}')"
+            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            Blokkeren
           </button>
-        </td>
+          <button
+            onclick="confirmActie('afgehandeld', '${id}')"
+            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            Markeer Afgehandeld
+          </button>
+        </div>
       `;
-      reportsList.appendChild(tr);
-    });
-  }
+      document.getElementById("popup").classList.remove("hidden");
+    }
 
-  function openPopup(id) {
-    const m = allReports[id];
-    const popupContent = document.getElementById('popupContent');
-    popupContent.innerHTML = `
-      <p><strong>Gebruiker:</strong> ${m.gebruiker || 'Onbekend'}</p>
-      <p><strong>E-mail:</strong> ${m.email || '-'}</p>
-      <p><strong>Pakket:</strong> ${m.pakket || '-'}</p>
-      <p><strong>Aankoopdatum:</strong> ${m.datum || '-'}</p>
-      <p><strong>Reden Rapport:</strong> ${m.reden || '-'}</p>
-      <p><strong>Status:</strong> ${m.status || '-'}</p>
-      <p><strong>Bezwaar:</strong> ${m.bezwaar || '-'}</p>
-      <p><strong>Behandeld door:</strong> ${m.behandeldDoor || '-'}</p>
-      <p><strong>Aantal servers:</strong> <span id="serverCount">Laden...</span></p>
-      <div class="flex justify-end mt-4 space-x-2">
-        <button onclick="confirmActie('blokkeren', '${id}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Blokkeren</button>
-        <button onclick="confirmActie('afgehandeld', '${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Markeer Afgehandeld</button>
-      </div>
-    `;
-    fetchServerCount(m.gebruiker);
-    document.getElementById('popup').classList.remove('hidden');
-  }
+    // Popup sluiten
+    function closePopup() {
+      document.getElementById("popup").classList.add("hidden");
+    }
 
-  // function fetchServerCount(gebruiker) {
-  //   firebase.database().ref(`servers/${gebruiker}`).once('value', snapshot => {
-  //     const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-  //     document.getElementById('serverCount').textContent = count;
-  //   });
-  // }
+    // Acties bevestigen en verwerken
+    function confirmActie(type, id) {
+      const melding = allReports[id];
+      if (!melding) return;
 
-  function openPopup(id) {
-  const m = allReports[id];
-  if (!m) return; // check of id geldig is
+      const bevestiging = confirm(
+        `Weet je zeker dat je wilt ${type} uitvoeren voor ${melding.gebruiker}?`
+      );
+      if (!bevestiging) return;
 
-  const popupContent = document.getElementById('popupContent');
-  popupContent.innerHTML = `
-    <p><strong>Gebruiker:</strong> ${m.gebruiker || 'Onbekend'}</p>
-    <p><strong>E-mail:</strong> ${m.email || '-'}</p>
-    <p><strong>Pakket:</strong> ${m.pakket || '-'}</p>
-    <p><strong>Aankoopdatum:</strong> ${m.datum || '-'}</p>
-    <p><strong>Reden Rapport:</strong> ${m.reden || '-'}</p>
-    <p><strong>Status:</strong> ${m.status || '-'}</p>
-    <p><strong>Bezwaar:</strong> ${m.bezwaar || '-'}</p>
-    <p><strong>Behandeld door:</strong> ${m.behandeldDoor || '-'}</p>
-    <div class="flex justify-end mt-4 space-x-2">
-      <button onclick="confirmActie('blokkeren', '${id}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Blokkeren</button>
-      <button onclick="confirmActie('afgehandeld', '${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Markeer Afgehandeld</button>
-    </div>
-  `;
-  
-  const popup = document.getElementById('popup');
-  popup.classList.remove('hidden');
-  popup.classList.add('flex');
-}
+      const nieuweStatus = type === "blokkeren" ? "Geblokkeerd" : "Afgehandeld";
 
-function closePopup() {
-  const popup = document.getElementById('popup');
-  popup.classList.add('hidden');
-  popup.classList.remove('flex');
-}
+      db.ref(`leakerreports/${id}`).update({
+        status: nieuweStatus,
+        behandeldDoor: "Admin",
+      });
 
-  function confirmActie(type, id) {
-    const melding = allReports[id];
-    if (!melding) return;
+      logNaarDiscord(melding, type);
+      closePopup();
+    }
 
-    const bevestiging = confirm(`Weet je zeker dat je wilt ${type} uitvoeren voor ${melding.gebruiker}?`);
-    if (!bevestiging) return;
+    // Log acties naar Discord via webhook
+    function logNaarDiscord(melding, actie) {
+      fetch(
+        "https://discord.com/api/webhooks/1394635081242513418/8pE1tGfd3X4_zedQ9V_ixX_ILZ_xdJTHHO5zCpHBn39-lWrg54YIltMaC0nZp1OCNt_3",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            embeds: [
+              {
+                title: `Leaker Report Actie: ${actie.toUpperCase()}`,
+                color: actie === "blokkeren" ? 15158332 : 3066993,
+                fields: [
+                  { name: "Gebruiker", value: melding.gebruiker, inline: true },
+                  { name: "E-mail", value: melding.email || "-", inline: true },
+                  { name: "Reden", value: melding.reden || "-", inline: false },
+                  { name: "Actie uitgevoerd door", value: "Admin", inline: false },
+                ],
+                timestamp: new Date().toISOString(),
+              },
+            ],
+          }),
+        }
+      );
+    }
 
-    const nieuweStatus = type === 'blokkeren' ? 'Geblokkeerd' : 'Afgehandeld';
-
-    db.ref(`leakerreports/${id}`).update({
-      status: nieuweStatus,
-      behandeldDoor: 'Admin'
-    });
-
-    logNaarDiscord(melding, type);
-    closePopup();
-  }
-
-  function logNaarDiscord(melding, actie) {
-    fetch('https://discord.com/api/webhooks/1394635081242513418/8pE1tGfd3X4_zedQ9V_ixX_ILZ_xdJTHHO5zCpHBn39-lWrg54YIltMaC0nZp1OCNt_3', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        embeds: [{
-          title: `Leaker Report Actie: ${actie.toUpperCase()}`,
-          color: actie === 'blokkeren' ? 15158332 : 3066993,
-          fields: [
-            { name: 'Gebruiker', value: melding.gebruiker, inline: true },
-            { name: 'E-mail', value: melding.email || '-', inline: true },
-            { name: 'Reden', value: melding.reden || '-', inline: false },
-            { name: 'Actie uitgevoerd door', value: 'Admin', inline: false }
-          ],
-          timestamp: new Date()
-        }]
-      })
-    });
-  }
-
-  fetchReports();
-</script>
-
+    // Start realtime ophalen
+    fetchReports();
+  </script>
 </body>
 </html>
