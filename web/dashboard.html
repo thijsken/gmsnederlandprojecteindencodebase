@@ -2233,22 +2233,34 @@ if (call.coordinates) {
         img.onload = function() {
             const width = img.width;
             const height = img.height;
-            const bounds = [[0, 0], [height, width]];
+            const bounds = [[0, 0], [height, width]];  // CRS.Simple gebruikt pixels als coordinaten
+
             window.customMapSize = { width, height };
 
-            if (customMapOverlay) {
-                mainMap.removeLayer(customMapOverlay);
-                dashboardMap.removeLayer(customMapOverlay);
+            console.log(`🖼️ Afbeelding geladen: ${width}px breed, ${height}px hoog`);
+            console.log(`📐 Bounds ingesteld op: ${JSON.stringify(bounds)}`);
+
+            // Oude overlay verwijderen
+            if (window.customMapOverlay) {
+                mainMap.removeLayer(window.customMapOverlay);
+                dashboardMap.removeLayer(window.customMapOverlay);
+                console.log('♻️ Oude overlay verwijderd.');
             }
 
-            customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
+            // Nieuwe overlay instellen
+            window.customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
             L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
 
+            console.log('✅ Nieuwe overlay toegevoegd aan kaarten.');
+
+            // Kaart beperken tot de afbeelding
             mainMap.setMaxBounds(bounds);
             dashboardMap.setMaxBounds(bounds);
 
             mainMap.fitBounds(bounds);
             dashboardMap.fitBounds(bounds);
+
+            console.log('🔒 Kaart begrensd en gefit aan overlay.');
 
             showNotification('📌 Kaart geladen met volledige zoomcontrole en exacte locatie!', 'success');
         };
