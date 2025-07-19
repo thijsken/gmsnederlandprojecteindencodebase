@@ -2636,7 +2636,7 @@ function displayEmergencyReports(reports) {
                 iconAnchor: [16, 42]
             });
 
-            const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
+            const marker = L.marker([y, x], { icon }).addTo(dashboardMap);
 
             marker.bindPopup(`
                 <b>${call.type}</b><br>
