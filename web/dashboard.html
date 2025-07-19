@@ -2027,8 +2027,8 @@ function updateCallList() {
     });
 }
 
-    function updateRecentCalls() {
-    const recentCallsContainer = document.getElementById('recentCallsContainer');
+    function updateRecentCalls(calls) {
+    const recentCallsContainer = document.getElementById('recentCalls');
     recentCallsContainer.innerHTML = ''; // Maak de container leeg
 
     recentCalls.forEach(call => {
@@ -2044,7 +2044,7 @@ function updateCallList() {
     });
 }
 
-function showCallDetails(callId) {
+    function showCallDetails(callId) {
     const call = calls.find(c => String(c.id) === String(callId));
     if (!call) return;
             
@@ -2107,7 +2107,7 @@ function showCallDetails(callId) {
     document.getElementById('callDetailsModal').classList.remove('hidden');
 }
 
-        function getCallStatusName(status) {
+    function getCallStatusName(status) {
             switch(status) {
                 case 'new': return 'Nieuw';
                 case 'accepted': return 'Geaccepteerd';
@@ -2117,7 +2117,7 @@ function showCallDetails(callId) {
             }
         }
 
-        function assignUnit(unitType) {
+    function assignUnit(unitType) {
             if (!currentCallId) return;
             
             // Find available unit of the requested type
@@ -2149,7 +2149,7 @@ function showCallDetails(callId) {
             showNotification(`${getUnitTypeName(unitType)} eenheid ${availableUnit.id} toegewezen!`);
         }
 
-        function closeCall() {
+    function closeCall() {
             if (!currentCallId) return;
             
             // Find call and mark as closed
@@ -2190,7 +2190,7 @@ function showCallDetails(callId) {
             document.getElementById('callDetailsModal').classList.add('hidden');
         }
 
-        function sluitMelding(timestamp) {
+    function sluitMelding(timestamp) {
           const id = String(timestamp);
 
           // ✅ Zoek en markeer de melding als gesloten
@@ -2231,7 +2231,7 @@ function showCallDetails(callId) {
           showNotification(`✅ Melding ${id} afgehandeld en verwijderd`, 'success');
         }
 
-        function formatTime(timestamp, full = false) {
+    function formatTime(timestamp, full = false) {
             if (!timestamp) return 'Onbekend';
             
             const date = new Date(timestamp);
@@ -2248,7 +2248,7 @@ function showCallDetails(callId) {
             return `${Math.floor(diffInMinutes / (60 * 24))} dagen geleden`;
         }
 
-        function voegNieuweMeldingToe(call) {
+    function voegNieuweMeldingToe(call) {
 
             // Toon visuele notificatie
             showNotification("📟 Nieuwe melding ontvangen!", "info");
@@ -2263,7 +2263,7 @@ function showCallDetails(callId) {
             }
         }
 
-        function showNotification(message, type = 'info') {
+    function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg ${
                 type === 'error' ? 'bg-red-600' : 
@@ -2283,97 +2283,97 @@ function showCallDetails(callId) {
             }, 3000);
         }
 
-        function logout() {
+    function logout() {
             localStorage.removeItem('apiKey');
             window.location.href = 'index.html';
         }
 
-let vorigeMeldingenTimestamps = [];
-let bekendeMeldingen = new Set();
+    let vorigeMeldingenTimestamps = [];
+    let bekendeMeldingen = new Set();
 
-function fetchEmergencyReports() {
-  if (!mapUploaded) {
-    console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
-    return;
-  }
-
-  const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
-  console.log("🌐 Ophalen meldingen van:", url);
-
-  fetch(url)
-    .then(res => {
-      if (!res.ok) {
-        return res.json().then(errData => {
-          throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
-        });
-      }
-      return res.json();
-    })
-    .then(data => {
-      const meldingenArray = Array.isArray(data) ? data : Object.values(data);
-
-      if (!Array.isArray(meldingenArray)) {
-        throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
+    function fetchEmergencyReports() {
+      if (!mapUploaded) {
+        console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
+        return;
       }
 
-      // Verwijder alleen markers die niet meer in de response zitten
-      Object.keys(emergencyMarkers).forEach(meldingId => {
-        if (!meldingenArray.some(m => m.timestamp === meldingId)) {
-          emergencyMarkers[meldingId].remove();
-          delete emergencyMarkers[meldingId];
-        }
-      });
+      const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
+      console.log("🌐 Ophalen meldingen van:", url);
 
-      // Verwerk nieuwe meldingen
-      meldingenArray.forEach(melding => {
-        if (melding.status === 'new' && !bekendeMeldingen.has(melding.timestamp)) {
-          bekendeMeldingen.add(melding.timestamp);
-
-          const callWithId = { id: melding.timestamp, ...melding };
-
-          console.log("🚨 Nieuwe melding:", callWithId);
-
-          // Voeg marker toe met omgezette coördinaten
-          if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
-            const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y);
-
-            const icon = L.divIcon({
-              className: '',
-              html: `
-                <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-                  <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
-                       onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                       style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
-                  <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
-                </div>
-              `,
-              iconSize: [32, 42],
-              iconAnchor: [16, 42]
+      fetch(url)
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(errData => {
+              throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
             });
-
-            // Voeg marker alleen toe aan de juiste kaart
-            const marker = L.marker([y, x], { icon }).addTo(mainMap); // Voeg toe aan mainMap
-
-            marker.bindPopup(`
-              <b>${callWithId.type}</b><br>
-              Locatie: ${callWithId.location}<br>
-              Speler: ${callWithId.playerName}<br>
-              Beschrijving: ${callWithId.description}
-            `);
-
-            emergencyMarkers[callWithId.id] = marker; // Sla de marker op
-          } else {
-            console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
           }
-        }
-      });
-      updateRecentCalls(calls);
-    })
-    .catch(err => {
-      console.error("❌ Fout bij ophalen meldingen:", err.message);
-      showNotification("Fout bij ophalen meldingen: " + err.message, "error");
-    });
-}
+          return res.json();
+        })
+        .then(data => {
+          const meldingenArray = Array.isArray(data) ? data : Object.values(data);
+
+          if (!Array.isArray(meldingenArray)) {
+            throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
+          }
+
+          // Verwijder alleen markers die niet meer in de response zitten
+          Object.keys(emergencyMarkers).forEach(meldingId => {
+            if (!meldingenArray.some(m => m.timestamp === meldingId)) {
+              emergencyMarkers[meldingId].remove();
+              delete emergencyMarkers[meldingId];
+            }
+          });
+
+          // Verwerk nieuwe meldingen
+          meldingenArray.forEach(melding => {
+            if (melding.status === 'new' && !bekendeMeldingen.has(melding.timestamp)) {
+              bekendeMeldingen.add(melding.timestamp);
+
+              const callWithId = { id: melding.timestamp, ...melding };
+
+              console.log("🚨 Nieuwe melding:", callWithId);
+
+              // Voeg marker toe met omgezette coördinaten
+              if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
+                const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y);
+
+                const icon = L.divIcon({
+                  className: '',
+                  html: `
+                    <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+                      <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
+                          onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                          style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                      <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+                    </div>
+                  `,
+                  iconSize: [32, 42],
+                  iconAnchor: [16, 42]
+                });
+
+                // Voeg marker alleen toe aan de juiste kaart
+                const marker = L.marker([y, x], { icon }).addTo(mainMap); // Voeg toe aan mainMap
+
+                marker.bindPopup(`
+                  <b>${callWithId.type}</b><br>
+                  Locatie: ${callWithId.location}<br>
+                  Speler: ${callWithId.playerName}<br>
+                  Beschrijving: ${callWithId.description}
+                `);
+
+                emergencyMarkers[callWithId.id] = marker; // Sla de marker op
+              } else {
+                console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
+              }
+            }
+          });
+          updateRecentCalls(calls);
+        })
+        .catch(err => {
+          console.error("❌ Fout bij ophalen meldingen:", err.message);
+          showNotification("Fout bij ophalen meldingen: " + err.message, "error");
+        });
+    }
 
 // Voeg dit toe aan je JS-bestand (na initialisatie van maps)
 function fetchUnits(serverId) {
