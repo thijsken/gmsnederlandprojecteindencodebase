@@ -2493,7 +2493,7 @@ setInterval(() => {
 let recentCalls = [];  // Dit is waar je de recente meldingen opslaat
 let callList = [];     // Dit is waar de geaccepteerde meldingen naar toe gaan
 
-function accepteerMelding(timestamp) {
+function acceptMelding(timestamp) {
     const ts = Number(timestamp);
     const index = calls.findIndex(m => Number(m.timestamp) === ts);
     
