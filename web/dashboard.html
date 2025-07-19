@@ -917,12 +917,18 @@ auth.onAuthStateChanged(user => {
     minZoom: -5,
     maxZoom: 2,
     zoomSnap: 0.1
-}).setView([0, 0], 0);
-const mainMap = L.map('map', {
-  crs: L.CRS.Simple,
-  minZoom: -5,
-  maxZoom: 5
-});
+        }).setView([0, 0], 0);
+                const mainMap = L.map('map', {
+          crs: L.CRS.Simple,
+          minZoom: -5,
+          maxZoom: 5
+        });
+
+        const imageBounds = [[0, 0], [556, 878]]; // [hoogte, breedte] van jouw PNG
+        L.imageOverlay('73c75a5e-fc6b-453d-ba45-1072457c7370.png', imageBounds).addTo(mainMap);
+        mainMap.setView([278, 439], 1); // centrum van de map
+        mainMap.setMaxBounds(imageBounds); // voorkomt buiten scrollen
+
 
         // Markers and data
         let availableUnits = [];
@@ -2204,61 +2210,79 @@ if (call.coordinates) {
             localStorage.removeItem('apiKey');
             window.location.href = 'index.html';
         }
+        // ✅ Roblox-coördinaten omzetten naar Leaflet-positie
+        function robloxToLeafletCoords(x, y) {
+          if (!window.customMapSize) {
+            console.warn("⚠️ Geen kaartgrootte bekend. Gebruik standaardwaarden.");
+            return [0, 0]; // Fallback
+          }
 
+          const { width: mapWidth, height: mapHeight } = window.customMapSize;
+
+          const robloxMinX = -512;
+          const robloxMaxX = 512;
+          const robloxMinY = -256;
+          const robloxMaxY = 256;
+
+          const leafletX = ((x - robloxMinX) / (robloxMaxX - robloxMinX)) * mapWidth;
+          const leafletY = mapHeight - ((y - robloxMinY) / (robloxMaxY - robloxMinY)) * mapHeight;
+
+          return [leafletY, leafletX];
+        }
+
+        // ✅ Kaart uploaden en tonen
         function uploadMapImage() {
-    const input = document.getElementById('mapImageInput');
-    const file = input.files[0];
+          const input = document.getElementById('mapImageInput');
+          const file = input.files[0];
 
-    if (!file || file.type !== 'image/png') {
-        showNotification('Upload een geldige PNG-afbeelding!', 'error');
-        return;
-    }
+          if (!file || file.type !== 'image/png') {
+            showNotification('❌ Upload een geldige PNG-afbeelding!', 'error');
+            return;
+          }
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const imageUrl = e.target.result;
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const imageUrl = e.target.result;
 
-        const img = new Image();
-        img.onload = function() {
-            const width = img.width;
-            const height = img.height;
-            const bounds = [[0, 0], [height, width]];  // CRS.Simple gebruikt pixels als coordinaten
+            const img = new Image();
+            img.onload = function() {
+              const width = img.width;
+              const height = img.height;
+              const bounds = [[0, 0], [height, width]];
 
-            window.customMapSize = { width, height };
+              // 📐 Sla grootte op
+              window.customMapSize = { width, height };
 
-            console.log(`🖼️ Afbeelding geladen: ${width}px breed, ${height}px hoog`);
-            console.log(`📐 Bounds ingesteld op: ${JSON.stringify(bounds)}`);
-
-            // Oude overlay verwijderen
-            if (window.customMapOverlay) {
+              // ♻️ Oude overlay verwijderen
+              if (window.customMapOverlay) {
                 mainMap.removeLayer(window.customMapOverlay);
                 dashboardMap.removeLayer(window.customMapOverlay);
-                console.log('♻️ Oude overlay verwijderd.');
-            }
+              }
 
-            // Nieuwe overlay instellen
-            window.customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
-            L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
+              // ✅ Nieuwe overlay toevoegen
+              window.customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
+              L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
 
-            console.log('✅ Nieuwe overlay toegevoegd aan kaarten.');
+              // 🔒 Beperk en zoom
+              mainMap.setMaxBounds(bounds);
+              dashboardMap.setMaxBounds(bounds);
+              mainMap.fitBounds(bounds);
+              dashboardMap.fitBounds(bounds);
 
-            // Kaart beperken tot de afbeelding
-            mainMap.setMaxBounds(bounds);
-            dashboardMap.setMaxBounds(bounds);
+              showNotification('📌 Kaart succesvol geladen!', 'success');
 
-            mainMap.fitBounds(bounds);
-            dashboardMap.fitBounds(bounds);
+              // 🔴 Testmarker op (0, 0) in Roblox-wereld
+              setTimeout(() => {
+                const [y, x] = robloxToLeafletCoords(0, 0);
+                L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
+              }, 500);
+            };
 
-            console.log('🔒 Kaart begrensd en gefit aan overlay.');
+            img.src = imageUrl;
+          };
 
-            showNotification('📌 Kaart geladen met volledige zoomcontrole en exacte locatie!', 'success');
-        };
-
-        img.src = imageUrl;
-    };
-
-    reader.readAsDataURL(file);
-}
+          reader.readAsDataURL(file);
+        }
 
 let vorigeMeldingenTimestamps = [];
 let bekendeMeldingen = new Set();
