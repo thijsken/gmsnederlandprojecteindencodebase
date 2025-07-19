@@ -2376,28 +2376,22 @@ function fetchEmergencyReports() {
       console.log("Ontvangen meldingen:", data);
 
       const meldingenArray = Object.entries(data).map(([id, melding]) => ({
-        id, // <-- Firebase key als callId
+        id, // Firebase key als callId
         ...melding,
       }));
 
+      // Verwijder oude markers
       Object.values(emergencyMarkers).forEach(marker => {
         if (marker) {
           mainMap.removeLayer(marker);
           dashboardMap.removeLayer(marker);
         }
       });
-
       emergencyMarkers = {};
       calls = [];
 
       meldingenArray.forEach(melding => {
-      calls.push(melding); // voeg alle meldingen toe aan de lijst
-
-      if (
-        melding.status === 'new' &&
-        !bekendeMeldingen.has(melding.timestamp)
-      ) {
-        bekendeMeldingen.add(melding.timestamp);
+        calls.push(melding);
 
         if (
           melding.coordinates &&
@@ -2405,18 +2399,33 @@ function fetchEmergencyReports() {
           typeof melding.coordinates.y === 'number'
         ) {
           const [y, x] = robloxToLeafletCoords(melding.coordinates.x, melding.coordinates.y);
+
+          // Custom pin icon met avatar in het midden
           const icon = L.divIcon({
-            className: '',
+            className: 'custom-pin-icon',
             html: `
-              <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-                <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${melding.userId}&width=100&height=100&format=png"
-                    onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                    style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
-                <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+              <div style="position: relative; width: 40px; height: 50px; transform: translate(-50%, -100%);">
+                <svg width="40" height="50" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top: 0; left: 0;">
+                  <path d="M20 0C11 0 4 7 4 16c0 13 16 32 16 32s16-19 16-32c0-9-7-16-16-16z" fill="#ef4444"/>
+                </svg>
+                <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${melding.userId}&width=32&height=32&format=png"
+                  onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                  style="
+                    position: absolute;
+                    top: 8px;
+                    left: 4px;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    box-shadow: 0 0 4px rgba(0,0,0,0.3);
+                    object-fit: cover;
+                  "
+                />
               </div>
             `,
-            iconSize: [32, 42],
-            iconAnchor: [16, 42]
+            iconSize: [40, 50],
+            iconAnchor: [20, 50]
           });
 
           const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
@@ -2431,8 +2440,7 @@ function fetchEmergencyReports() {
         } else {
           console.warn(`⚠️ Melding ${melding.id} heeft ongeldige coördinaten:`, melding.coordinates);
         }
-      }
-    });
+      });
 
       updateCalls();
     })
