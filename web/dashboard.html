@@ -1623,7 +1623,7 @@ function sluitKazerenModal() {
 
       reader.readAsDataURL(file);
     }
-    
+
         function showView(viewId) {
             document.getElementById('dashboardView').classList.add('hidden');
             document.getElementById('mapView').classList.add('hidden');
@@ -1876,7 +1876,7 @@ function sluitKazerenModal() {
                 iconAnchor: [12, 12]
             });
 
-            const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
+            const [y, x] = robloxToLeafletCoords(unit.location.lat, unit.location.lng);
 
             const marker = L.marker([y, x], {
                 icon: customIcon
