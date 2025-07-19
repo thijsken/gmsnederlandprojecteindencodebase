@@ -2327,8 +2327,7 @@ function updateCallList() {
             if (melding.status === 'new' && !bekendeMeldingen.has(melding.timestamp)) {
               bekendeMeldingen.add(melding.timestamp);
               const callWithId = { id: melding.timestamp, ...melding };
-              calls.push(callWithId);
-
+              calls.push(callWithId); // Voeg meldingen toe aan calls array
               console.log("🚨 Nieuwe melding:", callWithId);
 
               // Voeg marker toe met omgezette coördinaten
@@ -2499,6 +2498,7 @@ function acceptMelding(timestamp) {
     
     if (index === -1) {
         console.error("❌ Melding niet gevonden in calls!");
+        console.log("Huidige calls:", calls);
         return;
     }
 
