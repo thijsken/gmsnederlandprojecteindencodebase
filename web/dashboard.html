@@ -2377,7 +2377,7 @@ function fetchEmergencyReports() {
 
 // Voeg dit toe aan je JS-bestand (na initialisatie van maps)
 function fetchUnits(serverId) {
-  if (!mapUploaded) { // Controleer of de kaart is geüpload
+  if (!mapUploaded) {
     console.log("Kaart is nog niet geüpload, units worden niet geladen.");
     return;
   }
@@ -2422,10 +2422,8 @@ function fetchUnits(serverId) {
     // Voeg nieuwe markers toe
     data.forEach(unit => {
       units.push(unit); // Voeg de unit toe aan de lokale array
-      const marker = createMarker(unit);
+      const marker = createMarker(unit, mainMap); // Pass the map instance
       if (marker) {
-        const maps = [mainMap].filter(Boolean);
-        maps.forEach(map => marker.addTo(map));
         unitMarkers[unit.id] = marker;
       }
     });
@@ -2436,7 +2434,7 @@ function fetchUnits(serverId) {
   });
 }
 
-function createMarker(unit) {
+function createMarker(unit, map) { // Accept map as a parameter
   const { id, location, type, driver } = unit;
 
   if (!location || typeof location.lat !== 'number' || typeof location.lng !== 'number') {
@@ -2482,7 +2480,7 @@ function createMarker(unit) {
 
   const marker = L.marker([y, x], {
     icon: divIcon
-  }).addTo(map); // Voeg toe aan dashboardMap
+  }).addTo(map); // Voeg toe aan de juiste map
 
   return marker;
 }
@@ -2941,27 +2939,6 @@ function triggerLuchtalarm(actie, id) {
     showNotification("Luchtalarm", '⚠️ Fout bij uitvoeren actie');
   });
 }
-
-// 🚀 Ophalen van paaldata uit backend
-// fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`) // Verwijderd, wordt nu aangeroepen na kaart upload
-//   .then(res => {
-//     if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
-//     return res.json();
-//   })
-//   .then(palen => {
-//     console.log("✅ Ontvangen paaldata:", palen);
-
-//     if (typeof palen === 'object' && palen !== null) {
-//       const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
-//       palenArray.forEach(paal => {
-//         console.log("🧭 Verwerk paal:", paal);
-//         addLuchtalarmPaal(paal);
-//       });
-//     } else {
-//       console.warn("⚠️ Geen object met palen ontvangen:", palen);
-//     }
-//   })
-//   .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
 
 function fetchPosten() {
   if (!mapUploaded) { // Controleer of de kaart is geüpload
