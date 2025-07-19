@@ -1981,7 +1981,11 @@ function acceptCall(callId) {
 
     const marker = emergencyMarkers[callId];
     if (marker) {
+        console.log(`Marker gevonden voor ${callId}:`, marker);
         marker.setStyle({ color: '#f59e0b' });
+    } else {
+        console.warn(`⚠️ Marker voor melding ${callId} niet gevonden.`);
+        return; // Stop de functie hier als de marker niet bestaat
     }
 
     // 🌐 PATCH naar backend
