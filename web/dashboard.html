@@ -1968,7 +1968,7 @@ function updateCalls() {
 }
 // ✅ GEHELE HERSCHREVEN VERSIE VAN acceptCall(callId)
 function acceptCall(callId) {
-  const call = calls.find(c => String(c.id) === String(callId));
+    const call = calls.find(c => String(c.id) === String(callId));
     if (!call || call.status !== 'new') {
         console.warn("⚠️ Geen geldige melding gevonden of status is niet 'new':", callId);
         return;
@@ -1976,34 +1976,37 @@ function acceptCall(callId) {
 
     // ✅ Lokaal updaten
     call.status = 'accepted';
-    console.log(`Melding ${callId} geaccepteerd.`); // Debug-informatie
+    console.log(`📞 Melding ${callId} lokaal geaccepteerd.`);
     updateCalls();
 
     const marker = emergencyMarkers[callId];
     if (marker) {
-        console.log(`Marker gevonden voor ${callId}:`, marker);
+        console.log(`📍 Marker gevonden voor ${callId}:`, marker);
         try {
-            marker.setStyle({ color: '#f59e0b' });
+            marker.setStyle({ color: '#f59e0b' }); // Oranje kleur
         } catch (error) {
             console.error("❌ Fout bij het instellen van de marker stijl:", error);
         }
     } else {
         console.warn(`⚠️ Marker voor melding ${callId} niet gevonden.`);
-        return; // Stop de functie hier als de marker niet bestaat
+        return; // Stop hier als marker ontbreekt
     }
 
     // 🌐 PATCH naar backend
-    fetch(`${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}$callId=${callId}`, {
+    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`;
+    console.log("🔗 PATCH URL:", url);
+
+    fetch(url, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${currentApiKey}` // als je dat gebruikt
+            // 'Authorization': `Bearer ${currentApiKey}` // Als je een API key gebruikt
         },
         body: JSON.stringify({ status: 'accepted' })
     })
     .then(res => {
         console.log(`🌐 PATCH response status: ${res.status}`);
-        if (!res.ok) throw new Error("PATCH mislukt");
+        if (!res.ok) throw new Error(`PATCH mislukt met status ${res.status}`);
         return res.json();
     })
     .then(data => {
@@ -2012,10 +2015,10 @@ function acceptCall(callId) {
     })
     .catch(err => {
         console.error('❌ Fout bij PATCH melding:', err);
-        showNotification('Fout bij backend-update, lokaal geaccepteerd', 'error');
+        showNotification('⚠️ Fout bij backend-update, lokaal geaccepteerd', 'error');
     });
 }
- 
+
 function updateCallList() {
     const callListContainer = document.getElementById('callListContainer');
     callListContainer.innerHTML = ''; // Maak de container leeg
