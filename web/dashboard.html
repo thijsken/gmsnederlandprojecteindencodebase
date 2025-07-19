@@ -1976,6 +1976,7 @@ function acceptCall(callId) {
 
     // ✅ Lokaal updaten
     call.status = 'accepted';
+    console.log(`Melding ${callId} geaccepteerd.`); // Debug-informatie
     updateCalls();
 
     const marker = emergencyMarkers[callId];
@@ -1988,7 +1989,7 @@ function acceptCall(callId) {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${currentApiKey}` // als je dat gebruikt
+            // 'Authorization': `Bearer ${currentApiKey}` // als je dat gebruikt
         },
         body: JSON.stringify({ status: 'accepted' })
     })
@@ -2299,14 +2300,17 @@ function fetchEmergencyReports() {
 
   fetch(url)
     .then(res => {
+      console.log("Response status:", res.status);
       if (!res.ok) {
         return res.json().then(errData => {
+          console.error("Fout bij ophalen meldingen:", errData);
           throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
         });
       }
       return res.json();
     })
     .then(data => {
+      console.log("Ontvangen meldingen:", data);
       const meldingenArray = Array.isArray(data) ? data : Object.values(data);
 
       if (!Array.isArray(meldingenArray)) {
@@ -2622,6 +2626,7 @@ function displayEmergencyReports(reports) {
         // 🔴 Voeg marker toe
         if (call.coordinates && typeof call.coordinates.x === 'number' && typeof call.coordinates.y === 'number') {
             const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+            console.log(`Toevoegen marker voor melding ${call.id} op coördinaten: [${y}, ${x}]`);
 
             const icon = L.divIcon({
                 className: '',
