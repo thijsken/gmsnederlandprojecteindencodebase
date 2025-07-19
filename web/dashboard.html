@@ -2332,13 +2332,14 @@ function fetchEmergencyReports() {
       emergencyMarkers = {};
       calls = [];
 
-      const nieuweMeldingen = meldingenArray.filter(m =>
-        m.status === 'new' && !bekendeMeldingen.has(m.timestamp)
-      );
+      meldingenArray.forEach(melding => {
+      calls.push(melding); // voeg alle meldingen toe aan de lijst
 
-      nieuweMeldingen.forEach(melding => {
+      if (
+        melding.status === 'new' &&
+        !bekendeMeldingen.has(melding.timestamp)
+      ) {
         bekendeMeldingen.add(melding.timestamp);
-        calls.push(melding); // bevat nu een .id = Firebase key
 
         if (
           melding.coordinates &&
@@ -2351,8 +2352,8 @@ function fetchEmergencyReports() {
             html: `
               <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
                 <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${melding.userId}&width=100&height=100&format=png"
-                     onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                     style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                    onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                    style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
                 <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
               </div>
             `,
@@ -2372,7 +2373,8 @@ function fetchEmergencyReports() {
         } else {
           console.warn(`⚠️ Melding ${melding.id} heeft ongeldige coördinaten:`, melding.coordinates);
         }
-      });
+      }
+    });
 
       updateCalls();
     })
