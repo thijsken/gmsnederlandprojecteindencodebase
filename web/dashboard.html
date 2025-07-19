@@ -2493,62 +2493,62 @@ setInterval(() => {
 let recentCalls = [];  // Dit is waar je de recente meldingen opslaat
 let callList = [];     // Dit is waar de geaccepteerde meldingen naar toe gaan
 
-function acceptMelding(timestamp) {
-    const ts = Number(timestamp);
-    const index = calls.findIndex(m => Number(m.id) === ts);
+// function acceptMelding(timestamp) {
+//     const ts = Number(timestamp);
+//     const index = calls.findIndex(m => Number(m.timestamp) === ts);
     
-    if (index === -1) {
-        console.error("❌ Melding niet gevonden in calls!");
-        console.log("Huidige calls:", calls);
-        return;
-    }
+//     if (index === -1) {
+//         console.error("❌ Melding niet gevonden in calls!");
+//         console.log("Huidige calls:", calls);
+//         return;
+//     }
 
-    const call = calls[index];
+//     const call = calls[index];
 
-    // Verwijder visueel uit recentCalls
-    const recentContainer = document.getElementById('recentCalls');
-    const meldingen = recentContainer.querySelectorAll('.melding');
-    meldingen.forEach(el => {
-        const btn = el.querySelector('button.accepteer');
-        if (btn && btn.getAttribute('onclick')?.includes(timestamp)) {
-            el.remove();
-        }
-    });
+//     // Verwijder visueel uit recentCalls
+//     const recentContainer = document.getElementById('recentCalls');
+//     const meldingen = recentContainer.querySelectorAll('.melding');
+//     meldingen.forEach(el => {
+//         const btn = el.querySelector('button.accepteer');
+//         if (btn && btn.getAttribute('onclick')?.includes(timestamp)) {
+//             el.remove();
+//         }
+//     });
 
-    // Als al geaccepteerd of afgehandeld: verwijder alleen, doe niets meer
-    if (call.status !== 'new') {
-        console.log(`🔄 Melding ${timestamp} was al geaccepteerd (${call.status})`);
-        return;
-    }
+//     // Als al geaccepteerd of afgehandeld: verwijder alleen, doe niets meer
+//     if (call.status !== 'new') {
+//         console.log(`🔄 Melding ${timestamp} was al geaccepteerd (${call.status})`);
+//         return;
+//     }
 
-    // Zet status op geaccepteerd
-    call.status = 'accepted';
+//     // Zet status op geaccepteerd
+//     call.status = 'accepted';
 
-    // Voeg toe aan callList
-    const callListContainer = document.getElementById('callList');
-    const div = document.createElement('div');
-    div.className = 'bg-gray-800 p-4 rounded shadow mb-3 melding';
+//     // Voeg toe aan callList
+//     const callListContainer = document.getElementById('callList');
+//     const div = document.createElement('div');
+//     div.className = 'bg-gray-800 p-4 rounded shadow mb-3 melding';
 
-    div.innerHTML = `
-        <div class="bg-white-200 p-4 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-white">${call.type}</h3>
-            <p class="text-white-500 text-sm mb-2.5 mt-1">
-                <strong class="text-white-400">Locatie:</strong> ${call.location}
-            </p>
-            <p class="text-white-500 text-sm mb-2.5 mt-1">
-                <strong class="text-white-400">Speler:</strong> ${call.playerName}
-            </p>
-            <div class="buttons mt-2">
-                <button class="button meerinfo bg-gray-600 text-white p-2 rounded hover:bg-gray-700" onclick="meerInfo('${call.timestamp}')" data-id="${call.timestamp}">Meer info</button>
-                <button class="button sluit bg-red-600 text-white p-2 rounded hover:bg-red-700" onclick="sluitMelding('${call.timestamp}')">Afhandelen</button>
-            </div>
-        </div>
-    `;
-    callListContainer.appendChild(div);
+//     div.innerHTML = `
+//         <div class="bg-white-200 p-4 rounded-lg shadow-md">
+//             <h3 class="text-lg font-semibold text-white">${call.type}</h3>
+//             <p class="text-white-500 text-sm mb-2.5 mt-1">
+//                 <strong class="text-white-400">Locatie:</strong> ${call.location}
+//             </p>
+//             <p class="text-white-500 text-sm mb-2.5 mt-1">
+//                 <strong class="text-white-400">Speler:</strong> ${call.playerName}
+//             </p>
+//             <div class="buttons mt-2">
+//                 <button class="button meerinfo bg-gray-600 text-white p-2 rounded hover:bg-gray-700" onclick="meerInfo('${call.timestamp}')" data-id="${call.timestamp}">Meer info</button>
+//                 <button class="button sluit bg-red-600 text-white p-2 rounded hover:bg-red-700" onclick="sluitMelding('${call.timestamp}')">Afhandelen</button>
+//             </div>
+//         </div>
+//     `;
+//     callListContainer.appendChild(div);
 
-    // Update de status naar de backend
-    updateCallStatusOnBackend(call.timestamp, 'accepted');
-}
+//     // Update de status naar de backend
+//     updateCallStatusOnBackend(call.timestamp, 'accepted');
+// }
 
 // Functie om de status naar de backend te verzenden
 function updateCallStatusOnBackend(timestamp, status) {
