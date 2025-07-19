@@ -2650,7 +2650,7 @@ function displayEmergencyReports(reports) {
                 iconAnchor: [16, 42]
             });
 
-            const marker = L.marker([y, x], { icon }).addTo(dashboardMap);
+            const marker = L.circleMarker([y, x], {radius: 8, color: '#f59e0b', fillOpacity: 0.8}).addTo(dashboardMap);
             emergencyMarkers[call.id] = marker; // Zorg ervoor dat je de marker opslaat met de juiste ID
 
             marker.bindPopup(`
