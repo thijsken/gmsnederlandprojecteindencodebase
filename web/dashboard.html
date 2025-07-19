@@ -1995,12 +1995,12 @@ function acceptCall(callId) {
     // 🌐 PATCH naar backend
     const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`;
     console.log("🔗 PATCH URL:", url);
-
+    console.log("📦 PATCH payload:", JSON.stringify({ status: 'accepted' }));
     fetch(url, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${currentApiKey}` // Als je een API key gebruikt
+            'Authorization': `Bearer ${currentApiKey}` // Als je een API key gebruikt
         },
         body: JSON.stringify({ status: 'accepted' })
     })
