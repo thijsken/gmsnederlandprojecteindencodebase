@@ -1,19 +1,19 @@
 import { db } from '../../../web/firebase/firebaseAdmin';
 
 export default async function handler(req, res) {
-  const { serverId } = req.query;
+  const { serverId, callId } = req.query;
 
   if (!serverId) {
     return res.status(400).json({ error: 'serverId is verplicht' });
   }
 
   try {
-    //check of server id bestaad
+    // Check of serverId bestaat
     const serverSnapshot = await db.ref(`servers/${serverId}`).once('value');
-    if(!serverSnapshot.exists()) {
+    if (!serverSnapshot.exists()) {
       return res.status(404).json({ error: `Server met id ${serverId} bestaat niet` });
     }
-    
+
     switch (req.method) {
       case 'GET': {
         // Alle meldingen ophalen binnen de server
@@ -35,11 +35,10 @@ export default async function handler(req, res) {
       }
 
       case 'DELETE': {
-          const { callId } = req.query; // belangrijk!
         if (!callId) {
-          return res.status(400).json({ error: 'callId is verplicht voor Delete' });
+          return res.status(400).json({ error: 'callId is verplicht voor DELETE' });
         }
-        
+
         const ref = db.ref(`servers/${serverId}/meldingen/${callId}`);
         const snapshot = await ref.once('value');
 
@@ -48,28 +47,24 @@ export default async function handler(req, res) {
         }
 
         await ref.remove();
-        return res.status(200).json({ message: `Meldingen ${callId} verwijderd `});
+        return res.status(200).json({ message: `Melding ${callId} verwijderd` });
       }
 
       case 'PATCH': {
-
-        const { callId } = req.query;
-          console.log('PATCH binnengekomen:', { serverId, callId, body: req.body });
-
         if (!callId) {
           return res.status(400).json({ error: 'callId is verplicht voor PATCH' });
         }
 
         const { status } = req.body;
         if (!status || typeof status !== 'string') {
-          return res.status(400).json({ error: 'Status is verplicht en moet een String zijn' });
+          return res.status(400).json({ error: 'Status is verplicht en moet een string zijn' });
         }
 
         const ref = db.ref(`servers/${serverId}/meldingen/${callId}`);
         const snapshot = await ref.once('value');
 
         if (!snapshot.exists()) {
-          return res.status(400).json({ error: `Melding met Id ${callId} bestaat niet` });
+          return res.status(404).json({ error: `Melding met id ${callId} bestaat niet` });
         }
 
         await ref.update({ status });
@@ -81,6 +76,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: `Method ${req.method} not allowed` });
     }
   } catch (error) {
+    console.error('API error:', error);
     return res.status(500).json({ error: 'Er is iets misgegaan', details: error.message });
   }
 }
