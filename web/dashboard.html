@@ -981,7 +981,7 @@ const mainMap = L.map('map', {
         document.getElementById('assignPoliceBtn').addEventListener('click', () => assignUnit('police'));
         document.getElementById('assignAmbulanceBtn').addEventListener('click', () => assignUnit('ambulance'));
         document.getElementById('assignFireBtn').addEventListener('click', () => assignUnit('fire'));
-        document.getElementById('closeCallBtn').addEventListener('click', sluitMelding);
+        document.getElementById('closeCallBtn').addEventListener('click', () => sluitMelding(currentCallId));
 
         // CIOT management
           const dummyResults = [
