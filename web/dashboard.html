@@ -2754,19 +2754,14 @@ function meerInfo(callId) {
     
 // 🛰️ Ophalen en tonen van luchtalarm-palen via echte Roblox API data
 
-function waitForOverlay() {
+function waitForOverlayUpload(overlay) {
   return new Promise((resolve) => {
-    if (window.customMapSize) {
-      // overlay/grootte al bekend, direct door
+    if (overlay.isLoaded()) { // of een andere check als het bestaat
       resolve();
     } else {
-      // Luister naar kaart resize of andere event die customMapSize instelt
-      const checkInterval = setInterval(() => {
-        if (window.customMapSize) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 100); // elke 100ms checken
+      overlay.once('load', () => {
+        resolve();
+      });
     }
   });
 }
@@ -2801,7 +2796,7 @@ function addLuchtalarmPaal(paal) {
   `);
 }
 
-async function addLuchtalarmPaal(paal) {
+async function addLuchtalarmPaal(paal, overlay) {
   if (!paal || typeof paal !== 'object') {
     console.warn("❌ Ongeldige paaldata:", paal);
     return;
@@ -2814,18 +2809,17 @@ async function addLuchtalarmPaal(paal) {
     return;
   }
 
-  // Wacht tot overlay en kaartgrootte bekend zijn
-  await waitForOverlay();
+  // Wacht tot overlay geladen is
+  await waitForOverlayUpload(overlay);
+
+  window.customMapSize = mainMap.getSize();
 
   console.log("📍 Voeg marker toe voor:", paal);
 
-  // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
   const [lat, lng] = robloxToLeafletCoords(x, y);
 
-  // Voeg marker toe op de juiste locatie
   const marker = L.marker([lat, lng]).addTo(mainMap);
 
-  // Voeg popup met knoppen toe
   marker.bindPopup(`
     <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
     <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
