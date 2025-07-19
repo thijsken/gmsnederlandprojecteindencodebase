@@ -2753,6 +2753,24 @@ function meerInfo(callId) {
 
     
 // 🛰️ Ophalen en tonen van luchtalarm-palen via echte Roblox API data
+
+function waitForOverlay() {
+  return new Promise((resolve) => {
+    if (window.customMapSize) {
+      // overlay/grootte al bekend, direct door
+      resolve();
+    } else {
+      // Luister naar kaart resize of andere event die customMapSize instelt
+      const checkInterval = setInterval(() => {
+        if (window.customMapSize) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100); // elke 100ms checken
+    }
+  });
+}
+
 function addLuchtalarmPaal(paal) {
   if (!paal || typeof paal !== 'object') {
     console.warn("❌ Ongeldige paaldata:", paal);
@@ -2783,20 +2801,37 @@ function addLuchtalarmPaal(paal) {
   `);
 }
 
-function triggerLuchtalarm(actie, id) {
-  fetch(`${API_URL}/api/apiluchtalarm/apiluchtalarmacties/actie`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ actie, id })  // ✅ nu goed
-  })
-  .then(res => res.json())
-  .then(data => {
-    showNotification("Luchtalarm", data.message || 'Actie uitgevoerd');
-  })
-  .catch(err => {
-    console.error('Fout bij luchtalarm trigger:', err);
-    showNotification("Luchtalarm", '⚠️ Fout bij uitvoeren actie');
-  });
+async function addLuchtalarmPaal(paal) {
+  if (!paal || typeof paal !== 'object') {
+    console.warn("❌ Ongeldige paaldata:", paal);
+    return;
+  }
+
+  const { id, x, y } = paal;
+
+  if (typeof x !== 'number' || typeof y !== 'number') {
+    console.warn("❌ Ongeldige locatie voor paal:", paal);
+    return;
+  }
+
+  // Wacht tot overlay en kaartgrootte bekend zijn
+  await waitForOverlay();
+
+  console.log("📍 Voeg marker toe voor:", paal);
+
+  // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
+  const [lat, lng] = robloxToLeafletCoords(x, y);
+
+  // Voeg marker toe op de juiste locatie
+  const marker = L.marker([lat, lng]).addTo(mainMap);
+
+  // Voeg popup met knoppen toe
+  marker.bindPopup(`
+    <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
+    <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
+    <button onclick="triggerLuchtalarm('stop', '${id}')">Stop</button>
+    <button onclick="triggerLuchtalarm('test', '${id}')">Test</button>
+  `);
 }
 
 // 🚀 Ophalen van paaldata uit backend
