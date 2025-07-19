@@ -981,7 +981,7 @@ const mainMap = L.map('map', {
         document.getElementById('assignPoliceBtn').addEventListener('click', () => assignUnit('police'));
         document.getElementById('assignAmbulanceBtn').addEventListener('click', () => assignUnit('ambulance'));
         document.getElementById('assignFireBtn').addEventListener('click', () => assignUnit('fire'));
-        document.getElementById('closeCallBtn').addEventListener('click', closeCall);
+        document.getElementById('closeCallBtn').addEventListener('click', sluitMelding);
 
         // CIOT management
           const dummyResults = [
@@ -2183,87 +2183,104 @@ function robloxToLeafletCoords(robloxX, robloxY) {
             showNotification(`${getUnitTypeName(unitType)} eenheid ${availableUnit.id} toegewezen!`);
         }
 
-        function closeCall() {
-            if (!currentCallId) return;
+        // function closeCall() {
+        //     if (!currentCallId) return;
             
-            // Find call and mark as closed
-            const call = calls.find(c => String(c.id) === String(currentCallId));
-            if (call) {
-                call.status = 'closed';
-            }
+        //     // Find call and mark as closed
+        //     const call = calls.find(c => String(c.id) === String(currentCallId));
+        //     if (call) {
+        //         call.status = 'closed';
+        //     }
             
-            // Free up assigned units
-            units.forEach(unit => {
-                if (unit.assignedCall === currentCallId) {
-                    unit.status = 'available';
-                    unit.assignedCall = null;
+        //     // Free up assigned units
+        //     units.forEach(unit => {
+        //         if (unit.assignedCall === currentCallId) {
+        //             unit.status = 'available';
+        //             unit.assignedCall = null;
                     
-                    // Update marker
-                    if (unitMarkers[unit.id]) {
-                        let color = '#3b82f6'; // Blue for police
-                        if (unit.type === 'ambulance') color = '#10b981'; // Green for ambulance
-                        if (unit.type === 'fire') color = '#f59e0b'; // Orange for fire
+        //             // Update marker
+        //             if (unitMarkers[unit.id]) {
+        //                 let color = '#3b82f6'; // Blue for police
+        //                 if (unit.type === 'ambulance') color = '#10b981'; // Green for ambulance
+        //                 if (unit.type === 'fire') color = '#f59e0b'; // Orange for fire
                         
-                        unitMarkers[unit.id].setStyle({color: color});
-                    }
-                }
-            });
+        //                 unitMarkers[unit.id].setStyle({color: color});
+        //             }
+        //         }
+        //     });
             
-            // Update UI
-            // updateUnits();
-            updateCalls();
+        //     // Update UI
+        //     // updateUnits();
+        //     updateCalls();
             
-            // Remove emergency marker
-            if (emergencyMarkers[currentCallId]) {
-                mainMap.removeLayer(emergencyMarkers[currentCallId]);
-                dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
-                delete emergencyMarkers[currentCallId];
-            }
+        //     // Remove emergency marker
+        //     if (emergencyMarkers[currentCallId]) {
+        //         mainMap.removeLayer(emergencyMarkers[currentCallId]);
+        //         dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
+        //         delete emergencyMarkers[currentCallId];
+        //     }
             
-            showNotification(`Melding ${currentCallId} afgehandeld!`);
-            document.getElementById('callDetailsModal').classList.add('hidden');
-        }
+        //     showNotification(`Melding ${currentCallId} afgehandeld!`);
+        //     document.getElementById('callDetailsModal').classList.add('hidden');
+        // }
 
-        function sluitMelding(timestamp) {
-          const id = String(timestamp);
+        function sluitMelding(callId) {
+  if (!callId) {
+    console.warn("Geen callId meegegeven aan sluitMelding");
+    return;
+  }
 
-          // ✅ Zoek en markeer de melding als gesloten
-          const callIndex = calls.findIndex(c => String(c.timestamp) === id);
-          if (callIndex > -1) {
-            calls[callIndex].status = 'closed';
-          } else {
-            console.warn(`⚠️ Geen melding gevonden met timestamp ${id}`);
-          }
+  // 1. Lokale status update (call gesloten)
+  const callIndex = calls.findIndex(c => String(c.id) === String(callId));
+  if (callIndex === -1) {
+    console.warn(`⚠️ Geen melding gevonden met id ${callId}`);
+    return;
+  }
+  calls[callIndex].status = 'closed';
 
-          // 🗺️ Verwijder van de kaart
-          if (emergencyMarkers[id]) {
-            mainMap.removeLayer(emergencyMarkers[id]);
-            dashboardMap.removeLayer(emergencyMarkers[id]);
-            delete emergencyMarkers[id];
-          }
+  // 2. Marker verwijderen
+  if (emergencyMarkers[callId]) {
+    mainMap.removeLayer(emergencyMarkers[callId]);
+    dashboardMap.removeLayer(emergencyMarkers[callId]);
+    delete emergencyMarkers[callId];
+  }
 
-          // 🧼 Update de interface via render-functie
-          updateCalls();
+  // 3. Units vrijmaken (optioneel, als je dat wil)
+  units.forEach(unit => {
+    if (unit.assignedCall === callId) {
+      unit.status = 'available';
+      unit.assignedCall = null;
 
-          // ✅ Verwijder melding uit Firebase via backend
-          fetch(`${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${id}`, {
-            method: 'DELETE'
-          })
-            .then(res => {
-              if (!res.ok) throw new Error('Verwijderen op backend mislukt');
-              return res.json();
-            })
-            .then(data => {
-              console.log("✅ Firebase melding verwijderd:", data);
-            })
-            .catch(err => {
-              console.error("❌ Fout bij backend-verwijdering:", err);
-              showNotification("Backend-verwijdering mislukt", "error");
-            });
+      if (unitMarkers[unit.id]) {
+        let color = '#3b82f6'; // Politie blauw
+        if (unit.type === 'ambulance') color = '#10b981'; // Groen
+        if (unit.type === 'fire') color = '#f59e0b'; // Oranje
 
-          // ✅ Notificatie tonen
-          showNotification(`✅ Melding ${id} afgehandeld en verwijderd`, 'success');
-        }
+        unitMarkers[unit.id].setStyle({ color });
+      }
+    }
+  });
+
+  // 4. UI updaten
+  updateCalls();
+
+  // 5. Verwijder call uit Firebase realtime database via backend-API
+  fetch(`${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`, {
+    method: 'DELETE'
+  })
+    .then(res => {
+      if (!res.ok) throw new Error(`Backend verwijderen mislukt met status ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log(`✅ Melding ${callId} succesvol verwijderd uit Firebase`, data);
+      showNotification(`Melding ${callId} afgehandeld en verwijderd`, 'success');
+    })
+    .catch(err => {
+      console.error(`❌ Fout bij verwijderen melding ${callId}:`, err);
+      showNotification(`Fout bij verwijderen melding ${callId}`, 'error');
+    });
+}
 
         function formatTime(timestamp, full = false) {
             if (!timestamp) return 'Onbekend';
