@@ -2326,8 +2326,8 @@ function updateCallList() {
           meldingenArray.forEach(melding => {
             if (melding.status === 'new' && !bekendeMeldingen.has(melding.timestamp)) {
               bekendeMeldingen.add(melding.timestamp);
-
               const callWithId = { id: melding.timestamp, ...melding };
+              calls.push(callWithId);
 
               console.log("🚨 Nieuwe melding:", callWithId);
 
