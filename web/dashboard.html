@@ -2291,7 +2291,7 @@ let vorigeMeldingenTimestamps = [];
 let bekendeMeldingen = new Set();
 
 function fetchEmergencyReports() {
-  if (!mapUploaded) { // Controleer of de kaart is geüpload
+  if (!mapUploaded) {
     console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
     return;
   }
@@ -2317,8 +2317,9 @@ function fetchEmergencyReports() {
 
       // Verwijder alle bestaande melding markers voordat nieuwe worden toegevoegd
       Object.values(emergencyMarkers).forEach(marker => {
-          mainMap.removeLayer(marker);
-          dashboardMap.removeLayer(marker);
+        if (marker && typeof marker.remove === 'function') {
+          marker.remove(); // Correctly remove the marker
+        }
       });
       emergencyMarkers = {}; // Leeg de emergencyMarkers object
       calls = []; // Leeg de calls array
@@ -2337,34 +2338,34 @@ function fetchEmergencyReports() {
 
         // Voeg marker toe met omgezette coördinaten
         if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
-            const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y); // Gebruik robloxToLeafletCoords
+          const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y); // Gebruik robloxToLeafletCoords
 
-            const icon = L.divIcon({
-                className: '',
-                html: `
-                    <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
-                             onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                             style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
-                        <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
-                    </div>
-                `,
-                iconSize: [32, 42],
-                iconAnchor: [16, 42]
-            });
+          const icon = L.divIcon({
+            className: '',
+            html: `
+              <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+                <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
+                     onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                     style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+              </div>
+            `,
+            iconSize: [32, 42],
+            iconAnchor: [16, 42]
+          });
 
-            const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
+          const marker = L.marker([y, x], { icon }).addTo(mainMap); // Add marker to mainMap only
 
-            marker.bindPopup(`
-                <b>${callWithId.type}</b><br>
-                Locatie: ${callWithId.location}<br>
-                Speler: ${callWithId.playerName}<br>
-                Beschrijving: ${callWithId.description}
-            `);
+          marker.bindPopup(`
+            <b>${callWithId.type}</b><br>
+            Locatie: ${callWithId.location}<br>
+            Speler: ${callWithId.playerName}<br>
+            Beschrijving: ${callWithId.description}
+          `);
 
-            emergencyMarkers[callWithId.id] = marker;
+          emergencyMarkers[callWithId.id] = marker; // Store the marker
         } else {
-            console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
+          console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
         }
       });
       updateCalls();
