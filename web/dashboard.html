@@ -2519,7 +2519,7 @@ function createMarker(unit, map) { // Accept map as a parameter
 
   const marker = L.marker([y, x], {
     icon: divIcon
-  }).addTo(map); // Voeg toe aan de juiste map
+  }).bindPopup(popupHtml);
 
   return marker;
 }
