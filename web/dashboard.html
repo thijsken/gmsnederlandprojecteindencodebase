@@ -2004,6 +2004,7 @@ function acceptCall(callId) {
     .then(data => {
         console.log(`✅ PATCH geslaagd voor melding ${callId}:`, data);
         showNotification(`📞 Melding ${callId} geaccepteerd (via backend)`, 'success');
+            updateCalls();
 
         // 🔄 Opnieuw ophalen zodat status in lijst klopt
         fetchEmergencyReports();
