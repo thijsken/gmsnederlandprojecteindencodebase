@@ -1968,7 +1968,8 @@ function updateCalls() {
 }
 // ✅ GEHELE HERSCHREVEN VERSIE VAN acceptCall(callId)
 function acceptCall(callId) {
-    const call = calls.find(c => String(c.id) === String(callId));
+      const callsArray = Object.entries(calls).map(([id, data]) => ({ id, ...data }));
+    const call = callsArray.find(c => String(c.id) === String(callId));
     if (!call || call.status !== 'new') {
         console.warn("⚠️ Geen geldige melding gevonden of status is niet 'new':", callId);
         return;
