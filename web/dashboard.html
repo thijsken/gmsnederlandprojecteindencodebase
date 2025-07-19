@@ -929,6 +929,7 @@ const mainMap = L.map('map', {
         // Markers and data
         let availableUnits = [];
         let linkedUnits = [];
+        let emergencyMarkers = {};
         let unitMarkers = {};
         let calls = [];
         // let units = []; // Deze variabele wordt niet gebruikt in de provided code, maar is wel gedefinieerd in de context.
@@ -2288,7 +2289,6 @@ function showCallDetails(callId) {
 
 let vorigeMeldingenTimestamps = [];
 let bekendeMeldingen = new Set();
-let emergencyMarkers = {}; // Zorg ervoor dat dit object wordt gedefinieerd
 
 function fetchEmergencyReports() {
   if (!mapUploaded) {
