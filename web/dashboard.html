@@ -929,7 +929,6 @@ const mainMap = L.map('map', {
         // Markers and data
         let availableUnits = [];
         let linkedUnits = [];
-        let emergencyMarkers = {};
         let unitMarkers = {};
         let calls = [];
         // let units = []; // Deze variabele wordt niet gebruikt in de provided code, maar is wel gedefinieerd in de context.
@@ -2289,9 +2288,10 @@ function showCallDetails(callId) {
 
 let vorigeMeldingenTimestamps = [];
 let bekendeMeldingen = new Set();
+let emergencyMarkers = {}; // Zorg ervoor dat dit object wordt gedefinieerd
 
 function fetchEmergencyReports() {
-  if (!mapUploaded) { // Controleer of de kaart is geüpload
+  if (!mapUploaded) {
     console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
     return;
   }
@@ -2315,59 +2315,57 @@ function fetchEmergencyReports() {
         throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
       }
 
-      // Verwijder alle bestaande melding markers voordat nieuwe worden toegevoegd
-      Object.values(emergencyMarkers).forEach(marker => {
-          mainMap.removeLayer(marker);
-          dashboardMap.removeLayer(marker);
-      });
-      emergencyMarkers = {}; // Leeg de emergencyMarkers object
-      calls = []; // Leeg de calls array
-
-      const nieuweMeldingen = meldingenArray.filter(m =>
-        m.status === 'new' && !bekendeMeldingen.has(m.timestamp)
-      );
-
-      nieuweMeldingen.forEach(melding => {
-        bekendeMeldingen.add(melding.timestamp);
-
-        const callWithId = { id: melding.timestamp, ...melding };
-        calls.push(callWithId);
-
-        console.log("🚨 Nieuwe melding:", callWithId);
-
-        // Voeg marker toe met omgezette coördinaten
-        if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
-            const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y); // Gebruik robloxToLeafletCoords
-
-            const icon = L.divIcon({
-                className: '',
-                html: `
-                    <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
-                             onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                             style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
-                        <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
-                    </div>
-                `,
-                iconSize: [32, 42],
-                iconAnchor: [16, 42]
-            });
-
-            const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
-
-            marker.bindPopup(`
-                <b>${callWithId.type}</b><br>
-                Locatie: ${callWithId.location}<br>
-                Speler: ${callWithId.playerName}<br>
-                Beschrijving: ${callWithId.description}
-            `);
-
-            emergencyMarkers[callWithId.id] = marker;
-        } else {
-            console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
+      // Verwijder alleen markers die niet meer in de response zitten
+      Object.keys(emergencyMarkers).forEach(meldingId => {
+        if (!meldingenArray.some(m => m.timestamp === meldingId)) {
+          emergencyMarkers[meldingId].remove();
+          delete emergencyMarkers[meldingId];
         }
       });
-      updateCalls();
+
+      // Verwerk nieuwe meldingen
+      meldingenArray.forEach(melding => {
+        if (melding.status === 'new' && !bekendeMeldingen.has(melding.timestamp)) {
+          bekendeMeldingen.add(melding.timestamp);
+
+          const callWithId = { id: melding.timestamp, ...melding };
+
+          console.log("🚨 Nieuwe melding:", callWithId);
+
+          // Voeg marker toe met omgezette coördinaten
+          if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
+            const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y);
+
+            const icon = L.divIcon({
+              className: '',
+              html: `
+                <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+                  <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
+                       onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                       style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                  <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+                </div>
+              `,
+              iconSize: [32, 42],
+              iconAnchor: [16, 42]
+            });
+
+            // Voeg marker alleen toe aan de juiste kaart
+            const marker = L.marker([y, x], { icon }).addTo(mainMap); // Voeg toe aan mainMap
+
+            marker.bindPopup(`
+              <b>${callWithId.type}</b><br>
+              Locatie: ${callWithId.location}<br>
+              Speler: ${callWithId.playerName}<br>
+              Beschrijving: ${callWithId.description}
+            `);
+
+            emergencyMarkers[callWithId.id] = marker; // Sla de marker op
+          } else {
+            console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
+          }
+        }
+      });
     })
     .catch(err => {
       console.error("❌ Fout bij ophalen meldingen:", err.message);
