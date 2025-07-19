@@ -1571,58 +1571,83 @@ function sluitKazerenModal() {
     }
 
     // ✅ Kaart uploaden en tonen
-    function uploadMapImage() {
-      const input = document.getElementById('mapImageInput');
-      const file = input.files[0];
+const defaultMapUrl = './logogmsnederland.png'; // Vervang dit door jouw standaard kaartafbeelding
 
-      if (!file || file.type !== 'image/png') {
-        showNotification('❌ Upload een geldige PNG-afbeelding!', 'error');
-        return;
+function setMapOverlay(imageUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = function() {
+      const width = img.width;
+      const height = img.height;
+      const bounds = [[0, 0], [height, width]];
+
+      // 📐 Sla grootte op
+      window.customMapSize = { width, height };
+
+      // ♻️ Oude overlay verwijderen
+      if (window.customMapOverlay) {
+        mainMap.removeLayer(window.customMapOverlay);
+        dashboardMap.removeLayer(window.customMapOverlay);
       }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const imageUrl = e.target.result;
+      // ✅ Nieuwe overlay toevoegen
+      window.customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
+      L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
 
-        const img = new Image();
-        img.onload = function() {
-          const width = img.width;
-          const height = img.height;
-          const bounds = [[0, 0], [height, width]];
+      // 🔒 Beperk en zoom
+      mainMap.setMaxBounds(bounds);
+      dashboardMap.setMaxBounds(bounds);
+      mainMap.fitBounds(bounds);
+      dashboardMap.fitBounds(bounds);
 
-          // 📐 Sla grootte op
-          window.customMapSize = { width, height };
+      showNotification('📌 Kaart succesvol geladen!', 'success');
 
-          // ♻️ Oude overlay verwijderen
-          if (window.customMapOverlay) {
-            mainMap.removeLayer(window.customMapOverlay);
-            dashboardMap.removeLayer(window.customMapOverlay);
-          }
+      resolve();
+    };
+    img.onerror = function() {
+      showNotification('❌ Fout bij laden kaartafbeelding!', 'error');
+      resolve(); // fallback afhandelen
+    };
+    img.src = imageUrl;
+  });
+}
 
-          // ✅ Nieuwe overlay toevoegen
-          window.customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
-          L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
+async function uploadMapImage() {
+  const input = document.getElementById('mapImageInput');
+  const file = input.files[0];
 
-          // 🔒 Beperk en zoom
-          mainMap.setMaxBounds(bounds);
-          dashboardMap.setMaxBounds(bounds);
-          mainMap.fitBounds(bounds);
-          dashboardMap.fitBounds(bounds);
+  if (!file) {
+    // Geen bestand geüpload, laad standaard overlay
+    await setMapOverlay(defaultMapUrl);
 
-          showNotification('📌 Kaart succesvol geladen!', 'success');
+    // Voeg testmarker toe
+    setTimeout(() => {
+      const [y, x] = robloxToLeafletCoords(0, 0);
+      L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
+    }, 500);
 
-          // 🔴 Testmarker op (0, 0) in Roblox-wereld
-          setTimeout(() => {
-            const [y, x] = robloxToLeafletCoords(0, 0);
-            L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
-          }, 500);
-        };
+    return;
+  }
 
-        img.src = imageUrl;
-      };
+  if (file.type !== 'image/png') {
+    showNotification('❌ Upload een geldige PNG-afbeelding!', 'error');
+    return;
+  }
 
-      reader.readAsDataURL(file);
-    }
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const imageUrl = e.target.result;
+
+    await setMapOverlay(imageUrl);
+
+    setTimeout(() => {
+      const [y, x] = robloxToLeafletCoords(0, 0);
+      L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
+    }, 500);
+  };
+
+  reader.readAsDataURL(file);
+}
 
         function showView(viewId) {
             document.getElementById('dashboardView').classList.add('hidden');
@@ -2753,19 +2778,6 @@ function meerInfo(callId) {
 
     
 // 🛰️ Ophalen en tonen van luchtalarm-palen via echte Roblox API data
-
-function waitForOverlayUpload(overlay) {
-  return new Promise((resolve) => {
-    if (overlay.isLoaded()) { // of een andere check als het bestaat
-      resolve();
-    } else {
-      overlay.once('load', () => {
-        resolve();
-      });
-    }
-  });
-}
-
 function addLuchtalarmPaal(paal) {
   if (!paal || typeof paal !== 'object') {
     console.warn("❌ Ongeldige paaldata:", paal);
@@ -2796,36 +2808,20 @@ function addLuchtalarmPaal(paal) {
   `);
 }
 
-async function addLuchtalarmPaal(paal, overlay) {
-  if (!paal || typeof paal !== 'object') {
-    console.warn("❌ Ongeldige paaldata:", paal);
-    return;
-  }
-
-  const { id, x, y } = paal;
-
-  if (typeof x !== 'number' || typeof y !== 'number') {
-    console.warn("❌ Ongeldige locatie voor paal:", paal);
-    return;
-  }
-
-  // Wacht tot overlay geladen is
-  await waitForOverlayUpload(overlay);
-
-  window.customMapSize = mainMap.getSize();
-
-  console.log("📍 Voeg marker toe voor:", paal);
-
-  const [lat, lng] = robloxToLeafletCoords(x, y);
-
-  const marker = L.marker([lat, lng]).addTo(mainMap);
-
-  marker.bindPopup(`
-    <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
-    <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
-    <button onclick="triggerLuchtalarm('stop', '${id}')">Stop</button>
-    <button onclick="triggerLuchtalarm('test', '${id}')">Test</button>
-  `);
+function triggerLuchtalarm(actie, id) {
+  fetch(`${API_URL}/api/apiluchtalarm/apiluchtalarmacties/actie`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actie, id })  // ✅ nu goed
+  })
+  .then(res => res.json())
+  .then(data => {
+    showNotification("Luchtalarm", data.message || 'Actie uitgevoerd');
+  })
+  .catch(err => {
+    console.error('Fout bij luchtalarm trigger:', err);
+    showNotification("Luchtalarm", '⚠️ Fout bij uitvoeren actie');
+  });
 }
 
 // 🚀 Ophalen van paaldata uit backend
