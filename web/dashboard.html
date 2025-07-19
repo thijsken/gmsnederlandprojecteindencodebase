@@ -1969,63 +1969,48 @@ function updateCalls() {
 
 // ✅ GEHELE HERSCHREVEN VERSIE VAN acceptCall(callId)
 function acceptCall(callId) {
-      const callsArray = Object.entries(calls).map(([id, data]) => ({ id, ...data }));
-    const call = callsArray.find(c => String(c.id) === String(callId));
+    const call = calls.find(c => String(c.id) === String(callId));
     if (!call || call.status !== 'new') {
         console.warn("⚠️ Geen geldige melding gevonden of status is niet 'new':", callId);
         return;
     }
 
-    // ✅ Lokaal updaten
-    call.status = 'accepted';
-    console.log(`📞 Melding ${callId} lokaal geaccepteerd.`);
-    updateCalls();
-
     const marker = emergencyMarkers[callId];
     if (marker) {
-        console.log(`📍 Marker gevonden voor ${callId}:`, marker);
-        try {
-          const yellowIcon = new L.Icon({
+        const yellowIcon = new L.Icon({
             iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x-yellow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
             shadowSize: [41, 41]
-          });
-          marker.setIcon(yellowIcon);
-        } catch (error) {
-            console.error("❌ Fout bij het instellen van de marker stijl:", error);
-        }
-    } else {
-        console.warn(`⚠️ Marker voor melding ${callId} niet gevonden.`);
-        return; // Stop hier als marker ontbreekt
+        });
+        marker.setIcon(yellowIcon);
     }
 
-    // 🌐 PATCH naar backend
     const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`;
-    console.log("🔗 PATCH URL:", url);
-    console.log("📦 PATCH payload:", JSON.stringify({ status: 'accepted' }));
     fetch(url, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${currentApiKey}` // Als je een API key gebruikt
+            'Authorization': `Bearer ${currentApiKey}`
         },
         body: JSON.stringify({ status: 'accepted' })
     })
     .then(res => {
-        console.log(`🌐 PATCH response status: ${res.status}`);
         if (!res.ok) throw new Error(`PATCH mislukt met status ${res.status}`);
         return res.json();
     })
     .then(data => {
         console.log(`✅ PATCH geslaagd voor melding ${callId}:`, data);
         showNotification(`📞 Melding ${callId} geaccepteerd (via backend)`, 'success');
+
+        // 🔄 Opnieuw ophalen zodat status in lijst klopt
+        fetchEmergencyReports();
     })
     .catch(err => {
         console.error('❌ Fout bij PATCH melding:', err);
-        showNotification('⚠️ Fout bij backend-update, lokaal geaccepteerd', 'error');
+        showNotification('⚠️ Fout bij backend-update', 'error');
     });
 }
 
