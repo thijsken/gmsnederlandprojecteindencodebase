@@ -1982,7 +1982,11 @@ function acceptCall(callId) {
     const marker = emergencyMarkers[callId];
     if (marker) {
         console.log(`Marker gevonden voor ${callId}:`, marker);
-        marker.setStyle({ color: '#f59e0b' });
+        try {
+            marker.setStyle({ color: '#f59e0b' });
+        } catch (error) {
+            console.error("❌ Fout bij het instellen van de marker stijl:", error);
+        }
     } else {
         console.warn(`⚠️ Marker voor melding ${callId} niet gevonden.`);
         return; // Stop de functie hier als de marker niet bestaat
@@ -2647,6 +2651,7 @@ function displayEmergencyReports(reports) {
             });
 
             const marker = L.marker([y, x], { icon }).addTo(dashboardMap);
+            emergencyMarkers[call.id] = marker; // Zorg ervoor dat je de marker opslaat met de juiste ID
 
             marker.bindPopup(`
                 <b>${call.type}</b><br>
