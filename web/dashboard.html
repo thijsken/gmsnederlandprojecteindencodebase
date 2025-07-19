@@ -1,3 +1,5 @@
+// FileName: /goedencodetopnu.txt
+// FileContents:
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -1186,8 +1188,7 @@ function copyCommunityId() {
         availableUnitsList.appendChild(li);
       });
   }
-  
-  function scanKenteken() {
+function scanKenteken() {
   const input = document.getElementById('anprKentekenInput').value.trim().toUpperCase();
   const result = document.getElementById('anprResult');
 
@@ -1216,16 +1217,16 @@ function copyCommunityId() {
   }
 }
 
-  function openP2000Modal() {
+function openP2000Modal() {
   document.getElementById('p2000Modal').classList.remove('hidden');
   laadPostenVoorP2000();
 }
 
-  function closeP2000Modal() {
+function closeP2000Modal() {
   document.getElementById('p2000Modal').classList.add('hidden');
 }
 
-  function laadPostenVoorP2000() {
+function laadPostenVoorP2000() {
   const select = document.getElementById('p2000PostSelect');
   if (!select) {
     console.error("❌ Selectelement #p2000PostSelect niet gevonden!");
@@ -1264,7 +1265,7 @@ function copyCommunityId() {
     });
 }
 
-  function genereerP2000Code(beschrijving) {
+function genereerP2000Code(beschrijving) {
   const tekst = beschrijving.toLowerCase();
   const codes = [];
 
@@ -1359,7 +1360,7 @@ function copyCommunityId() {
   return codes;
 }
 
-  function verstuurP2000Alarm() {
+function verstuurP2000Alarm() {
   const adres = document.getElementById('p2000Adres').value.trim();
   const voertuigen = document.getElementById('p2000Voertuigen').value.trim();
   const situatie = document.getElementById('p2000Situatie').value.trim();
@@ -1427,15 +1428,15 @@ fetch(`${API_URL}/api/apiposten/apialarmposten/alarm?serverId=${serverId}`, {
 });
 }
 
-  function openNLAlertModal() {
+function openNLAlertModal() {
     document.getElementById('nlalertModal').classList.remove('hidden');
 }
 
-  function closeNLAlertModal() {
+function closeNLAlertModal() {
     document.getElementById('nlalertModal').classList.add('hidden');
 }
 
-  function saveNLAlert() {
+function saveNLAlert() {
   const title = document.getElementById('nlalertTitle').value.trim();
   const message = document.getElementById('nlalertMessage').value.trim();
   const location = document.getElementById('nlalertLocation').value.trim();
@@ -1464,15 +1465,15 @@ fetch(`${API_URL}/api/apiposten/apialarmposten/alarm?serverId=${serverId}`, {
   });
 }
 
-  function openAmberModal() {
+function openAmberModal() {
   document.getElementById('amberModal').classList.remove('hidden');
 }
 
-  function closeAmberModal() {
+function closeAmberModal() {
   document.getElementById('amberModal').classList.add('hidden');
 }
 
-  function saveAmberAlert() {
+function saveAmberAlert() {
   const name = document.getElementById('amberPlayerName').value.trim();
   const userId = document.getElementById('amberUserId').value.trim();
   const location = document.getElementById('amberLocation').value.trim();
@@ -1513,7 +1514,7 @@ fetch(`${API_URL}/api/apiamber/amber?serverId=${encodeURIComponent(serverId)}`, 
   });
 }
 
-  function updateAmberTable() {
+function updateAmberTable() {
   const container = document.getElementById('amberTable');
   container.innerHTML = '';
 
@@ -1543,7 +1544,7 @@ fetch(`${API_URL}/api/apiamber/amber?serverId=${encodeURIComponent(serverId)}`, 
   });
 }
 
-  function openKazerenModal(postId) {
+function openKazerenModal(postId) {
   actievePostId = postId;
   document.getElementById('kazerenAdres').value = '';
   document.getElementById('kazerenInfo').value = '';
@@ -1551,7 +1552,7 @@ fetch(`${API_URL}/api/apiamber/amber?serverId=${encodeURIComponent(serverId)}`, 
   document.getElementById('kazerenomroepModal').classList.remove('hidden');
 }
 
-  function sluitKazerenModal() {
+function sluitKazerenModal() {
   document.getElementById('kazerenomroepModal').classList.add('hidden');
 }
 
@@ -2025,8 +2026,8 @@ function updateCallList() {
     });
 }
 
-    function updateRecentCalls(calls) {
-    const recentCallsContainer = document.getElementById('recentCalls');
+    function updateRecentCalls() {
+    const recentCallsContainer = document.getElementById('recentCallsContainer');
     recentCallsContainer.innerHTML = ''; // Maak de container leeg
 
     recentCalls.forEach(call => {
@@ -2042,7 +2043,7 @@ function updateCallList() {
     });
 }
 
-    function showCallDetails(callId) {
+function showCallDetails(callId) {
     const call = calls.find(c => String(c.id) === String(callId));
     if (!call) return;
             
@@ -2105,7 +2106,7 @@ function updateCallList() {
     document.getElementById('callDetailsModal').classList.remove('hidden');
 }
 
-    function getCallStatusName(status) {
+        function getCallStatusName(status) {
             switch(status) {
                 case 'new': return 'Nieuw';
                 case 'accepted': return 'Geaccepteerd';
@@ -2115,7 +2116,7 @@ function updateCallList() {
             }
         }
 
-    function assignUnit(unitType) {
+        function assignUnit(unitType) {
             if (!currentCallId) return;
             
             // Find available unit of the requested type
@@ -2147,7 +2148,7 @@ function updateCallList() {
             showNotification(`${getUnitTypeName(unitType)} eenheid ${availableUnit.id} toegewezen!`);
         }
 
-    function closeCall() {
+        function closeCall() {
             if (!currentCallId) return;
             
             // Find call and mark as closed
@@ -2188,7 +2189,7 @@ function updateCallList() {
             document.getElementById('callDetailsModal').classList.add('hidden');
         }
 
-    function sluitMelding(timestamp) {
+        function sluitMelding(timestamp) {
           const id = String(timestamp);
 
           // ✅ Zoek en markeer de melding als gesloten
@@ -2229,7 +2230,7 @@ function updateCallList() {
           showNotification(`✅ Melding ${id} afgehandeld en verwijderd`, 'success');
         }
 
-    function formatTime(timestamp, full = false) {
+        function formatTime(timestamp, full = false) {
             if (!timestamp) return 'Onbekend';
             
             const date = new Date(timestamp);
@@ -2246,7 +2247,7 @@ function updateCallList() {
             return `${Math.floor(diffInMinutes / (60 * 24))} dagen geleden`;
         }
 
-    function voegNieuweMeldingToe(call) {
+        function voegNieuweMeldingToe(call) {
 
             // Toon visuele notificatie
             showNotification("📟 Nieuwe melding ontvangen!", "info");
@@ -2261,7 +2262,7 @@ function updateCallList() {
             }
         }
 
-    function showNotification(message, type = 'info') {
+        function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg ${
                 type === 'error' ? 'bg-red-600' : 
@@ -2281,97 +2282,98 @@ function updateCallList() {
             }, 3000);
         }
 
-    function logout() {
+        function logout() {
             localStorage.removeItem('apiKey');
             window.location.href = 'index.html';
         }
 
-    let vorigeMeldingenTimestamps = [];
-    let bekendeMeldingen = new Set();
+let vorigeMeldingenTimestamps = [];
+let bekendeMeldingen = new Set();
 
-    function fetchEmergencyReports() {
-      if (!mapUploaded) {
-        console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
-        return;
+function fetchEmergencyReports() {
+  if (!mapUploaded) { // Controleer of de kaart is geüpload
+    console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
+    return;
+  }
+
+  const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
+  console.log("🌐 Ophalen meldingen van:", url);
+
+  fetch(url)
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(errData => {
+          throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
+        });
+      }
+      return res.json();
+    })
+    .then(data => {
+      const meldingenArray = Array.isArray(data) ? data : Object.values(data);
+
+      if (!Array.isArray(meldingenArray)) {
+        throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
       }
 
-      const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
-      console.log("🌐 Ophalen meldingen van:", url);
+      // Verwijder alle bestaande melding markers voordat nieuwe worden toegevoegd
+      Object.values(emergencyMarkers).forEach(marker => {
+          mainMap.removeLayer(marker);
+          dashboardMap.removeLayer(marker);
+      });
+      emergencyMarkers = {}; // Leeg de emergencyMarkers object
+      calls = []; // Leeg de calls array
 
-      fetch(url)
-        .then(res => {
-          if (!res.ok) {
-            return res.json().then(errData => {
-              throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
-            });
-          }
-          return res.json();
-        })
-        .then(data => {
-          const meldingenArray = Array.isArray(data) ? data : Object.values(data);
+      const nieuweMeldingen = meldingenArray.filter(m =>
+        m.status === 'new' && !bekendeMeldingen.has(m.timestamp)
+      );
 
-          if (!Array.isArray(meldingenArray)) {
-            throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
-          }
+      nieuweMeldingen.forEach(melding => {
+        bekendeMeldingen.add(melding.timestamp);
 
-          // Verwijder alleen markers die niet meer in de response zitten
-          Object.keys(emergencyMarkers).forEach(meldingId => {
-            if (!meldingenArray.some(m => m.timestamp === meldingId)) {
-              emergencyMarkers[meldingId].remove();
-              delete emergencyMarkers[meldingId];
-            }
-          });
+        const callWithId = { id: melding.timestamp, ...melding };
+        calls.push(callWithId);
 
-          // Verwerk nieuwe meldingen
-          meldingenArray.forEach(melding => {
-            if (melding.status === 'new' && !bekendeMeldingen.has(melding.timestamp)) {
-              bekendeMeldingen.add(melding.timestamp);
-              const callWithId = { id: melding.timestamp, ...melding };
-              calls.push(callWithId); // Voeg meldingen toe aan calls array
-              console.log("🚨 Nieuwe melding:", callWithId);
+        console.log("🚨 Nieuwe melding:", callWithId);
 
-              // Voeg marker toe met omgezette coördinaten
-              if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
-                const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y);
+        // Voeg marker toe met omgezette coördinaten
+        if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
+            const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y); // Gebruik robloxToLeafletCoords
 
-                const icon = L.divIcon({
-                  className: '',
-                  html: `
+            const icon = L.divIcon({
+                className: '',
+                html: `
                     <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-                      <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
-                          onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                          style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
-                      <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
+                             onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                             style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                        <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
                     </div>
-                  `,
-                  iconSize: [32, 42],
-                  iconAnchor: [16, 42]
-                });
+                `,
+                iconSize: [32, 42],
+                iconAnchor: [16, 42]
+            });
 
-                // Voeg marker alleen toe aan de juiste kaart
-                const marker = L.marker([y, x], { icon }).addTo(mainMap); // Voeg toe aan mainMap
+            const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
 
-                marker.bindPopup(`
-                  <b>${callWithId.type}</b><br>
-                  Locatie: ${callWithId.location}<br>
-                  Speler: ${callWithId.playerName}<br>
-                  Beschrijving: ${callWithId.description}
-                `);
+            marker.bindPopup(`
+                <b>${callWithId.type}</b><br>
+                Locatie: ${callWithId.location}<br>
+                Speler: ${callWithId.playerName}<br>
+                Beschrijving: ${callWithId.description}
+            `);
 
-                emergencyMarkers[callWithId.id] = marker; // Sla de marker op
-              } else {
-                console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
-              }
-            }
-          });
-          console.log("Huidige calls:", calls); // is voor logs
-          updateRecentCalls(calls);
-        })
-        .catch(err => {
-          console.error("❌ Fout bij ophalen meldingen:", err.message);
-          showNotification("Fout bij ophalen meldingen: " + err.message, "error");
-        });
-    }
+            emergencyMarkers[callWithId.id] = marker;
+        } else {
+            console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
+        }
+      });
+      updateCalls();
+    })
+    .catch(err => {
+      console.error("❌ Fout bij ophalen meldingen:", err.message);
+      showNotification("Fout bij ophalen meldingen: " + err.message, "error");
+    });
+}
 
 // Voeg dit toe aan je JS-bestand (na initialisatie van maps)
 function fetchUnits(serverId) {
@@ -2493,85 +2495,56 @@ setInterval(() => {
 let recentCalls = [];  // Dit is waar je de recente meldingen opslaat
 let callList = [];     // Dit is waar de geaccepteerde meldingen naar toe gaan
 
-// function acceptMelding(timestamp) {
-//     const ts = Number(timestamp);
-//     const index = calls.findIndex(m => Number(m.timestamp) === ts);
-    
-//     if (index === -1) {
-//         console.error("❌ Melding niet gevonden in calls!");
-//         console.log("Huidige calls:", calls);
-//         return;
-//     }
+function accepteerMelding(timestamp) {
+    const ts = Number(timestamp);
+    const index = calls.findIndex(m => Number(m.timestamp) === ts);
+    if (index === -1) {
+        console.error("❌ Melding niet gevonden in calls!");
+        return;
+    }
 
-//     const call = calls[index];
+    const call = calls[index];
 
-//     // Verwijder visueel uit recentCalls
-//     const recentContainer = document.getElementById('recentCalls');
-//     const meldingen = recentContainer.querySelectorAll('.melding');
-//     meldingen.forEach(el => {
-//         const btn = el.querySelector('button.accepteer');
-//         if (btn && btn.getAttribute('onclick')?.includes(timestamp)) {
-//             el.remove();
-//         }
-//     });
-
-//     // Als al geaccepteerd of afgehandeld: verwijder alleen, doe niets meer
-//     if (call.status !== 'new') {
-//         console.log(`🔄 Melding ${timestamp} was al geaccepteerd (${call.status})`);
-//         return;
-//     }
-
-//     // Zet status op geaccepteerd
-//     call.status = 'accepted';
-
-//     // Voeg toe aan callList
-//     const callListContainer = document.getElementById('callList');
-//     const div = document.createElement('div');
-//     div.className = 'bg-gray-800 p-4 rounded shadow mb-3 melding';
-
-//     div.innerHTML = `
-//         <div class="bg-white-200 p-4 rounded-lg shadow-md">
-//             <h3 class="text-lg font-semibold text-white">${call.type}</h3>
-//             <p class="text-white-500 text-sm mb-2.5 mt-1">
-//                 <strong class="text-white-400">Locatie:</strong> ${call.location}
-//             </p>
-//             <p class="text-white-500 text-sm mb-2.5 mt-1">
-//                 <strong class="text-white-400">Speler:</strong> ${call.playerName}
-//             </p>
-//             <div class="buttons mt-2">
-//                 <button class="button meerinfo bg-gray-600 text-white p-2 rounded hover:bg-gray-700" onclick="meerInfo('${call.timestamp}')" data-id="${call.timestamp}">Meer info</button>
-//                 <button class="button sluit bg-red-600 text-white p-2 rounded hover:bg-red-700" onclick="sluitMelding('${call.timestamp}')">Afhandelen</button>
-//             </div>
-//         </div>
-//     `;
-//     callListContainer.appendChild(div);
-
-//     // Update de status naar de backend
-//     updateCallStatusOnBackend(call.timestamp, 'accepted');
-// }
-
-// Functie om de status naar de backend te verzenden
-function updateCallStatusOnBackend(timestamp, status) {
-    fetch(`${API_URL}/api/apimeldingen/meldingen/${timestamp}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${currentApiKey}` // Als je een API-sleutel gebruikt
-        },
-        body: JSON.stringify({ status })
-    })
-    .then(res => {
-        if (!res.ok) {
-            throw new Error('Fout bij het bijwerken van de status');
+    // Verwijder visueel uit recentCalls
+    const recentContainer = document.getElementById('recentCalls');
+    const meldingen = recentContainer.querySelectorAll('.melding');
+    meldingen.forEach(el => {
+        const btn = el.querySelector('button.accepteer');
+        if (btn && btn.getAttribute('onclick')?.includes(timestamp)) {
+            el.remove();
         }
-        return res.json();
-    })
-    .then(data => {
-        console.log("✅ Status succesvol bijgewerkt:", data);
-    })
-    .catch(err => {
-        console.error("❌ Fout bij het bijwerken van de status:", err);
     });
+
+    // Als al geaccepteerd of afgehandeld: verwijder alleen, doe niets meer
+    if (call.status !== 'new') {
+        console.log(`🔄 Melding ${timestamp} was al geaccepteerd (${call.status})`);
+        return;
+    }
+
+    // Zet status op geaccepteerd
+    call.status = 'accepted';
+
+    // Voeg toe aan callList
+    const callListContainer = document.getElementById('callList');
+    const div = document.createElement('div');
+    div.className = 'bg-gray-800 p-4 rounded shadow mb-3 melding';
+
+    div.innerHTML = `
+        <div class="bg-white-200 p-4 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-white">${call.type}</h3>
+            <p class="text-white-500 text-sm mb-2.5 mt-1">
+                <strong class="text-white-400">Locatie:</strong> ${call.location}
+            </p>
+            <p class="text-white-500 text-sm mb-2.5 mt-1">
+                <strong class="text-white-400">Speler:</strong> ${call.playerName}
+            </p>
+            <div class="buttons mt-2">
+                <button class="button meerinfo bg-gray-600 text-white p-2 rounded hover:bg-gray-700" onclick="meerInfo('${call.timestamp}')" data-id="${call.timestamp}">Meer info</button>
+                <button class="button sluit bg-red-600 text-white p-2 rounded hover:bg-red-700" onclick="sluitMelding('${call.timestamp}')">Afhandelen</button>
+            </div>
+        </div>
+    `;
+    callListContainer.appendChild(div);
 }
 
 function loadMeldingenToCallList() {
