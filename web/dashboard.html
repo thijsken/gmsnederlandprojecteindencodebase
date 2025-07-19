@@ -2633,16 +2633,21 @@ function displayEmergencyReports(reports) {
 
         // 🔴 Voeg marker toe
         if (call.coordinates && typeof call.coordinates.x === 'number' && typeof call.coordinates.y === 'number') {
-            const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
-            console.log(`Toevoegen marker voor melding ${call.id} op coördinaten: [${y}, ${x}]`);
+            const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y);
+            
+            // Controleer of de coördinaten geldig zijn
+            if (y < -90 || y > 90 || x < -180 || x > 180) {
+                console.warn(`⚠️ Ongeldige coördinaten voor melding ${call.id}: [${y}, ${x}]`);
+                return; // Stop hier als de coördinaten ongeldig zijn
+            }
 
             const icon = L.divIcon({
                 className: '',
                 html: `
                     <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
                         <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${call.userId}&width=100&height=100&format=png"
-                             onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                             style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                            onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                            style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
                         <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
                     </div>
                 `,
@@ -2650,17 +2655,9 @@ function displayEmergencyReports(reports) {
                 iconAnchor: [16, 42]
             });
 
-            const marker = L.circleMarker([y, x], {radius: 8, color: '#f59e0b', fillOpacity: 0.8}).addTo(dashboardMap);
+            // Maak de marker aan
+            const marker = L.marker([y, x], { icon }).addTo(dashboardMap);
             emergencyMarkers[call.id] = marker; // Zorg ervoor dat je de marker opslaat met de juiste ID
-
-            marker.bindPopup(`
-                <b>${call.type}</b><br>
-                Locatie: ${call.location}<br>
-                Speler: ${call.playerName}<br>
-                Beschrijving: ${call.description}
-            `);
-
-            emergencyMarkers[call.id] = marker;
         } else {
             console.warn(`⚠️ Melding ${call.id} heeft ongeldige coördinaten:`, call.coordinates);
         }
