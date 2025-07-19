@@ -915,20 +915,14 @@ auth.onAuthStateChanged(user => {
         const dashboardMap = L.map('dashboardMap', {
     crs: L.CRS.Simple,
     minZoom: -5,
-    maxZoom: 2,
+    maxZoom: 5,
     zoomSnap: 0.1
-        }).setView([0, 0], 0);
-                const mainMap = L.map('map', {
-          crs: L.CRS.Simple,
-          minZoom: -5,
-          maxZoom: 5
-        });
-
-        const imageBounds = [[0, 0], [556, 878]]; // [hoogte, breedte] van jouw PNG
-        L.imageOverlay('73c75a5e-fc6b-453d-ba45-1072457c7370.png', imageBounds).addTo(mainMap);
-        mainMap.setView([278, 439], 1); // centrum van de map
-        mainMap.setMaxBounds(imageBounds); // voorkomt buiten scrollen
-
+}).setView([0, 0], 0);
+const mainMap = L.map('map', {
+  crs: L.CRS.Simple,
+  minZoom: -5,
+  maxZoom: 5
+});
 
         // Markers and data
         let availableUnits = [];
@@ -1557,22 +1551,79 @@ function sluitKazerenModal() {
   document.getElementById('kazerenomroepModal').classList.add('hidden');
 }
 
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
+    function robloxToLeafletCoords(x, y) {
+      if (!window.customMapSize) {
+        console.warn("⚠️ Geen kaartgrootte bekend. Gebruik standaardwaarden.");
+        return [0, 0]; // Fallback
+      }
 
-        function robloxXZtoMapXY(x, z) {
-    const { width, height } = window.customMapSize;
-    console.log('Kaartgrootte:', width, height);
-    console.log('Roblox coords:', x, z);
+      const { width: mapWidth, height: mapHeight } = window.customMapSize;
 
-    const pixelX = (x / 1000) * width;
-    const pixelY = height - (z / 1000) * height;
+      const robloxMinX = -512;
+      const robloxMaxX = 512;
+      const robloxMinY = -256;
+      const robloxMaxY = 256;
 
-    console.log('Pixel coords:', pixelX, pixelY);
-    return [pixelX, pixelY];
-}
+      const leafletX = ((x - robloxMinX) / (robloxMaxX - robloxMinX)) * mapWidth;
+      const leafletY = mapHeight - ((y - robloxMinY) / (robloxMaxY - robloxMinY)) * mapHeight;
 
+      return [leafletY, leafletX];
+    }
+
+    // ✅ Kaart uploaden en tonen
+    function uploadMapImage() {
+      const input = document.getElementById('mapImageInput');
+      const file = input.files[0];
+
+      if (!file || file.type !== 'image/png') {
+        showNotification('❌ Upload een geldige PNG-afbeelding!', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageUrl = e.target.result;
+
+        const img = new Image();
+        img.onload = function() {
+          const width = img.width;
+          const height = img.height;
+          const bounds = [[0, 0], [height, width]];
+
+          // 📐 Sla grootte op
+          window.customMapSize = { width, height };
+
+          // ♻️ Oude overlay verwijderen
+          if (window.customMapOverlay) {
+            mainMap.removeLayer(window.customMapOverlay);
+            dashboardMap.removeLayer(window.customMapOverlay);
+          }
+
+          // ✅ Nieuwe overlay toevoegen
+          window.customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
+          L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
+
+          // 🔒 Beperk en zoom
+          mainMap.setMaxBounds(bounds);
+          dashboardMap.setMaxBounds(bounds);
+          mainMap.fitBounds(bounds);
+          dashboardMap.fitBounds(bounds);
+
+          showNotification('📌 Kaart succesvol geladen!', 'success');
+
+          // 🔴 Testmarker op (0, 0) in Roblox-wereld
+          setTimeout(() => {
+            const [y, x] = robloxToLeafletCoords(0, 0);
+            L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
+          }, 500);
+        };
+
+        img.src = imageUrl;
+      };
+
+      reader.readAsDataURL(file);
+    }
+    
         function showView(viewId) {
             document.getElementById('dashboardView').classList.add('hidden');
             document.getElementById('mapView').classList.add('hidden');
@@ -1810,48 +1861,39 @@ function clamp(value, min, max) {
                 default: return status;
             }
         }
-       
-function addUnitMarker(unit) {
-    if (!unit.location || unit.location.x == null || unit.location.z == null) {
-        console.warn(`⚠️ Unit ${unit.id} heeft geen geldige locatie.`);
-        return;
-    }
 
-    const [pixelX, pixelY] = robloxXZtoMapXY(unit.location.x, unit.location.z);
+        function addUnitMarker(unit) {
+            if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
 
-    console.log(`Pixel coords voor unit ${unit.id}: x=${pixelX}, y=${pixelY}`);
+            let iconClass = 'fa-car text-blue-500';
+            if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
+            if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
 
-    const latLng = mainMap.unproject([pixelX, pixelY], mainMap.getMaxZoom());
+            const customIcon = L.divIcon({
+                html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
+                className: '', // geen Leaflet standaard stijl
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
 
-    console.log(`Map positie Leaflet voor unit ${unit.id}: lat=${latLng.lat}, lng=${latLng.lng}`);
+            const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
 
-    let iconClass = 'fa-car text-blue-500';
-    if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
-    if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
+            const marker = L.marker([y, x], {
+                icon: customIcon
+            }).addTo(mainMap);
 
-    const customIcon = L.divIcon({
-        html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
-        className: '',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-    });
+            if (unit.type === 'police') {
+                marker.addTo(dashboardMap);
+            }
 
-    const marker = L.marker(latLng, { icon: customIcon }).addTo(mainMap);
-    console.log(`✅ Marker toegevoegd voor unit ${unit.id} op hoofdkaart.`);
+            unitMarkers[unit.id] = marker;
 
-    if (unit.type === 'police') {
-        L.marker(latLng, { icon: customIcon }).addTo(dashboardMap);
-        console.log(`📊 Marker van unit ${unit.id} ook toegevoegd op dashboardMap.`);
-    }
-
-    unitMarkers[unit.id] = marker;
-
-    marker.bindPopup(`
-        <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
-        Bestuurder: ${unit.driver}<br>
-        Status: ${getStatusName(unit.status)}
-    `);
-}
+            marker.bindPopup(`
+                <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
+                Bestuurder: ${unit.driver}<br>
+                Status: ${getStatusName(unit.status)}
+            `);
+        }
 
 function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
@@ -2209,79 +2251,6 @@ if (call.coordinates) {
         function logout() {
             localStorage.removeItem('apiKey');
             window.location.href = 'index.html';
-        }
-        // ✅ Roblox-coördinaten omzetten naar Leaflet-positie
-        function robloxToLeafletCoords(x, y) {
-          if (!window.customMapSize) {
-            console.warn("⚠️ Geen kaartgrootte bekend. Gebruik standaardwaarden.");
-            return [0, 0]; // Fallback
-          }
-
-          const { width: mapWidth, height: mapHeight } = window.customMapSize;
-
-          const robloxMinX = -512;
-          const robloxMaxX = 512;
-          const robloxMinY = -256;
-          const robloxMaxY = 256;
-
-          const leafletX = ((x - robloxMinX) / (robloxMaxX - robloxMinX)) * mapWidth;
-          const leafletY = mapHeight - ((y - robloxMinY) / (robloxMaxY - robloxMinY)) * mapHeight;
-
-          return [leafletY, leafletX];
-        }
-
-        // ✅ Kaart uploaden en tonen
-        function uploadMapImage() {
-          const input = document.getElementById('mapImageInput');
-          const file = input.files[0];
-
-          if (!file || file.type !== 'image/png') {
-            showNotification('❌ Upload een geldige PNG-afbeelding!', 'error');
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const imageUrl = e.target.result;
-
-            const img = new Image();
-            img.onload = function() {
-              const width = img.width;
-              const height = img.height;
-              const bounds = [[0, 0], [height, width]];
-
-              // 📐 Sla grootte op
-              window.customMapSize = { width, height };
-
-              // ♻️ Oude overlay verwijderen
-              if (window.customMapOverlay) {
-                mainMap.removeLayer(window.customMapOverlay);
-                dashboardMap.removeLayer(window.customMapOverlay);
-              }
-
-              // ✅ Nieuwe overlay toevoegen
-              window.customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
-              L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
-
-              // 🔒 Beperk en zoom
-              mainMap.setMaxBounds(bounds);
-              dashboardMap.setMaxBounds(bounds);
-              mainMap.fitBounds(bounds);
-              dashboardMap.fitBounds(bounds);
-
-              showNotification('📌 Kaart succesvol geladen!', 'success');
-
-              // 🔴 Testmarker op (0, 0) in Roblox-wereld
-              setTimeout(() => {
-                const [y, x] = robloxToLeafletCoords(0, 0);
-                L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
-              }, 500);
-            };
-
-            img.src = imageUrl;
-          };
-
-          reader.readAsDataURL(file);
         }
 
 let vorigeMeldingenTimestamps = [];
@@ -2799,8 +2768,7 @@ function addLuchtalarmPaal(paal) {
 
   console.log("📍 Voeg marker toe voor:", paal);
 
-  const [leafletY, leafletX] = robloxToLeafletCoords(x, y);
-  const marker = L.marker([leafletY, leafletX]).addTo(mainMap);
+  const marker = L.marker([x, y]).addTo(mainMap);
   marker.bindPopup(`
     <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
     <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
