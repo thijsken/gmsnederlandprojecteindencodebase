@@ -2597,7 +2597,6 @@ function displayEmergencyReports(reports) {
 
     // Verwijder oude markers
     Object.values(emergencyMarkers).forEach(marker => {
-        mainMap.removeLayer(marker);
         dashboardMap.removeLayer(marker);
     });
     emergencyMarkers = {};
@@ -2673,8 +2672,12 @@ function zoomToCall(callId) {
 
     const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
 
-    mainMap.setView([y, x], 17); // Zoom in op locatie
-    emergencyMarkers[call.id].openPopup(); // Open popup op de marker
+  mainMap.setView([y, x], 17); // Zoom in op locatie
+  if (emergencyMarkers[call.id]) {
+    emergencyMarkers[call.id].openPopup();
+  } else {
+    console.warn('⚠️ Marker voor melding ${call.id} niet gevonden.');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
