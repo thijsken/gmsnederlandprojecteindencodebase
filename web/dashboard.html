@@ -2496,6 +2496,7 @@ let callList = [];     // Dit is waar de geaccepteerde meldingen naar toe gaan
 function accepteerMelding(timestamp) {
     const ts = Number(timestamp);
     const index = calls.findIndex(m => Number(m.timestamp) === ts);
+    
     if (index === -1) {
         console.error("❌ Melding niet gevonden in calls!");
         return;
@@ -2543,6 +2544,33 @@ function accepteerMelding(timestamp) {
         </div>
     `;
     callListContainer.appendChild(div);
+
+    // Update de status naar de backend
+    updateCallStatusOnBackend(call.timestamp, 'accepted');
+}
+
+// Functie om de status naar de backend te verzenden
+function updateCallStatusOnBackend(timestamp, status) {
+    fetch(`${API_URL}/api/apimeldingen/meldingen/${timestamp}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentApiKey}` // Als je een API-sleutel gebruikt
+        },
+        body: JSON.stringify({ status })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('Fout bij het bijwerken van de status');
+        }
+        return res.json();
+    })
+    .then(data => {
+        console.log("✅ Status succesvol bijgewerkt:", data);
+    })
+    .catch(err => {
+        console.error("❌ Fout bij het bijwerken van de status:", err);
+    });
 }
 
 function loadMeldingenToCallList() {
