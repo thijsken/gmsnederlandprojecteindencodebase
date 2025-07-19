@@ -1602,7 +1602,7 @@ function uploadMapImage() {
             } else {
                 fetchEmergencyReports();
                 fetchUnits(localStorage.getItem("serverId"));
-                fetchLuchtalarmPalen();
+                addLuchtalarmPaal();
                 fetchPosten();
             }
         };
@@ -1616,7 +1616,7 @@ function loadMarkers() {
     console.log("Markers laden...");
     fetchEmergencyReports();
     fetchUnits(localStorage.getItem("serverId"));
-    fetchLuchtalarmPalen();
+    addLuchtalarmPaal();
     fetchPosten();
 }
 
