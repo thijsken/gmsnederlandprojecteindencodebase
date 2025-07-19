@@ -2315,30 +2315,28 @@ function fetchEmergencyReports() {
         throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
       }
 
-      // Verwijder alle bestaande melding markers voordat nieuwe worden toegevoegd
-      Object.values(emergencyMarkers).forEach(marker => {
-        if (marker && typeof marker.remove === 'function') {
-          marker.remove(); // Correctly remove the marker
+      // Verzamel alle melding IDs uit de API response
+      const huidigeMeldingIds = new Set(meldingenArray.map(m => m.timestamp));
+
+      // Verwijder alleen markers die niet meer in de response zitten
+      Object.keys(emergencyMarkers).forEach(meldingId => {
+        if (!huidigeMeldingIds.has(meldingId)) {
+          emergencyMarkers[meldingId].remove();
+          delete emergencyMarkers[meldingId];
         }
       });
-      emergencyMarkers = {}; // Leeg de emergencyMarkers object
-      calls = []; // Leeg de calls array
 
-      const nieuweMeldingen = meldingenArray.filter(m =>
-        m.status === 'new' && !bekendeMeldingen.has(m.timestamp)
-      );
+      // Verwerk nieuwe meldingen
+      const nieuweMeldingen = meldingenArray.filter(m => !emergencyMarkers.hasOwnProperty(m.timestamp));
 
       nieuweMeldingen.forEach(melding => {
-        bekendeMeldingen.add(melding.timestamp);
-
         const callWithId = { id: melding.timestamp, ...melding };
         calls.push(callWithId);
 
         console.log("🚨 Nieuwe melding:", callWithId);
 
-        // Voeg marker toe met omgezette coördinaten
         if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
-          const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y); // Gebruik robloxToLeafletCoords
+          const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y);
 
           const icon = L.divIcon({
             className: '',
@@ -2354,7 +2352,7 @@ function fetchEmergencyReports() {
             iconAnchor: [16, 42]
           });
 
-          const marker = L.marker([y, x], { icon }).addTo(mainMap); // Add marker to mainMap only
+          const marker = L.marker([y, x], { icon }).addTo(mainMap);
 
           marker.bindPopup(`
             <b>${callWithId.type}</b><br>
@@ -2363,11 +2361,12 @@ function fetchEmergencyReports() {
             Beschrijving: ${callWithId.description}
           `);
 
-          emergencyMarkers[callWithId.id] = marker; // Store the marker
+          emergencyMarkers[callWithId.id] = marker;
         } else {
           console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
         }
       });
+
       updateCalls();
     })
     .catch(err => {
