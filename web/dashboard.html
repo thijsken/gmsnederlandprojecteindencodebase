@@ -2768,7 +2768,13 @@ function addLuchtalarmPaal(paal) {
 
   console.log("📍 Voeg marker toe voor:", paal);
 
-  const marker = L.marker([x, y]).addTo(mainMap);
+  // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
+  const [lat, lng] = robloxToLeafletCoords(x, y);
+
+  // Voeg marker toe op de juiste locatie
+  const marker = L.marker([lat, lng]).addTo(mainMap);
+
+  // Voeg popup met knoppen toe
   marker.bindPopup(`
     <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
     <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
