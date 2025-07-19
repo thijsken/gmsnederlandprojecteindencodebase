@@ -1188,7 +1188,8 @@ function copyCommunityId() {
         availableUnitsList.appendChild(li);
       });
   }
-function scanKenteken() {
+  
+  function scanKenteken() {
   const input = document.getElementById('anprKentekenInput').value.trim().toUpperCase();
   const result = document.getElementById('anprResult');
 
@@ -1217,16 +1218,16 @@ function scanKenteken() {
   }
 }
 
-function openP2000Modal() {
+  function openP2000Modal() {
   document.getElementById('p2000Modal').classList.remove('hidden');
   laadPostenVoorP2000();
 }
 
-function closeP2000Modal() {
+  function closeP2000Modal() {
   document.getElementById('p2000Modal').classList.add('hidden');
 }
 
-function laadPostenVoorP2000() {
+  function laadPostenVoorP2000() {
   const select = document.getElementById('p2000PostSelect');
   if (!select) {
     console.error("❌ Selectelement #p2000PostSelect niet gevonden!");
@@ -1265,7 +1266,7 @@ function laadPostenVoorP2000() {
     });
 }
 
-function genereerP2000Code(beschrijving) {
+  function genereerP2000Code(beschrijving) {
   const tekst = beschrijving.toLowerCase();
   const codes = [];
 
@@ -1360,7 +1361,7 @@ function genereerP2000Code(beschrijving) {
   return codes;
 }
 
-function verstuurP2000Alarm() {
+  function verstuurP2000Alarm() {
   const adres = document.getElementById('p2000Adres').value.trim();
   const voertuigen = document.getElementById('p2000Voertuigen').value.trim();
   const situatie = document.getElementById('p2000Situatie').value.trim();
@@ -1428,15 +1429,15 @@ fetch(`${API_URL}/api/apiposten/apialarmposten/alarm?serverId=${serverId}`, {
 });
 }
 
-function openNLAlertModal() {
+  function openNLAlertModal() {
     document.getElementById('nlalertModal').classList.remove('hidden');
 }
 
-function closeNLAlertModal() {
+  function closeNLAlertModal() {
     document.getElementById('nlalertModal').classList.add('hidden');
 }
 
-function saveNLAlert() {
+  function saveNLAlert() {
   const title = document.getElementById('nlalertTitle').value.trim();
   const message = document.getElementById('nlalertMessage').value.trim();
   const location = document.getElementById('nlalertLocation').value.trim();
@@ -1465,15 +1466,15 @@ function saveNLAlert() {
   });
 }
 
-function openAmberModal() {
+  function openAmberModal() {
   document.getElementById('amberModal').classList.remove('hidden');
 }
 
-function closeAmberModal() {
+  function closeAmberModal() {
   document.getElementById('amberModal').classList.add('hidden');
 }
 
-function saveAmberAlert() {
+  function saveAmberAlert() {
   const name = document.getElementById('amberPlayerName').value.trim();
   const userId = document.getElementById('amberUserId').value.trim();
   const location = document.getElementById('amberLocation').value.trim();
@@ -1514,7 +1515,7 @@ fetch(`${API_URL}/api/apiamber/amber?serverId=${encodeURIComponent(serverId)}`, 
   });
 }
 
-function updateAmberTable() {
+  function updateAmberTable() {
   const container = document.getElementById('amberTable');
   container.innerHTML = '';
 
@@ -1544,7 +1545,7 @@ function updateAmberTable() {
   });
 }
 
-function openKazerenModal(postId) {
+  function openKazerenModal(postId) {
   actievePostId = postId;
   document.getElementById('kazerenAdres').value = '';
   document.getElementById('kazerenInfo').value = '';
@@ -1552,7 +1553,7 @@ function openKazerenModal(postId) {
   document.getElementById('kazerenomroepModal').classList.remove('hidden');
 }
 
-function sluitKazerenModal() {
+  function sluitKazerenModal() {
   document.getElementById('kazerenomroepModal').classList.add('hidden');
 }
 
@@ -2366,6 +2367,7 @@ function fetchEmergencyReports() {
           }
         }
       });
+      updateRecentCalls(calls);
     })
     .catch(err => {
       console.error("❌ Fout bij ophalen meldingen:", err.message);
