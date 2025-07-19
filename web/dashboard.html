@@ -1989,7 +1989,7 @@ function acceptCall(callId) {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${currentApiKey}` // als je dat gebruikt
+            'Authorization': `Bearer ${currentApiKey}` // als je dat gebruikt
         },
         body: JSON.stringify({ status: 'accepted' })
     })
