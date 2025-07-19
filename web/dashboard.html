@@ -1966,6 +1966,7 @@ function updateCalls() {
 
     document.getElementById('activeCallsCount').textContent = calls.filter(c => c.status !== 'closed').length;
 }
+
 // ✅ GEHELE HERSCHREVEN VERSIE VAN acceptCall(callId)
 function acceptCall(callId) {
       const callsArray = Object.entries(calls).map(([id, data]) => ({ id, ...data }));
@@ -2320,7 +2321,6 @@ function fetchEmergencyReports() {
 
   fetch(url)
     .then(res => {
-      console.log("Response status:", res.status);
       if (!res.ok) {
         return res.json().then(errData => {
           console.error("Fout bij ophalen meldingen:", errData);
@@ -2331,19 +2331,19 @@ function fetchEmergencyReports() {
     })
     .then(data => {
       console.log("Ontvangen meldingen:", data);
-      const meldingenArray = Array.isArray(data) ? data : Object.values(data);
 
-      if (!Array.isArray(meldingenArray)) {
-        throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
-      }
+      const meldingenArray = Object.entries(data).map(([id, melding]) => ({
+        id, // <-- Firebase key als callId
+        ...melding,
+      }));
 
-      // Verwijder bestaande markers
       Object.values(emergencyMarkers).forEach(marker => {
         if (marker) {
           mainMap.removeLayer(marker);
           dashboardMap.removeLayer(marker);
         }
       });
+
       emergencyMarkers = {};
       calls = [];
 
@@ -2353,18 +2353,19 @@ function fetchEmergencyReports() {
 
       nieuweMeldingen.forEach(melding => {
         bekendeMeldingen.add(melding.timestamp);
-        const callWithId = { id: melding.timestamp, ...melding };
-        calls.push(callWithId);
+        calls.push(melding); // bevat nu een .id = Firebase key
 
-        console.log("🚨 Nieuwe melding:", callWithId);
-
-        if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
-          const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y);
+        if (
+          melding.coordinates &&
+          typeof melding.coordinates.x === 'number' &&
+          typeof melding.coordinates.y === 'number'
+        ) {
+          const [y, x] = robloxToLeafletCoords(melding.coordinates.x, melding.coordinates.y);
           const icon = L.divIcon({
             className: '',
             html: `
               <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-                <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
+                <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${melding.userId}&width=100&height=100&format=png"
                      onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
                      style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
                 <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
@@ -2376,17 +2377,18 @@ function fetchEmergencyReports() {
 
           const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
           marker.bindPopup(`
-            <b>${callWithId.type}</b><br>
-            Locatie: ${callWithId.location}<br>
-            Speler: ${callWithId.playerName}<br>
-            Beschrijving: ${callWithId.description}
+            <b>${melding.type}</b><br>
+            Locatie: ${melding.location}<br>
+            Speler: ${melding.playerName}<br>
+            Beschrijving: ${melding.description}
           `);
 
-          emergencyMarkers[callWithId.id] = marker;
+          emergencyMarkers[melding.id] = marker;
         } else {
-          console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
+          console.warn(`⚠️ Melding ${melding.id} heeft ongeldige coördinaten:`, melding.coordinates);
         }
       });
+
       updateCalls();
     })
     .catch(err => {
