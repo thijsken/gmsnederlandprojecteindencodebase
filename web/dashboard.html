@@ -2079,67 +2079,67 @@ function robloxToLeafletCoords(robloxX, robloxY) {
 }
 
         function showCallDetails(callId) {
-    const call = calls.find(c => String(c.id) === String(callId));
-    if (!call) return;
-            
-    currentCallId = callId;
-            
-    document.getElementById('callType').textContent = call.type;
-    document.getElementById('callTime').textContent = formatTime(call.timestamp, true);
-    document.getElementById('callLocation').textContent = call.location;
-    document.getElementById('callStatus').textContent = getCallStatusName(call.status);
-    document.getElementById('callDescription').textContent = call.description || 'Geen beschrijving beschikbaar';
-    document.getElementById('callPlayerName').textContent = call.playerName || 'Onbekend';
-    document.getElementById('callPlayerId').textContent = `UserID: ${call.userId || 'Onbekend'}`;
-    document.getElementById('callCoordinates').textContent = `Locatie: X: ${call.coordinates?.x || 0}, Y: ${call.coordinates?.y || 0}, Z: ${call.coordinates?.z || 0}`;
-            
-    // Update assigned units
-    const assignedUnitsContainer = document.getElementById('assignedUnits');
-    assignedUnitsContainer.innerHTML = '';
-            
-    const assignedUnits = units.filter(u => u.assignedCall === callId);
-    assignedUnits.forEach(unit => {
-        const unitElement = document.createElement('div');
-        unitElement.className = 'bg-gray-700 p-2 rounded flex items-center';
-                
-        let iconColor = 'bg-blue-500';
-        if (unit.type === 'ambulance') iconColor = 'bg-green-500';
-        if (unit.type === 'fire') iconColor = 'bg-yellow-500';
-                
-        unitElement.innerHTML = `
-            <div class="w-6 h-6 ${iconColor} rounded-full mr-2"></div>
-            <div>
-                <p class="font-medium">${unit.id}</p>
-                <p class="text-xs text-gray-400">${unit.driver}</p>
-            </div>
-        `;
-                
-        assignedUnitsContainer.appendChild(unitElement);
-    });
-            
-    // Zoom to call location on map
-    if (call.coordinates && mapUploaded) { // Controleer of kaart is geüpload
-        const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+            const call = calls.find(c => String(c.id) === String(callId));
+            if (!call) return;
+                    
+            currentCallId = callId;
+                    
+            document.getElementById('callType').textContent = call.type;
+            document.getElementById('callTime').textContent = formatTime(call.timestamp, true);
+            document.getElementById('callLocation').textContent = call.location;
+            document.getElementById('callStatus').textContent = getCallStatusName(call.status);
+            document.getElementById('callDescription').textContent = call.description || 'Geen beschrijving beschikbaar';
+            document.getElementById('callPlayerName').textContent = call.playerName || 'Onbekend';
+            document.getElementById('callPlayerId').textContent = `UserID: ${call.userId || 'Onbekend'}`;
+            document.getElementById('callCoordinates').textContent = `Locatie: X: ${call.coordinates?.x || 0}, Y: ${call.coordinates?.y || 0}, Z: ${call.coordinates?.z || 0}`;
+                    
+            // Update assigned units
+            const assignedUnitsContainer = document.getElementById('assignedUnits');
+            assignedUnitsContainer.innerHTML = '';
+                    
+            const assignedUnits = units.filter(u => u.assignedCall === callId);
+            assignedUnits.forEach(unit => {
+                const unitElement = document.createElement('div');
+                unitElement.className = 'bg-gray-700 p-2 rounded flex items-center';
+                        
+                let iconColor = 'bg-blue-500';
+                if (unit.type === 'ambulance') iconColor = 'bg-green-500';
+                if (unit.type === 'fire') iconColor = 'bg-yellow-500';
+                        
+                unitElement.innerHTML = `
+                    <div class="w-6 h-6 ${iconColor} rounded-full mr-2"></div>
+                    <div>
+                        <p class="font-medium">${unit.id}</p>
+                        <p class="text-xs text-gray-400">${unit.driver}</p>
+                    </div>
+                `;
+                        
+                assignedUnitsContainer.appendChild(unitElement);
+            });
+                    
+            // Zoom to call location on map
+            if (call.coordinates && mapUploaded) { // Controleer of kaart is geüpload
+                const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
 
-        // Eerst naar locatie zoomen
-        mainMap.setView([y, x], 13);
+                // Eerst naar locatie zoomen
+                mainMap.setView([y, x], 13);
 
-        // Wacht tot de kaart klaar is en plaats marker
-        mainMap.whenReady(() => {
-            if (window.lastCallMarker) {
-                mainMap.removeLayer(window.lastCallMarker);
+                // Wacht tot de kaart klaar is en plaats marker
+                mainMap.whenReady(() => {
+                    if (window.lastCallMarker) {
+                        mainMap.removeLayer(window.lastCallMarker);
+                    }
+
+                    window.lastCallMarker = L.circleMarker([y, x], {
+                        radius: 8,
+                        color: 'red',
+                        fillOpacity: 0.8
+                    }).addTo(mainMap);
+                });
             }
-
-            window.lastCallMarker = L.circleMarker([y, x], {
-                radius: 8,
-                color: 'red',
-                fillOpacity: 0.8
-            }).addTo(mainMap);
-        });
-    }
-            
-    document.getElementById('callDetailsModal').classList.remove('hidden');
-}
+                    
+            document.getElementById('callDetailsModal').classList.remove('hidden');
+        }
 
         function getCallStatusName(status) {
             switch(status) {
