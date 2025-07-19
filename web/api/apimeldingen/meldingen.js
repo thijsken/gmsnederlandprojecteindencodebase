@@ -30,7 +30,7 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'Melding data is verplicht' });
         }
 
-        const newRef = await db.ref(`servers/${serverId}/meldingen`).push(melding);
+        const newRef = await db.ref(`servers/${serverId}/meldingen/${callId}`).push(melding);
         return res.status(201).json({ message: 'Melding opgeslagen', id: newRef.key, data: melding });
       }
 
