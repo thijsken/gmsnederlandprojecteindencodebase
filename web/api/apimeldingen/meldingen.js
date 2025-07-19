@@ -51,6 +51,9 @@ export default async function handler(req, res) {
       }
 
       case 'PATCH': {
+
+        const { callId } = req.query;
+        
         if (!callId) {
           return res.status(400).json({ error: 'callId is verplicht voor PATCH' });
         }
