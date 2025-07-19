@@ -2225,41 +2225,72 @@ function robloxToLeafletCoords(robloxX, robloxY) {
         // }
 
         function sluitMelding(callId) {
-          // callId is Firebase key zoals "-OVXdp-AHusqhnhVJ6bd"
-          
+          if (!callId) {
+            console.warn("Geen callId meegegeven aan sluitMelding");
+            return;
+          }
+
+          // 1. Lokale status update (call gesloten)
           const callIndex = calls.findIndex(c => c.id === callId);
-          if (callIndex > -1) {
-            calls[callIndex].status = 'closed';
-          } else {
+          if (callIndex === -1) {
             console.warn(`⚠️ Geen melding gevonden met id ${callId}`);
+            return;
           }
+          calls[callIndex].status = 'closed';
 
+          // 2. Marker verwijderen
           if (emergencyMarkers[callId]) {
-            mainMap.removeLayer(emergencyMarkers[callId]);
-            dashboardMap.removeLayer(emergencyMarkers[callId]);
-            delete emergencyMarkers[callId];
-          } else {
-            console.warn(`⚠️ Geen marker gevonden voor callId: ${callId}`);
+            console.log("Verwijder marker:", emergencyMarkers[currentCallId]);
+            mainMap.removeLayer(emergencyMarkers[currentCallId]);
+            if (emergencyMarkers[currentCallId]) {
+              mainMap.removeLayer(emergencyMarkers[currentCallId]);
+              dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
+              delete emergencyMarkers[currentCallId];
+            } else {
+              console.warn(`⚠️ Geen marker gevonden voor callId: ${currentCallId}`);
+            }
+            delete emergencyMarkers[currentCallId];
+            } else {
+              console.warn(`Geen marker gevonden voor callId ${currentCallId}`);
           }
 
+          // 3. Units vrijmaken (optioneel, als je dat wil)
+          units.forEach(unit => {
+            if (unit.assignedCall === callId) {
+              unit.status = 'available';
+              unit.assignedCall = null;
+
+              if (unitMarkers[unit.id]) {
+                let color = '#3b82f6'; // Politie blauw
+                if (unit.type === 'ambulance') color = '#10b981'; // Groen
+                if (unit.type === 'fire') color = '#f59e0b'; // Oranje
+
+                unitMarkers[unit.id].setStyle({ color });
+              }
+            }
+          });
+
+          // 4. UI updaten
           updateCalls();
 
+          // 5. Verwijder call uit Firebase realtime database via backend-API
           fetch(`${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`, {
             method: 'DELETE'
           })
-          .then(res => {
-            if (!res.ok) throw new Error('Verwijderen op backend mislukt');
-            return res.json();
-          })
-          .then(data => {
-            console.log("✅ Firebase melding verwijderd:", data);
-          })
-          .catch(err => {
-            console.error("❌ Fout bij backend-verwijdering:", err);
-            showNotification("Backend-verwijdering mislukt", "error");
-          });
-
-          showNotification(`✅ Melding ${callId} afgehandeld en verwijderd`, 'success');
+            .then(res => {
+              if (!res.ok) throw new Error(`Backend verwijderen mislukt met status ${res.status}`);
+              return res.json();
+            })
+            .then(data => {
+              console.log(`✅ Melding ${callId} succesvol verwijderd uit Firebase`, data);
+              showNotification(`Melding ${callId} afgehandeld en verwijderd`, 'success');
+              // sluit popup
+              document.getElementById('callDetailsModal').classList.add('hidden');
+            })
+            .catch(err => {
+              console.error(`❌ Fout bij verwijderen melding ${callId}:`, err);
+              showNotification(`Fout bij verwijderen melding ${callId}`, 'error');
+            });
         }
 
         function formatTime(timestamp, full = false) {
