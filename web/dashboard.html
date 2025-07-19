@@ -2597,7 +2597,9 @@ function displayEmergencyReports(reports) {
 
     // Verwijder oude markers
     Object.values(emergencyMarkers).forEach(marker => {
+      if (marker) {
         dashboardMap.removeLayer(marker);
+      }
     });
     emergencyMarkers = {};
     calls = [];
