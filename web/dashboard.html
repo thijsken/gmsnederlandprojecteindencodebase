@@ -2364,6 +2364,7 @@ function updateCallList() {
               }
             }
           });
+          console.log("Huidige calls:", calls); // is voor logs
           updateRecentCalls(calls);
         })
         .catch(err => {
