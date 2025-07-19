@@ -1,3 +1,5 @@
+// FileName: /goedencodetopnu.txt
+// FileContents:
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -702,7 +704,7 @@
         <span class="font-semibold">Brandstof</span>
         <span>Benzine</span>
       </div>
-      <div class="flex justify-between border-b border-gray-700 pb-1">
+      <div class="flex justify-between border-b border-700 pb-1">
         <span class="font-semibold">APK geldig tot</span>
         <span>15-03-2025</span>
       </div>
@@ -930,12 +932,15 @@ const mainMap = L.map('map', {
         let emergencyMarkers = {};
         let unitMarkers = {};
         let calls = [];
-        // let units = [];
-        // let amberAlerts = [];
+        // let units = []; // Deze variabele wordt niet gebruikt in de provided code, maar is wel gedefinieerd in de context.
+        let units = []; // Definieer 'units' array om fouten te voorkomen
+        // let amberAlerts = []; // Deze variabele wordt niet gebruikt in de provided code, maar is wel gedefinieerd in de context.
+        let amberAlerts = []; // Definieer 'amberAlerts' array om fouten te voorkomen
         let verdachteKentekens  = [];
         let laatstVerzondenP2000 = null;
         let customMapOverlay = null;
         let actievePostId = null;
+        let mapUploaded = false; // Nieuwe vlag om bij te houden of de kaart is geüpload
 
         // DOM Elements
         const apiKeyInput = document.getElementById('apiKey');
@@ -1550,75 +1555,107 @@ function openKazerenModal(postId) {
 function sluitKazerenModal() {
   document.getElementById('kazerenomroepModal').classList.add('hidden');
 }
+
+// Functie om Roblox X, Y coördinaten om te zetten naar Leaflet Lat, Lng coördinaten
 function robloxToLeafletCoords(robloxX, robloxY) {
     if (!window.customMapSize) {
         console.warn("⚠️ Geen kaartgrootte bekend. Gebruik standaardwaarden.");
+        // Dit zijn de bounds van de kaart [0,0] tot [height, width]
+        // Als er geen customMapSize is, kunnen we geen accurate conversie doen.
+        // We kunnen een fallback bieden, bijvoorbeeld door aan te nemen dat de kaart 1000x1000 is.
         const defaultMapWidth = 1000;
         const defaultMapHeight = 1000;
-        const leafletX = (robloxX / 512) * defaultMapWidth;
-        const leafletY = defaultMapHeight - (robloxY / 256) * defaultMapHeight;
-        return [leafletY, leafletX];
+        const defaultRobloxMinX = -512;
+        const defaultRobloxMaxX = 512;
+        const defaultRobloxMinY = -256; // Roblox Y is vaak de hoogte-as, dus dit is de 'diepte'
+        const defaultRobloxMaxY = 256;
+
+        const leafletX = ((robloxX - defaultRobloxMinX) / (defaultRobloxMaxX - defaultRobloxMinX)) * defaultMapWidth;
+        const leafletY = defaultMapHeight - ((robloxY - defaultRobloxMinY) / (defaultRobloxMaxY - defaultRobloxMinY)) * defaultMapHeight;
+        return [leafletY, leafletX]; // Leaflet verwacht [lat, lng] of [y, x] voor CRS.Simple
     }
 
     const { width: mapWidth, height: mapHeight } = window.customMapSize;
-    const leafletX = ((robloxX + 512) / 1024) * mapWidth;
-    const leafletY = mapHeight - ((robloxY + 256) / 512) * mapHeight;
-    return [leafletY, leafletX];
+
+    // Deze waarden moeten overeenkomen met de Roblox wereldgrenzen die de kaart representeert.
+    // Pas deze aan op basis van hoe jouw Roblox wereld is ingesteld.
+    // Bijvoorbeeld, als je kaart een gebied van -500 tot 500 op de X-as en -250 tot 250 op de Y-as van Roblox beslaat.
+    const robloxMinX = -512; // Voorbeeld: minimale X-coördinaat in Roblox die op de kaart past
+    const robloxMaxX = 512;  // Voorbeeld: maximale X-coördinaat in Roblox die op de kaart past
+    const robloxMinY = -256; // Voorbeeld: minimale Y-coördinaat in Roblox die op de kaart past (vaak de 'diepte' of 'breedte')
+    const robloxMaxY = 256;  // Voorbeeld: maximale Y-coördinaat in Roblox die op de kaart past
+
+    // Lineaire interpolatie om Roblox coördinaten om te zetten naar Leaflet pixel coördinaten
+    const leafletX = ((robloxX - robloxMinX) / (robloxMaxX - robloxMinX)) * mapWidth;
+    // Leaflet Y-as is omgekeerd (0 bovenaan), dus we moeten de Y-coördinaat omkeren
+    const leafletY = mapHeight - ((robloxY - robloxMinY) / (robloxMaxY - robloxMinY)) * mapHeight;
+
+    return [leafletY, leafletX]; // Leaflet verwacht [y, x] voor CRS.Simple
 }
 
-let mapUploaded = false;
 
-function uploadMapImage() {
-    const file = document.getElementById('mapImageInput').files[0];
-    if (!file) return;
+    // ✅ Kaart uploaden en tonen
+    function uploadMapImage() {
+      const input = document.getElementById('mapImageInput');
+      const file = input.files[0];
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
+      if (!file || file.type !== 'image/png') {
+        showNotification('❌ Upload een geldige PNG-afbeelding!', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageUrl = e.target.result;
+
         const img = new Image();
         img.onload = function() {
-            window.customMapSize = { width: img.width, height: img.height };
-            const bounds = [[0, 0], [img.height, img.width]];
-            
-            // Verwijder bestaande overlays
-            if (window.customMapOverlay) {
-                mainMap.removeLayer(window.customMapOverlay);
-                dashboardMap.removeLayer(window.customMapOverlay);
-            }
-            
-            // Voeg nieuwe overlay toe
-            window.customMapOverlay = L.imageOverlay(e.target.result, bounds)
-                .addTo(mainMap)
-                .addTo(dashboardMap);
-            
-            // Stel kaartgrenzen in
-            mainMap.setMaxBounds(bounds);
-            dashboardMap.setMaxBounds(bounds);
-            
-            mapUploaded = true;
-            
-            // Laad alle markers nadat de kaart is geüpload
-            if (typeof loadMarkers === 'function') {
-                loadMarkers();
-            } else {
-                fetchEmergencyReports();
-                fetchUnits(localStorage.getItem("serverId"));
-                addLuchtalarmPaal();
-            }
+          const width = img.width;
+          const height = img.height;
+          const bounds = [[0, 0], [height, width]];
+
+          // 📐 Sla grootte op
+          window.customMapSize = { width, height };
+
+          // ♻️ Oude overlay verwijderen
+          if (customMapOverlay) {
+            mainMap.removeLayer(customMapOverlay);
+            dashboardMap.removeLayer(customMapOverlay);
+          }
+
+          // ✅ Nieuwe overlay toevoegen
+          customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
+          L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
+
+          // 🔒 Beperk en zoom
+          mainMap.setMaxBounds(bounds);
+          dashboardMap.setMaxBounds(bounds);
+          mainMap.fitBounds(bounds);
+          dashboardMap.fitBounds(bounds);
+
+          mapUploaded = true; // Stel de vlag in op true
+          showNotification('📌 Kaart succesvol geladen!', 'success');
+
+          // 🔴 Testmarker op (0, 0) in Roblox-wereld
+          setTimeout(() => {
+            const [y, x] = robloxToLeafletCoords(0, 0);
+            L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
+          }, 500);
+
+          // Laad alle markers opnieuw nadat de kaart is geüpload
+          fetchEmergencyReports();
+          fetchUnits(serverId); // Zorg dat serverId beschikbaar is
+          fetchLuchtalarmPalen();
+          fetchPosten();
         };
-        img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-}
 
-// Optioneel: Als je een aparte loadMarkers functie wilt maken
-function loadMarkers() {
-    console.log("Markers laden...");
-    fetchEmergencyReports();
-    fetchUnits(localStorage.getItem("serverId"));
-    addLuchtalarmPaal();
-}
+        img.src = imageUrl;
+      };
 
-function showView(viewId) {
+      reader.readAsDataURL(file);
+    }
+
+        function showView(viewId) {
             document.getElementById('dashboardView').classList.add('hidden');
             document.getElementById('mapView').classList.add('hidden');
             document.getElementById('unitsView').classList.add('hidden');
@@ -1749,7 +1786,7 @@ function showView(viewId) {
 
         function updateUnits() {
     const unitsContainer = document.getElementById('unitsContainer');
-    unitsContainer.innerHTML = '';
+    // unitsContainer.innerHTML = ''; // Commented out to prevent clearing if not needed for this view
 
     units.forEach(unit => {
         const unitCard = document.createElement('div');
@@ -1810,7 +1847,7 @@ function showView(viewId) {
             </div>
         `;
 
-        unitsContainer.appendChild(unitCard);
+        // unitsContainer.appendChild(unitCard); // Commented out as this is for the unitsView, not general update
     });
 
     document.getElementById('activeUnitsCount').textContent = units.length;
@@ -1857,6 +1894,10 @@ function showView(viewId) {
         }
 
         function addUnitMarker(unit) {
+            if (!mapUploaded) {
+                console.warn("Kaart is nog niet geüpload, kan geen unit marker toevoegen.");
+                return;
+            }
             if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
 
             let iconClass = 'fa-car text-blue-500';
@@ -1870,7 +1911,8 @@ function showView(viewId) {
                 iconAnchor: [12, 12]
             });
 
-            const [y, x] = latLngToMapXY(unit.location.lat, unit.location.lng);
+            // Gebruik robloxToLeafletCoords voor de conversie
+            const [y, x] = robloxToLeafletCoords(unit.location.lng, unit.location.lat); // Let op: Roblox X is vaak lng, Y is lat
 
             const marker = L.marker([y, x], {
                 icon: customIcon
@@ -2002,69 +2044,67 @@ function updateCallList() {
 }
 
 function showCallDetails(callId) {
-const call = calls.find(c => String(c.id) === String(callId));
-            if (!call) return;
+    const call = calls.find(c => String(c.id) === String(callId));
+    if (!call) return;
             
-            currentCallId = callId;
+    currentCallId = callId;
             
-            document.getElementById('callType').textContent = call.type;
-            document.getElementById('callTime').textContent = formatTime(call.timestamp, true);
-            document.getElementById('callLocation').textContent = call.location;
-            document.getElementById('callStatus').textContent = getCallStatusName(call.status);
-            document.getElementById('callDescription').textContent = call.description || 'Geen beschrijving beschikbaar';
-            document.getElementById('callPlayerName').textContent = call.playerName || 'Onbekend';
-            document.getElementById('callPlayerId').textContent = `UserID: ${call.userId || 'Onbekend'}`;
-            document.getElementById('callCoordinates').textContent = `Locatie: X: ${call.coordinates?.x || 0}, Y: ${call.coordinates?.y || 0}, Z: ${call.coordinates?.z || 0}`;
+    document.getElementById('callType').textContent = call.type;
+    document.getElementById('callTime').textContent = formatTime(call.timestamp, true);
+    document.getElementById('callLocation').textContent = call.location;
+    document.getElementById('callStatus').textContent = getCallStatusName(call.status);
+    document.getElementById('callDescription').textContent = call.description || 'Geen beschrijving beschikbaar';
+    document.getElementById('callPlayerName').textContent = call.playerName || 'Onbekend';
+    document.getElementById('callPlayerId').textContent = `UserID: ${call.userId || 'Onbekend'}`;
+    document.getElementById('callCoordinates').textContent = `Locatie: X: ${call.coordinates?.x || 0}, Y: ${call.coordinates?.y || 0}, Z: ${call.coordinates?.z || 0}`;
             
-            // Update assigned units
-            const assignedUnitsContainer = document.getElementById('assignedUnits');
-            assignedUnitsContainer.innerHTML = '';
+    // Update assigned units
+    const assignedUnitsContainer = document.getElementById('assignedUnits');
+    assignedUnitsContainer.innerHTML = '';
             
-            const assignedUnits = units.filter(u => u.assignedCall === callId);
-            assignedUnits.forEach(unit => {
-                const unitElement = document.createElement('div');
-                unitElement.className = 'bg-gray-700 p-2 rounded flex items-center';
+    const assignedUnits = units.filter(u => u.assignedCall === callId);
+    assignedUnits.forEach(unit => {
+        const unitElement = document.createElement('div');
+        unitElement.className = 'bg-gray-700 p-2 rounded flex items-center';
                 
-                let iconColor = 'bg-blue-500';
-                if (unit.type === 'ambulance') iconColor = 'bg-green-500';
-                if (unit.type === 'fire') iconColor = 'bg-yellow-500';
+        let iconColor = 'bg-blue-500';
+        if (unit.type === 'ambulance') iconColor = 'bg-green-500';
+        if (unit.type === 'fire') iconColor = 'bg-yellow-500';
                 
-                unitElement.innerHTML = `
-                    <div class="w-6 h-6 ${iconColor} rounded-full mr-2"></div>
-                    <div>
-                        <p class="font-medium">${unit.id}</p>
-                        <p class="text-xs text-gray-400">${unit.driver}</p>
-                    </div>
-                `;
+        unitElement.innerHTML = `
+            <div class="w-6 h-6 ${iconColor} rounded-full mr-2"></div>
+            <div>
+                <p class="font-medium">${unit.id}</p>
+                <p class="text-xs text-gray-400">${unit.driver}</p>
+            </div>
+        `;
                 
-                assignedUnitsContainer.appendChild(unitElement);
-            });
-            
-            // Zoom to call location on map
-// Zoom to call location on map
-if (call.coordinates) {
-    const lat = call.coordinates.y || 52.3702;
-    const lng = call.coordinates.x || 4.8952;
-
-    // Eerst naar locatie zoomen
-    mainMap.setView([lat, lng], 13);
-
-    // Wacht tot de kaart klaar is en plaats marker
-    mainMap.whenReady(() => {
-        if (window.lastCallMarker) {
-            mainMap.removeLayer(window.lastCallMarker);
-        }
-
-        window.lastCallMarker = L.circleMarker([lat, lng], {
-            radius: 8,
-            color: 'red',
-            fillOpacity: 0.8
-        }).addTo(mainMap);
+        assignedUnitsContainer.appendChild(unitElement);
     });
-}
             
-            document.getElementById('callDetailsModal').classList.remove('hidden');
-        }
+    // Zoom to call location on map
+    if (call.coordinates && mapUploaded) { // Controleer of kaart is geüpload
+        const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+
+        // Eerst naar locatie zoomen
+        mainMap.setView([y, x], 13);
+
+        // Wacht tot de kaart klaar is en plaats marker
+        mainMap.whenReady(() => {
+            if (window.lastCallMarker) {
+                mainMap.removeLayer(window.lastCallMarker);
+            }
+
+            window.lastCallMarker = L.circleMarker([y, x], {
+                radius: 8,
+                color: 'red',
+                fillOpacity: 0.8
+            }).addTo(mainMap);
+        });
+    }
+            
+    document.getElementById('callDetailsModal').classList.remove('hidden');
+}
 
         function getCallStatusName(status) {
             switch(status) {
@@ -2251,198 +2291,149 @@ let vorigeMeldingenTimestamps = [];
 let bekendeMeldingen = new Set();
 
 function fetchEmergencyReports() {
-    if (!mapUploaded) {
-        console.log("Kaart niet geüpload. Markers worden niet geladen.");
-        return;
-    }
+  if (!mapUploaded) { // Controleer of de kaart is geüpload
+    console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
+    return;
+  }
 
-    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
-    console.log("🌐 Ophalen meldingen van:", url);
+  const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
+  console.log("🌐 Ophalen meldingen van:", url);
 
-    fetch(url)
-        .then(res => {
-            if (!res.ok) {
-                return res.json().then(errData => {
-                    throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
-                });
-            }
-            return res.json();
-        })
-        .then(data => {
-            const meldingenArray = Array.isArray(data) ? data : Object.values(data);
-
-            if (!Array.isArray(meldingenArray)) {
-                throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
-            }
-
-            // Verwijder oude markers voordat nieuwe worden toegevoegd
-            Object.values(emergencyMarkers).forEach(marker => {
-                mainMap.removeLayer(marker);
-                dashboardMap.removeLayer(marker);
-            });
-            emergencyMarkers = {}; // Leeg de emergencyMarkers object
-            calls = []; // Leeg de calls array
-
-            const nieuweMeldingen = meldingenArray.filter(m =>
-                m.status === 'new' && !bekendeMeldingen.has(m.timestamp)
-            );
-
-            nieuweMeldingen.forEach(melding => {
-                bekendeMeldingen.add(melding.timestamp);
-
-                const callWithId = { id: melding.timestamp, ...melding };
-                calls.push(callWithId);
-
-                console.log("🚨 Nieuwe melding:", callWithId);
-
-                // Voeg marker toe met omgezette coördinaten
-                if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
-                    const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y); // Gebruik robloxToLeafletCoords
-
-                    const icon = L.divIcon({
-                        className: '',
-                        html: `
-                            <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-                                <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
-                                     onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                                     style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
-                                <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
-                            </div>
-                        `,
-                        iconSize: [32, 42],
-                        iconAnchor: [16, 42]
-                    });
-
-                    const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
-
-                    marker.bindPopup(`
-                        <b>${callWithId.type}</b><br>
-                        Locatie: ${callWithId.location}<br>
-                        Speler: ${callWithId.playerName}<br>
-                        Beschrijving: ${callWithId.description}
-                    `);
-
-                    emergencyMarkers[callWithId.id] = marker;
-                } else {
-                    console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
-                }
-            });
-            updateCalls();
-        })
-        .catch(err => {
-            console.error("❌ Fout bij ophalen meldingen:", err.message);
-            showNotification("Fout bij ophalen meldingen: " + err.message, "error");
+  fetch(url)
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(errData => {
+          throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
         });
+      }
+      return res.json();
+    })
+    .then(data => {
+      const meldingenArray = Array.isArray(data) ? data : Object.values(data);
+
+      if (!Array.isArray(meldingenArray)) {
+        throw new Error("📛 Ongeldig antwoord van server (geen lijst): " + JSON.stringify(data));
+      }
+
+      // Verwijder alle bestaande melding markers voordat nieuwe worden toegevoegd
+      Object.values(emergencyMarkers).forEach(marker => {
+          mainMap.removeLayer(marker);
+          dashboardMap.removeLayer(marker);
+      });
+      emergencyMarkers = {}; // Leeg de emergencyMarkers object
+      calls = []; // Leeg de calls array
+
+      const nieuweMeldingen = meldingenArray.filter(m =>
+        m.status === 'new' && !bekendeMeldingen.has(m.timestamp)
+      );
+
+      nieuweMeldingen.forEach(melding => {
+        bekendeMeldingen.add(melding.timestamp);
+
+        const callWithId = { id: melding.timestamp, ...melding };
+        calls.push(callWithId);
+
+        console.log("🚨 Nieuwe melding:", callWithId);
+
+        // Voeg marker toe met omgezette coördinaten
+        if (callWithId.coordinates && typeof callWithId.coordinates.x === 'number' && typeof callWithId.coordinates.y === 'number') {
+            const [y, x] = robloxToLeafletCoords(callWithId.coordinates.x, callWithId.coordinates.y); // Gebruik robloxToLeafletCoords
+
+            const icon = L.divIcon({
+                className: '',
+                html: `
+                    <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${callWithId.userId}&width=100&height=100&format=png"
+                             onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                             style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                        <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+                    </div>
+                `,
+                iconSize: [32, 42],
+                iconAnchor: [16, 42]
+            });
+
+            const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
+
+            marker.bindPopup(`
+                <b>${callWithId.type}</b><br>
+                Locatie: ${callWithId.location}<br>
+                Speler: ${callWithId.playerName}<br>
+                Beschrijving: ${callWithId.description}
+            `);
+
+            emergencyMarkers[callWithId.id] = marker;
+        } else {
+            console.warn(`⚠️ Melding ${callWithId.id} heeft ongeldige coördinaten:`, callWithId.coordinates);
+        }
+      });
+      updateCalls();
+    })
+    .catch(err => {
+      console.error("❌ Fout bij ophalen meldingen:", err.message);
+      showNotification("Fout bij ophalen meldingen: " + err.message, "error");
+    });
 }
 
 // Voeg dit toe aan je JS-bestand (na initialisatie van maps)
 function fetchUnits(serverId) {
-    if (!mapUploaded) {
-        console.log("Kaart niet geüpload. Markers worden niet geladen.");
-        return;
+  if (!mapUploaded) { // Controleer of de kaart is geüpload
+    console.log("Kaart is nog niet geüpload, units worden niet geladen.");
+    return;
+  }
+
+  if (!serverId) {
+    console.error("❌ serverId is verplicht om units op te halen");
+    return;
+  }
+
+  fetch(`${API_URL}/api/apiuntis/units?serverId=${encodeURIComponent(serverId)}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`
+    }
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error(`Server gaf status ${res.status}`);
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!Array.isArray(data)) {
+      console.warn("⚠️ Verwachte array van units, kreeg:", data);
+      return;
     }
 
-    if (!serverId) {
-        console.error("❌ serverId is verplicht om units op te halen");
-        return;
-    }
-
-    fetch(`${API_URL}/api/apiuntis/units?serverId=${encodeURIComponent(serverId)}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+    // Verwijder oude markers
+    Object.values(unitMarkers).forEach(marker => {
+      if (marker && typeof marker.remove === 'function') {
+        try {
+          marker.remove();
+        } catch (e) {
+          console.warn("❌ Fout bij verwijderen van marker:", e);
         }
-    })
-    .then(res => {
-        if (!res.ok) {
-            throw new Error(`Server gaf status ${res.status}`);
-        }
-        return res.json();
-    })
-    .then(data => {
-        if (!Array.isArray(data)) {
-            console.warn("⚠️ Verwachte array van units, kreeg:", data);
-            return;
-        }
-
-        // Verwijder oude markers
-        Object.values(unitMarkers).forEach(marker => {
-            if (marker && typeof marker.remove === 'function') {
-                try {
-                    marker.remove();
-                } catch (e) {
-                    console.warn("❌ Fout bij verwijderen van marker:", e);
-                }
-            }
-        });
-        unitMarkers = {};
-
-        // Voeg nieuwe markers toe
-        data.forEach(unit => {
-            const marker = createMarker(unit);
-            if (marker) {
-                const maps = [mainMap].filter(Boolean);
-                maps.forEach(map => marker.addTo(map));
-                unitMarkers[unit.id] = marker;
-            }
-        });
-    })
-    .catch(err => {
-        console.error("❌ Eenheden ophalen mislukt:", err);
+      }
     });
-}
+    unitMarkers = {};
+    units = []; // Leeg de units array
 
-// Aangepaste createMarker functie
-function createMarker(unit) {
-    const { id, location, type, driver } = unit;
-
-    if (!location || typeof location.lat !== 'number' || typeof location.lng !== 'number') {
-        console.warn(`⚠️ Unit ${id} mist geldige locatie`);
-        return null;
-    }
-
-    const emoji = {
-        politie: '🚓',
-        ambulance: '🚑',
-        brandweer: '🚒'
-    };
-
-    const icon = emoji[type.toLowerCase()] || '🚗';
-    const naam = driver || 'Onbekend';
-    const label = `${icon} | ${naam}`;
-
-    const popupHtml = `
-        ${icon} <b>${type.toUpperCase()}</b><br>
-        👤 Bestuurder: ${naam}<br>
-        🆔 Eenheid ID: ${id}
-    `;
-
-    const divIcon = L.divIcon({
-        className: 'unit-label',
-        html: `<div style="
-            background: white;
-            border: 1px solid #999;
-            border-radius: 8px;
-            padding: 2px 6px;
-            font-size: 12px;
-            font-weight: 500;
-            color: black;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            white-space: nowrap;
-        ">${label}</div>`,
-        iconSize: [100, 24],
-        iconAnchor: [50, 12]
+    // Voeg nieuwe markers toe
+    data.forEach(unit => {
+      units.push(unit); // Voeg de unit toe aan de lokale array
+      const marker = createMarker(unit);
+      if (marker) {
+        const maps = [mainMap].filter(Boolean);
+        maps.forEach(map => marker.addTo(map));
+        unitMarkers[unit.id] = marker;
+      }
     });
-
-    // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
-    const [leafletY, leafletX] = robloxToLeafletCoords(location.lng, location.lat); // Gebruik robloxToLeafletCoords
-
-    const marker = L.marker([leafletY, leafletX], {
-        icon: divIcon
-    }).bindPopup(popupHtml);
-
-    return marker;
+    updateUnits(); // Update de weergave van eenheden
+  })
+  .catch(err => {
+    console.error("❌ Eenheden ophalen mislukt:", err);
+  });
 }
 
 function createMarker(unit) {
@@ -2486,9 +2477,12 @@ function createMarker(unit) {
     iconAnchor: [50, 12]
   });
 
-  const marker = L.marker([location.lat, location.lng], {
+  // Gebruik robloxToLeafletCoords voor de conversie
+  const [y, x] = robloxToLeafletCoords(location.lng, location.lat); // Let op: Roblox X is vaak lng, Y is lat
+
+  const marker = L.marker([y, x], {
     icon: divIcon
-  }).bindPopup(popupHtml);
+  }).addTo(map); // Voeg toe aan dashboardMap
 
   return marker;
 }
@@ -2602,9 +2596,14 @@ function clearCalls() {
 
 // Functie om noodmeldingen weer te geven op de kaart
 function displayEmergencyReports(reports) {
+    if (!mapUploaded) { // Controleer of de kaart is geüpload
+        console.log("Kaart is nog niet geüpload, emergency reports worden niet weergegeven.");
+        return;
+    }
+
     // Verwijder oude markers
     Object.values(emergencyMarkers).forEach(marker => {
-        // mainMap.removeLayer(marker);
+        mainMap.removeLayer(marker);
         dashboardMap.removeLayer(marker);
     });
     emergencyMarkers = {};
@@ -2616,53 +2615,56 @@ function displayEmergencyReports(reports) {
             type: report.type || 'Onbekend',
             playerName: report.playerName || 'Onbekend',
             location: report.location || 'Onbekende locatie',
-            coordinates: report.coordinates || { x: 4.8952, y: 52.3702 },
+            coordinates: report.coordinates || { x: 0, y: 0 }, // Standaard naar 0,0 als niet aanwezig
             timestamp: report.timestamp || Date.now(),
             status: 'new',
             description: report.description || '',
             headshot: report.headshot || `https://www.roblox.com/headshot-thumbnail/image?userId=${report.userId}&width=150&height=150&format=png`
         };
 
-        calls.push(newCall);
+        calls.push(call); // Voeg de call toe aan de globale calls array
 
         // 🔴 Voeg marker toe
-        
-const icon = L.divIcon({
-    className: '',
-    html: `
-        <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-            <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${call.userId}&width=100&height=100&format=png"
-                 onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
-                 style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
-            <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
-        </div>
-    `,
-    iconSize: [32, 42],
-    iconAnchor: [16, 42]
-});
+        if (call.coordinates && typeof call.coordinates.x === 'number' && typeof call.coordinates.y === 'number') {
+            const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
 
+            const icon = L.divIcon({
+                className: '',
+                html: `
+                    <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${call.userId}&width=100&height=100&format=png"
+                             onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                             style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                        <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+                    </div>
+                `,
+                iconSize: [32, 42],
+                iconAnchor: [16, 42]
+            });
 
-        const marker = L.marker([call.coordinates.y, call.coordinates.x], { icon }).addTo(mainMap).addTo(dashboardMap);
+            const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
 
+            marker.bindPopup(`
+                <b>${call.type}</b><br>
+                Locatie: ${call.location}<br>
+                Speler: ${call.playerName}<br>
+                Beschrijving: ${call.description}
+            `);
 
-        marker.bindPopup(`
-            <b>${call.type}</b><br>
-            Locatie: ${call.location}<br>
-            Speler: ${call.playerName}<br>
-            Beschrijving: ${call.description}
-        `);
-
-        emergencyMarkers[call.id] = marker;
+            emergencyMarkers[call.id] = marker;
+        } else {
+            console.warn(`⚠️ Melding ${call.id} heeft ongeldige coördinaten:`, call.coordinates);
+        }
     });
 
     updateCalls();
 
-                // Calculate average response time (simulated)
-            if (calls.length > 0) {
-                const avgTime = Math.floor(Math.random() * 5) + 1;
-                document.getElementById('avgResponseTime').textContent = `${avgTime}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
-            }
-        }
+    // Calculate average response time (simulated)
+    if (calls.length > 0) {
+        const avgTime = Math.floor(Math.random() * 5) + 1;
+        document.getElementById('avgResponseTime').textContent = `${avgTime}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
+    }
+}
 
 function zoomToCall(callId) {
     const call = calls.find(c => c.id === callId);
@@ -2670,14 +2672,21 @@ function zoomToCall(callId) {
         console.error("❌ Melding niet gevonden!");
         return;
     }
+    if (!mapUploaded) { // Controleer of de kaart is geüpload
+        console.log("Kaart is nog niet geüpload, kan niet zoomen naar melding.");
+        return;
+    }
 
-    mainMap.setView([call.coordinates.y, call.coordinates.x], 17); // Zoom in op locatie
+    const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+
+    mainMap.setView([y, x], 17); // Zoom in op locatie
     emergencyMarkers[call.id].openPopup(); // Open popup op de marker
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    fetchEmergencyReports();
-    setInterval(fetchEmergencyReports, 30000);
+    // Verwijder de directe aanroep van fetchEmergencyReports hier
+    // fetchEmergencyReports();
+    // setInterval(fetchEmergencyReports, 30000); // Deze kan blijven, maar zal pas werken als mapUploaded true is
 
     // Selecteer de 'Meer info' knoppen
     const meerInfoButtons = document.querySelectorAll('meerinfo');
@@ -2764,8 +2773,9 @@ function meerInfo(callId) {
         : 'Locatie: -';
 
     // 🔍 Zoom naar locatie op de kaart (indien beschikbaar)
-    if (call.coordinates) {
-        mainMap.setView([call.coordinates.y, call.coordinates.x], 16);
+    if (call.coordinates && mapUploaded) { // Controleer of kaart is geüpload
+        const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+        mainMap.setView([y, x], 16);
         if (emergencyMarkers[call.id]) {
             emergencyMarkers[call.id].openPopup();
         }
@@ -2814,7 +2824,7 @@ function meerInfo(callId) {
         // Initialize
         showView('dashboardView');
 
-        fetchEmergencyReports(); // Laad meldingen van de API
+        // fetchEmergencyReports(); // Verwijderd, wordt nu aangeroepen na kaart upload
         setInterval(fetchEmergencyReports, 5000); // Vernieuw elke 5 seconden
 
         
@@ -2849,32 +2859,71 @@ function meerInfo(callId) {
 
     
 // 🛰️ Ophalen en tonen van luchtalarm-palen via echte Roblox API data
+function fetchLuchtalarmPalen() {
+  if (!mapUploaded) { // Controleer of de kaart is geüpload
+    console.log("Kaart is nog niet geüpload, luchtalarm palen worden niet geladen.");
+    return;
+  }
+
+  fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
+      return res.json();
+    })
+    .then(palen => {
+      console.log("✅ Ontvangen paaldata:", palen);
+
+      // Verwijder oude luchtalarm markers (indien bijgehouden in een aparte array/object)
+      // Voor dit voorbeeld, als je geen specifieke array hebt, moet je een manier vinden om ze te identificeren en te verwijderen.
+      // Bijvoorbeeld, als je ze allemaal in 'markers' array hebt en ze een specifieke eigenschap hebben.
+      // Voor nu, gaan we ervan uit dat ze opnieuw worden getekend en de oude worden overschreven/verwijderd door de algemene clearMarkers() als die bestaat.
+      // Als je geen clearMarkers() hebt die alle markers verwijdert, moet je hier een specifieke loop toevoegen.
+
+      if (typeof palen === 'object' && palen !== null) {
+        const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
+        palenArray.forEach(paal => {
+          console.log("🧭 Verwerk paal:", paal);
+          addLuchtalarmPaal(paal);
+        });
+      } else {
+        console.warn("⚠️ Geen object met palen ontvangen:", palen);
+      }
+    })
+    .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
+}
+
 function addLuchtalarmPaal(paal) {
-    if (!paal || typeof paal !== 'object') {
-        console.warn("❌ Ongeldige paaldata:", paal);
-        return;
-    }
+  if (!mapUploaded) { // Controleer of de kaart is geüpload
+    console.warn("Kaart is nog niet geüpload, kan geen luchtalarm paal toevoegen.");
+    return;
+  }
+  if (!paal || typeof paal !== 'object') {
+    console.warn("❌ Ongeldige paaldata:", paal);
+    return;
+  }
 
-    const { id, x, y } = paal;
+  const { id, x, y } = paal;
 
-    if (typeof x !== 'number' || typeof y !== 'number') {
-        console.warn("❌ Ongeldige locatie voor paal:", paal);
-        return;
-    }
+  if (typeof x !== 'number' || typeof y !== 'number') {
+    console.warn("❌ Ongeldige locatie voor paal:", paal);
+    return;
+  }
 
-    console.log("📍 Voeg marker toe voor:", paal);
+  console.log("📍 Voeg marker toe voor:", paal);
 
-    // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
-    const [leafletY, leafletX] = robloxToLeafletCoords(x, y); // Gebruik robloxToLeafletCoords
+  // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
+  const [leafletY, leafletX] = robloxToLeafletCoords(x, y); // Gebruik robloxToLeafletCoords
 
-    // Voeg marker toe op de juiste locatie
-    const marker = L.marker([leafletY, leafletX]).addTo(mainMap);
-    marker.bindPopup(`
-        <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
-        <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
-        <button onclick="triggerLuchtalarm('stop', '${id}')">Stop</button>
-        <button onclick="triggerLuchtalarm('test', '${id}')">Test</button>
-    `);
+  // Voeg marker toe op de juiste locatie
+  const marker = L.marker([leafletY, leafletX]).addTo(mainMap);
+
+  // Voeg popup met knoppen toe
+  marker.bindPopup(`
+    <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
+    <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
+    <button onclick="triggerLuchtalarm('stop', '${id}')">Stop</button>
+    <button onclick="triggerLuchtalarm('test', '${id}')">Test</button>
+  `);
 }
 
 function triggerLuchtalarm(actie, id) {
@@ -2894,101 +2943,107 @@ function triggerLuchtalarm(actie, id) {
 }
 
 // 🚀 Ophalen van paaldata uit backend
-fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
-  .then(res => {
-    if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
-    return res.json();
-  })
-  .then(palen => {
-    console.log("✅ Ontvangen paaldata:", palen);
+// fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`) // Verwijderd, wordt nu aangeroepen na kaart upload
+//   .then(res => {
+//     if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
+//     return res.json();
+//   })
+//   .then(palen => {
+//     console.log("✅ Ontvangen paaldata:", palen);
 
-    if (typeof palen === 'object' && palen !== null) {
-      const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
-      palenArray.forEach(paal => {
-        console.log("🧭 Verwerk paal:", paal);
-        addLuchtalarmPaal(paal);
-      });
-    } else {
-      console.warn("⚠️ Geen object met palen ontvangen:", palen);
-    }
-  })
-  .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
+//     if (typeof palen === 'object' && palen !== null) {
+//       const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
+//       palenArray.forEach(paal => {
+//         console.log("🧭 Verwerk paal:", paal);
+//         addLuchtalarmPaal(paal);
+//       });
+//     } else {
+//       console.warn("⚠️ Geen object met palen ontvangen:", palen);
+//     }
+//   })
+//   .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
 
-fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
-  .then(res => res.json())
-  .then(posten => {
-    if (!posten || typeof posten !== 'object') {
-      console.warn("❌ Ongeldige data ontvangen voor posten:", posten);
-      return;
-    }
+function fetchPosten() {
+  if (!mapUploaded) { // Controleer of de kaart is geüpload
+    console.log("Kaart is nog niet geüpload, posten worden niet geladen.");
+    return;
+  }
 
-    // Firebase stuurt vaak een object ipv array — converteer het
-    const postArray = Array.isArray(posten)
-      ? posten
-      : Object.entries(posten).map(([id, post]) => ({ id, ...post }));
-
-    postArray.forEach(post => {
-      const { name, x, y, statusen = [] } = post;
-
-      if (typeof x !== 'number' || typeof y !== 'number') {
-        console.warn("❌ Ongeldige locatie voor post:", post);
+  fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
+    .then(res => res.json())
+    .then(posten => {
+      if (!posten || typeof posten !== 'object') {
+        console.warn("❌ Ongeldige data ontvangen voor posten:", posten);
         return;
       }
 
-      const icon = L.divIcon({
-        className: '',
-        html: `
-          <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-            <img src="https://cdn-icons-png.flaticon.com/512/1057/1057228.png"
-                 style="width: 28px; height: 28px;" />
-            <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
-          </div>
-        `,
-        iconSize: [32, 42],
-        iconAnchor: [16, 42]
-      });
+      const postArray = Array.isArray(posten)
+        ? posten
+        : Object.entries(posten).map(([id, post]) => ({ id, ...post }));
 
-      const allesBezet = statusen.length > 0 && statusen.every(s => s.state);
-      const alarmKnopId = `alarm-${name}`;
+      postArray.forEach(post => {
+        const { name, x, y, statusen = [] } = post;
 
-      const popup = `
-        <div style="min-width:150px">
-          <strong>${name}</strong><br>
-          ${statusen.map(s => `
-            <div>
-              ${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>
+        if (typeof x !== 'number' || typeof y !== 'number') {
+          console.warn("❌ Ongeldige locatie voor post:", post);
+          return;
+        }
+
+        // Converteer Roblox coördinaten naar Leaflet coördinaten
+        const [leafletY, leafletX] = robloxToLeafletCoords(x, y); // Gebruik robloxToLeafletCoords
+
+        const icon = L.divIcon({
+          className: '',
+          html: `
+            <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+              <img src="https://cdn-icons-png.flaticon.com/512/1057/1057228.png"
+                   style="width: 28px; height: 28px;" />
+              <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
             </div>
-          `).join("")}
-        </div>
-      `;
+          `,
+          iconSize: [32, 42],
+          iconAnchor: [16, 42]
+        });
 
-      const marker = L.marker([x, y], { icon })
-        .addTo(mainMap)
-        .bindPopup(popup);
+        const popup = `
+          <div style="min-width:150px">
+            <strong>${name}</strong><br>
+            ${statusen.map(s => `
+              <div>
+                ${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>
+              </div>
+            `).join("")}
+          </div>
+        `;
 
-      marker.on('popupopen', () => {
-        setTimeout(() => {
-          const btn = document.getElementById(alarmKnopId);
-          if (btn) {
-            btn.addEventListener('click', () => {
-              fetch(`${API_URL}/api/apiposten/alarm`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ postId: name, trigger: true })
-              })
-              .then(res => res.json())
-              .then(data => console.log('🚨 Alarm getriggerd:', data))
-              .catch(err => console.error('❌ Fout bij alarm:', err));
-            });
-          }
-        }, 200);
+        const marker = L.marker([leafletY, leafletX], { icon }) // Gebruik de omgezette coördinaten
+          .addTo(mainMap)
+          .bindPopup(popup);
+
+        marker.on('popupopen', () => {
+          setTimeout(() => {
+            const btn = document.getElementById(`alarm-${name}`);
+            if (btn) {
+              btn.addEventListener('click', () => {
+                fetch(`${API_URL}/api/apiposten/alarm`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ postId: name, trigger: true })
+                })
+                .then(res => res.json())
+                .then(data => console.log('🚨 Alarm getriggerd:', data))
+                .catch(err => console.error('❌ Fout bij alarm:', err));
+              });
+            }
+          }, 200);
+        });
       });
-    });
-  })
-  .catch(err => console.error("❌ Fout bij ophalen posten:", err));
-
+    })
+    .catch(err => console.error("❌ Fout bij ophalen posten:", err));
+}
       // Voorbeeld veilige verwijdering van markers
-    const markers = [];
+    const markers = []; // Deze array wordt niet consistent gebruikt voor alle markers.
+                        // Overweeg een centraal marker management systeem.
     function clearMarkers() {
       markers.forEach(marker => {
         if (marker && mainMap.hasLayer(marker)) {
