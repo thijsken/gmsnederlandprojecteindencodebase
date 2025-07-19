@@ -2275,6 +2275,8 @@ function robloxToLeafletCoords(robloxX, robloxY) {
     .then(data => {
       console.log(`✅ Melding ${callId} succesvol verwijderd uit Firebase`, data);
       showNotification(`Melding ${callId} afgehandeld en verwijderd`, 'success');
+      // sluit popup
+      document.getElementById('callDetailsModal').classList.add('hidden');
     })
     .catch(err => {
       console.error(`❌ Fout bij verwijderen melding ${callId}:`, err);
