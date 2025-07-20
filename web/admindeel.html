@@ -329,18 +329,50 @@
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const discordId = document.getElementById('discordId').value.trim();
+
+      const loginError = document.getElementById('loginError');
+      loginError.classList.add('hidden');
+      loginError.textContent = '';
+
+      if (!email || !password || !discordId) {
+        loginError.textContent = 'Vul alle velden in.';
+        loginError.classList.remove('hidden');
+        return;
+      }
+
       try {
+        // 1. Inloggen met email + wachtwoord
         await auth.signInWithEmailAndPassword(email, password);
+
+        // 2. Controleren of Discord ID in admins staat
+        const adminRef = ref(database, `admins/${discordId}`);
+        const snapshot = await get(adminRef);
+
+        if (!snapshot.exists()) {
+          // Niet geautoriseerd, uitloggen en foutmelding tonen
+          await auth.signOut();
+          loginError.textContent = 'Discord ID niet geautoriseerd als admin.';
+          loginError.classList.remove('hidden');
+          return;
+        }
+
+        // 3. Succesvolle login, dashboard tonen
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
+
+        // Jouw dashboard functies oproepen
         loadServers();
         telActieveServers();
         telonderhoudactive();
         teluitgeschakeldServers();
+
       } catch (err) {
-        document.getElementById('loginError').classList.remove('hidden');
+        loginError.textContent = 'Fout bij inloggen: ' + err.message;
+        loginError.classList.remove('hidden');
       }
     });
 
