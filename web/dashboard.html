@@ -888,7 +888,6 @@ auth.onAuthStateChanged(user => {
           localStorage.removeItem("serverId");
           window.location.href = 'index.html';
         } else {
-          console.log("✅ Server gevalideerd:", serverId);
           // Laad dashboard zoals normaal
         }
       })
@@ -900,12 +899,10 @@ auth.onAuthStateChanged(user => {
   }
 });
   // end
-        console.log('🌐 Start fetchEmergencyReports()');
         // API Configuration
         // https://gmsnederland-production.up.railway.app
         const API_URL = 'https://gmsnederlandprojecteindencodebase.vercel.app';
         const serverId = localStorage.getItem("serverId");
-        console.log("✅ Gekozen serverId:", serverId);
         const API_BASE_URL = 'https://gmsnederlandprojecteindencodebase.vercel.app'; // Wijzig dit naar je backend URL
         const API_KEY = 'UVg7JOX9vcOHRAQjm1KoxCB6'; // vervang dit met de juiste sleutel
         let currentCallId = null;
@@ -2360,7 +2357,7 @@ function fetchEmergencyReports() {
   }
 
   const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
-  console.log("🌐 Ophalen meldingen van:", url);
+  // console.log("🌐 Ophalen meldingen van:", url);
 
   fetch(url)
     .then(res => {
