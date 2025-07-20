@@ -255,6 +255,40 @@
         &copy; 2025 GMS Nederland. Alle rechten voorbehouden.
       </p>
     </div>
+    <!-- Wachtwoord reset modal -->
+    <div id="resetPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg w-full max-w-md p-6 relative shadow-lg">
+        <button
+          id="closeModalBtn"
+          class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+          aria-label="Sluit modal"
+        >
+          <i class="fas fa-times fa-lg"></i>
+        </button>
+        <h3 class="text-xl font-semibold mb-4">Wachtwoord vergeten?</h3>
+        <p class="mb-4 text-gray-700">Vul hieronder je e-mailadres in om een resetlink te ontvangen.</p>
+        <form id="resetPasswordForm" class="space-y-4">
+          <input
+            type="email"
+            id="resetEmail"
+            name="resetEmail"
+            placeholder="E-mailadres"
+            required
+            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div class="flex justify-end space-x-2">
+            <button type="button" id="cancelResetBtn" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Annuleren</button>
+            <button
+              type="submit"
+              class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              Verstuur
+            </button>
+          </div>
+        </form>
+        <p id="resetMsg" class="mt-4 text-green-600 font-medium hidden"></p>
+      </div>
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -309,24 +343,54 @@
     }
 
     // Wachtwoord vergeten
-    document.querySelector("a.forgot-password").addEventListener("click", function (e) {
-      e.preventDefault();
-      const email = document.getElementById("username").value.trim();
-      if (!email) {
-        alert("Voer eerst je e-mailadres in om een resetlink te ontvangen.");
-        return;
-      }
+    const modal = document.getElementById("resetPasswordModal");
+    const forgotPasswordLink = document.querySelector("a.forgot-password");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const cancelResetBtn = document.getElementById("cancelResetBtn");
+    const resetPasswordForm = document.getElementById("resetPasswordForm");
+    const resetMsg = document.getElementById("resetMsg");
 
-      auth
-        .sendPasswordResetEmail(email)
-        .then(() => {
-          alert(
-            "Er is een e-mail verstuurd met instructies om je wachtwoord te resetten."
-          );
-        })
-        .catch((error) => {
-          alert("Fout bij verzenden resetmail: " + error.message);
-        });
+    forgotPasswordLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  resetMsg.classList.add("hidden");
+  resetMsg.classList.remove("text-red-600");
+  resetMsg.textContent = "";
+  resetPasswordForm.reset();
+  modal.classList.remove("hidden");
+  document.getElementById("resetEmail").focus();
+});
+
+    closeModalBtn.addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+
+    cancelResetBtn.addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+
+    resetPasswordForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("resetEmail").value.trim();
+      if (!email) return;
+
+      const submitBtn = resetPasswordForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Versturen...";
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        resetMsg.textContent = "Er is een e-mail verstuurd met instructies om je wachtwoord te resetten.";
+        resetMsg.classList.remove("hidden");
+        resetMsg.classList.remove("text-red-600");
+        resetPasswordForm.reset();
+      } catch (error) {
+        resetMsg.textContent = `Fout bij verzenden resetmail: ${error.message}`;
+        resetMsg.classList.remove("hidden");
+        resetMsg.classList.add("text-red-600");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Verstuur";
+      }
     });
 
     // Toggle wachtwoord tonen/verbergen
