@@ -108,13 +108,8 @@
       if (user) {
         // Gebruiker is ingelogd
         console.log("Ingelogd als:", user.email);
-
-        // Pas hier eventueel admin-checks toe als je dat wilt,
-        // bijvoorbeeld controleer of de user admin is in jouw database.
-        
         // Start met het ophalen van rapporten
         fetchReports();
-
         // Logout knop functionaliteit (als je dat wilt)
         document.getElementById("logoutBtn").addEventListener("click", () => {
           auth.signOut().then(() => {
@@ -134,7 +129,7 @@
     let allReports = {};
     let filteredReports = [];
 
-        // Format timestamp naar leesbare datum
+    // Format timestamp naar leesbare datum
     function formatTimestamp(ts) {
       if (!ts) return "-";
       const d = new Date(ts);
@@ -267,14 +262,25 @@
       );
       if (!bevestiging) return;
 
-      const nieuweStatus = type === "blokkeren" ? "Geblokkeerd" : "Afgehandeld";
+      if (type === "blokkeren" || type === "afgehandeld") {
+        db.ref(`leakerreports/${id}`).remove()
+          .then(() => {
+            console.log(`Report ${id} verwijderd omdat status ${type} is.`);
+            logNaarDiscord(melding, type);
+          })
+          .catch((error) => {
+            alert("Fout bij verwijderen van rapport: " + error.message);
+          });
+      } else {
+        const nieuweStatus = type === "blokkeren" ? "Geblokkeerd" : "Afgehandeld";
+        db.ref(`leakerreports/${id}`).update({
+          status: nieuweStatus,
+          behandeldDoor: "Admin",
+        }).then(() => {
+          logNaarDiscord(melding, type);
+        });
+      }
 
-      db.ref(`leakerreports/${id}`).update({
-        status: nieuweStatus,
-        behandeldDoor: "Admin",
-      });
-
-      logNaarDiscord(melding, type);
       closePopup();
     }
 

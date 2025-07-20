@@ -289,35 +289,35 @@
 
     // voor active gebruikers op dat moment.
     auth.onAuthStateChanged(user => {
-  if (user) {
-    const userStatusDatabaseRef = db.ref('/status/' + user.uid);
+    if (user) {
+      const userStatusDatabaseRef = db.ref('/status/' + user.uid);
 
-    const isOfflineForDatabase = {
-      state: 'offline',
-      last_changed: firebase.database.ServerValue.TIMESTAMP,
-    };
+      const isOfflineForDatabase = {
+        state: 'offline',
+        last_changed: firebase.database.ServerValue.TIMESTAMP,
+      };
 
-    const isOnlineForDatabase = {
-      state: 'online',
-      last_changed: firebase.database.ServerValue.TIMESTAMP,
-    };
+      const isOnlineForDatabase = {
+        state: 'online',
+        last_changed: firebase.database.ServerValue.TIMESTAMP,
+      };
 
-    db.ref('.info/connected').on('value', snapshot => {
-      if (snapshot.val() === false) return;
+      db.ref('.info/connected').on('value', snapshot => {
+        if (snapshot.val() === false) return;
 
-      userStatusDatabaseRef
-        .onDisconnect()
-        .set(isOfflineForDatabase)
-        .then(() => {
-          userStatusDatabaseRef.set(isOnlineForDatabase);
-        });
-    });
+        userStatusDatabaseRef
+          .onDisconnect()
+          .set(isOfflineForDatabase)
+          .then(() => {
+            userStatusDatabaseRef.set(isOnlineForDatabase);
+          });
+      });
 
-    telActieveGebruikers(); // start de teller zodra ingelogd
-  } else {
-    document.getElementById('aantalActivegebruikers').textContent = 0;
-  }
-});
+      telActieveGebruikers(); // start de teller zodra ingelogd
+    } else {
+      document.getElementById('aantalActivegebruikers').textContent = 0;
+    }
+  });
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -417,22 +417,22 @@
     });
 
     function getInitials(name) {
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase();
-}
+      return name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase();
+    }
 
     function createBadge(text, color) {
-  const colorClasses = {
-    pro: 'bg-blue-100 text-blue-700',
-    basic: 'bg-yellow-100 text-yellow-800',
-    enterprise: 'bg-purple-100 text-purple-700',
-    custom: 'bg-gray-100 text-gray-700'
-  };
-  return `<span class="text-xs px-2 py-1 rounded-full ${colorClasses[text] || 'bg-gray-100 text-gray-700'}">${text.charAt(0).toUpperCase() + text.slice(1)}</span>`;
-}
+      const colorClasses = {
+        pro: 'bg-blue-100 text-blue-700',
+        basic: 'bg-yellow-100 text-yellow-800',
+        enterprise: 'bg-purple-100 text-purple-700',
+        custom: 'bg-gray-100 text-gray-700'
+      };
+      return `<span class="text-xs px-2 py-1 rounded-full ${colorClasses[text] || 'bg-gray-100 text-gray-700'}">${text.charAt(0).toUpperCase() + text.slice(1)}</span>`;
+    }
 
     function createStatusBadge(status) {
         const statuses = {
@@ -445,34 +445,34 @@
 }
 
     function loadServers() {
-const serverList = document.getElementById('serverList');
-serverList.innerHTML = '';
-db.ref('servers').on('value', snapshot => {
-    serverList.innerHTML = '';
-    snapshot.forEach(child => {
-        const data = child.val();
-        const initials = getInitials(data.gebruiker || '');
-        const row = document.createElement('tr');
+      const serverList = document.getElementById('serverList');
+      serverList.innerHTML = '';
+      db.ref('servers').on('value', snapshot => {
+          serverList.innerHTML = '';
+          snapshot.forEach(child => {
+              const data = child.val();
+              const initials = getInitials(data.gebruiker || '');
+              const row = document.createElement('tr');
 
-        row.innerHTML = `
-            <td class="px-4 py-2 border">${data.servernaam}</td>
-            <td class="px-4 py-2 border">
-                <div class="flex items-center space-x-2">
-                    <div class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">${initials}</div>
-                    <span class="text-sm">${data.gebruiker}</span>
-                </div>
-            </td>
-            <td class="px-4 py-2 border">${data.pakket}</td>
-            <td class="px-4 py-2 border whitespace-nowrap">${data.datum}</td>
-            <td class="px-4 py-2 border">${createStatusBadge(data.status || 'actief')}
-            <td class="px-4 py-2 border">
-              <button onclick="editServer('${child.key}')" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteServer('${child.key}')" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
-            </td>
-        `;
-        serverList.appendChild(row);
-    });
-});
+              row.innerHTML = `
+                  <td class="px-4 py-2 border">${data.servernaam}</td>
+                  <td class="px-4 py-2 border">
+                      <div class="flex items-center space-x-2">
+                          <div class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">${initials}</div>
+                          <span class="text-sm">${data.gebruiker}</span>
+                      </div>
+                  </td>
+                  <td class="px-4 py-2 border">${data.pakket}</td>
+                  <td class="px-4 py-2 border whitespace-nowrap">${data.datum}</td>
+                  <td class="px-4 py-2 border">${createStatusBadge(data.status || 'actief')}
+                  <td class="px-4 py-2 border">
+                    <button onclick="editServer('${child.key}')" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteServer('${child.key}')" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                  </td>
+              `;
+              serverList.appendChild(row);
+          });
+      });
     }
     
     function telActieveServers() {
@@ -502,10 +502,10 @@ db.ref('servers').on('value', snapshot => {
     }
 
     function telActieveGebruikers() {
-    db.ref('/status').orderByChild('state').equalTo('online').on('value', snapshot => {
-        const onlineCount = snapshot.numChildren();
-        document.getElementById('aantalActivegebruikers').textContent = onlineCount;
-    });
+      db.ref('/status').orderByChild('state').equalTo('online').on('value', snapshot => {
+          const onlineCount = snapshot.numChildren();
+          document.getElementById('aantalActivegebruikers').textContent = onlineCount;
+      });
     }
 
     function telonderhoudactive() {
@@ -539,28 +539,28 @@ db.ref('servers').on('value', snapshot => {
   });
 }
 
-function closeEditModal() {
-  document.getElementById('editServerModal').classList.add('hidden');
-}
+    function closeEditModal() {
+      document.getElementById('editServerModal').classList.add('hidden');
+    }
 
-document.getElementById('editServerForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const id = document.getElementById('editServerId').value;
-  const updates = {
-    servernaam: document.getElementById('editServernaam').value,
-    gebruiker: document.getElementById('editgebruikersnaam').value,
-    pakket: document.getElementById('editPakket').value,
-    status: document.getElementById('editStatus').value,
-    ownerdiscordid: document.getElementById('editDiscordid').value
-  };
-  db.ref('servers/' + id).update(updates).then(() => {
-    closeEditModal();
-    loadServers();
-    telActieveServers();
-    telonderhoudactive();
-    teluitgeschakeldServers();
-  });
-});
-  </script>
+    document.getElementById('editServerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const id = document.getElementById('editServerId').value;
+      const updates = {
+        servernaam: document.getElementById('editServernaam').value,
+        gebruiker: document.getElementById('editgebruikersnaam').value,
+        pakket: document.getElementById('editPakket').value,
+        status: document.getElementById('editStatus').value,
+        ownerdiscordid: document.getElementById('editDiscordid').value
+      };
+      db.ref('servers/' + id).update(updates).then(() => {
+        closeEditModal();
+        loadServers();
+        telActieveServers();
+        telonderhoudactive();
+        teluitgeschakeldServers();
+      });
+    });
+</script>
 </body>
 </html>
