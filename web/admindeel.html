@@ -279,10 +279,10 @@
 
   <script>
 
-    const SECRET_KEY = '12345678901234567890123456789012';
+  const SECRET_KEY = "12345678901234567890123456789012";
 
 // 🔐 Email decryptie functie
-function decryptEmail(cipherText) {
+    function decryptEmail(cipherText) {
   try {
     const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
     return bytes.toString(CryptoJS.enc.Utf8);
@@ -290,6 +290,7 @@ function decryptEmail(cipherText) {
     return null;
   }
 }
+    
     const firebaseConfig = {
       apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
       authDomain: "gmsnederland.firebaseapp.com",
