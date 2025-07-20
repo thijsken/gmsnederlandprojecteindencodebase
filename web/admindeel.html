@@ -18,19 +18,66 @@
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <div id="loginScreen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
-    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
-      <h1 class="text-3xl font-bold text-center">GMS Nederland</h1>
-      <form id="loginForm" class="space-y-4">
-        <input id="email" type="email" placeholder="E-mailadres" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-        <input id="password" type="password" placeholder="Wachtwoord" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-        <input id="discordId" type="text" placeholder="Voer hier je discord id in." required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-        <button type="submit" class="w-full btn-primary py-2 px-4 text-white font-medium rounded-lg">Inloggen</button>
-      </form>
-      <div id="loginError" class="text-red-500 text-center hidden">Fout bij inloggen</div>
-    </div>
-  </div>
+<!-- Login Form -->
+<div id="loginScreen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
+    <h1 class="text-3xl font-bold text-center text-gray-800">GMS Nederland</h1>
 
+    <form id="loginForm" class="space-y-4">
+      <!-- E-mail -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">E-mailadres</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
+          placeholder="Voer je e-mailadres in"
+        />
+      </div>
+
+      <!-- Wachtwoord -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Wachtwoord</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
+          placeholder="Voer je wachtwoord in"
+        />
+      </div>
+
+      <!-- Discord ID -->
+      <div>
+        <label for="discordId" class="block text-sm font-medium text-gray-700">Discord ID</label>
+        <input
+          id="discordId"
+          name="discordId"
+          type="text"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
+          placeholder="Bijv. 123456789012345678"
+        />
+      </div>
+
+      <!-- Inloggen knop -->
+      <div>
+        <button
+          type="submit"
+          class="w-full btn-primary py-2 px-4 text-white font-medium rounded-lg"
+        >
+          Inloggen
+        </button>
+      </div>
+    </form>
+
+    <!-- Foutmelding -->
+    <div id="loginError" class="text-red-500 text-center hidden mt-2">Fout bij inloggen</div>
+  </div>
+</div>
 
   <!-- Main Dashboard -->
   <div id="dashboard" class="min-h-screen hidden">
@@ -258,20 +305,49 @@
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const discordId = document.getElementById('discordId').value.trim();
+
       try {
-        await auth.signInWithEmailAndPassword(email, password);
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        loadServers();
-        telActieveServers();
-        telonderhoudactive();
-        teluitgeschakeldServers();
+        // Eerst Firebase-authenticatie
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+
+        // Controleer of Discord ID key bestaat én of het overeenkomt met het interne veld
+        const adminRef = db.ref('/admins/' + discordId);
+        adminRef.once('value', snapshot => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+
+            if (data.discordId === discordId) {
+              // ✅ Toegang toegestaan
+              document.getElementById('loginScreen').classList.add('hidden');
+              document.getElementById('dashboard').classList.remove('hidden');
+              loadServers();
+              telActieveServers();
+              telonderhoudactive();
+              teluitgeschakeldServers();
+            } else {
+              // ❌ Mismatch tussen key en interne discordId
+              auth.signOut();
+              showError('Ongeldige toegang: Discord ID komt niet overeen met admin-gegevens.');
+            }
+          } else {
+            // ❌ Geen admin gevonden
+            auth.signOut();
+            showError('Geen toegang: Discord ID is geen geregistreerde admin.');
+          }
+        });
       } catch (err) {
-        document.getElementById('loginError').classList.remove('hidden');
+        showError('Inloggen mislukt: ' + err.message);
       }
     });
+
+    function showError(message) {
+      const errorEl = document.getElementById('loginError');
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    }
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await auth.signOut();
