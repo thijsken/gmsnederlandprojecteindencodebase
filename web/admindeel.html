@@ -278,6 +278,18 @@
 </main>
 
   <script>
+
+    const SECRET_KEY = '12345678901234567890123456789012';
+
+// 🔐 Email decryptie functie
+function decryptEmail(cipherText) {
+  try {
+    const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  } catch (e) {
+    return null;
+  }
+}
     const firebaseConfig = {
       apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
       authDomain: "gmsnederland.firebaseapp.com",
@@ -321,47 +333,44 @@
   });
 
   // Zorg dat dit exact overeenkomt met wat de bot gebruikt
-  const SECRET_KEY = "12345678901234567890123456789012";
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value.trim();
+      const discordId = document.getElementById('discordId').value.trim();
 
-  function encryptEmail(email) {
-    const lowercaseEmail = email.toLowerCase().trim();
-    return CryptoJS.AES.encrypt(lowercaseEmail, SECRET_KEY).toString();
-  }
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const discordId = document.getElementById('discordId').value.trim();
+        const adminRef = db.ref('/admins/' + discordId);
+        const snapshot = await adminRef.once('value');
+        if (!snapshot.exists()) throw new Error('Geen admin gevonden voor deze Discord ID.');
 
-    try {
-      const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-      const user = userCredential.user;
+        const adminData = snapshot.val();
+        const decryptedEmail = decryptEmail(adminData.email);
 
-      const encryptedEmail = encryptEmail(email); // ⬅ versleuteld email
+        if (
+          adminData.discordId !== discordId ||
+          decryptedEmail?.trim().toLowerCase() !== email
+        ) {
+          await auth.signOut();
+          throw new Error('Toegang geweigerd: gegevens komen niet overeen met geregistreerde admin.');
+        }
 
-      const adminRef = firebase.database().ref('/admins/' + discordId);
-      const snapshot = await adminRef.once('value');
+        // ✅ Login geslaagd
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        loadServers();
+        telActieveServers();
+        telonderhoudactive();
+        teluitgeschakeldServers();
 
-      if (!snapshot.exists()) throw new Error('Geen admin gevonden voor deze Discord ID.');
-
-      const adminData = snapshot.val();
-
-      if (
-        adminData.discordId !== discordId ||
-        adminData.email !== encryptedEmail // ⬅ match controleren
-      ) {
-        await firebase.auth().signOut();
-        throw new Error('Toegang geweigerd: gegevens komen niet overeen met geregistreerde admin.');
+      } catch (err) {
+        showError(err.message || 'Fout bij inloggen');
       }
-
-      // ✅ Toegang verleend
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('dashboard').classList.remove('hidden');
-    } catch (err) {
-      showError(err.message || 'Fout bij inloggen');
-    }
-  });
+    });
 
     function showError(message) {
       const errorEl = document.getElementById('loginError');
