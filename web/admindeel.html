@@ -283,10 +283,6 @@
 </div>
 </div>
 </main>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
@@ -296,7 +292,6 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const database = getDatabase(app);
     const db = firebase.database();
 
     // voor active gebruikers op dat moment.
@@ -349,26 +344,21 @@
       }
 
       try {
-        // 1. Inloggen met email + wachtwoord
         await auth.signInWithEmailAndPassword(email, password);
 
-        // 2. Controleren of Discord ID in admins staat
-        const adminRef = ref(database, `admins/${discordId}`);
-        const snapshot = await get(adminRef);
+        const adminRef = db.ref(`admins/${discordId}`);
+        const snapshot = await adminRef.once('value');
 
         if (!snapshot.exists()) {
-          // Niet geautoriseerd, uitloggen en foutmelding tonen
           await auth.signOut();
           loginError.textContent = 'Discord ID niet geautoriseerd als admin.';
           loginError.classList.remove('hidden');
           return;
         }
 
-        // 3. Succesvolle login, dashboard tonen
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
 
-        // Jouw dashboard functies oproepen
         loadServers();
         telActieveServers();
         telonderhoudactive();
