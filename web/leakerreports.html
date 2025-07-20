@@ -107,8 +107,6 @@
     auth.onAuthStateChanged(user => {
       if (user) {
         // Gebruiker is ingelogd
-        console.log("Ingelogd als:", user.email);
-        // Start met het ophalen van rapporten
         fetchReports();
         // Logout knop functionaliteit (als je dat wilt)
         document.getElementById("logoutBtn").addEventListener("click", () => {
