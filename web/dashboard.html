@@ -1024,7 +1024,7 @@ const mainMap = L.map('map', {
         }
         // end meldingenupdates.
 
-                // Zorg ervoor dat de modal bovenop alles komt
+        // Zorg ervoor dat de modal bovenop alles komt
         let modal = document.getElementById("callDetailsModal");
         modal.style.zIndex = 9999; // Zet de z-index op 9999 of een andere hoge waarde
         document.getElementById('closeNewUnitModal').addEventListener('click', () => {
@@ -1065,7 +1065,6 @@ const mainMap = L.map('map', {
               showCIOTResults(dummyResults);
             });
 
-
         // liveopx management
           const linkedUnitsList = document.getElementById('linkedUnitsList');
           const availableUnitsList = document.getElementById('availableUnitsList');
@@ -1097,12 +1096,12 @@ const mainMap = L.map('map', {
     });
     notificationsCount.textContent = cards.length;
   }
-  window.addEventListener('load', () => {
+    window.addEventListener('load', () => {
     fetchMedelingen();
   });
-  setInterval(fetchMedelingen, 5 * 60 * 1000);    
-    // Functions
+    setInterval(fetchMedelingen, 5 * 60 * 1000);  
 
+    // Functions
     function copyCommunityId() {
     const communityId = localStorage.getItem('serverName'); // of welke key jij gebruikt voor CommunityID
     if (!communityId) {
