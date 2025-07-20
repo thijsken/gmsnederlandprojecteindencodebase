@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="favicon.ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <title>GMS Nederland - Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -23,47 +24,62 @@
   <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
     <h1 class="text-3xl font-bold text-center text-gray-800">GMS Nederland</h1>
 
-    <form id="loginForm" class="space-y-4">
-      <!-- E-mail -->
+    <form id="loginForm" class="space-y-5">
+      <!-- E-mailadres -->
       <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">E-mailadres</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
-          placeholder="Voer je e-mailadres in"
-        />
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mailadres</label>
+        <div class="relative">
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
+            placeholder="Bijv. admin@example.com"
+          />
+          <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
       </div>
 
       <!-- Wachtwoord -->
       <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Wachtwoord</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
-          placeholder="Voer je wachtwoord in"
-        />
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Wachtwoord</label>
+        <div class="relative">
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
+            placeholder="Voer je wachtwoord in"
+          />
+          <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <span
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
+            onclick="togglePasswordVisibility()"
+          >
+            <i id="eyeIcon" class="fas fa-eye"></i>
+          </span>
+        </div>
       </div>
 
       <!-- Discord ID -->
       <div>
-        <label for="discordId" class="block text-sm font-medium text-gray-700">Discord ID</label>
-        <input
-          id="discordId"
-          name="discordId"
-          type="text"
-          required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
-          placeholder="Bijv. 123456789012345678"
-        />
+        <label for="discordId" class="block text-sm font-medium text-gray-700 mb-1">Discord ID</label>
+        <div class="relative">
+          <input
+            id="discordId"
+            name="discordId"
+            type="text"
+            required
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
+            placeholder="Bijv. 123456789012345678"
+          />
+          <i class="fab fa-discord absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
       </div>
 
-      <!-- Inloggen knop -->
+      <!-- Login knop -->
       <div>
         <button
           type="submit"
@@ -310,36 +326,41 @@
       const discordId = document.getElementById('discordId').value.trim();
 
       try {
-        // Eerst Firebase-authenticatie
+        // Firebase authenticatie
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-        // Controleer of Discord ID key bestaat én of het overeenkomt met het interne veld
+        // Haal admin gegevens op uit DB
         const adminRef = db.ref('/admins/' + discordId);
-        adminRef.once('value', snapshot => {
-          if (snapshot.exists()) {
-            const data = snapshot.val();
+        const snapshot = await adminRef.once('value');
 
-            if (data.discordId === discordId) {
-              // ✅ Toegang toegestaan
-              document.getElementById('loginScreen').classList.add('hidden');
-              document.getElementById('dashboard').classList.remove('hidden');
-              loadServers();
-              telActieveServers();
-              telonderhoudactive();
-              teluitgeschakeldServers();
-            } else {
-              // ❌ Mismatch tussen key en interne discordId
-              auth.signOut();
-              showError('Ongeldige toegang: Discord ID komt niet overeen met admin-gegevens.');
-            }
-          } else {
-            // ❌ Geen admin gevonden
-            auth.signOut();
-            showError('Geen toegang: Discord ID is geen geregistreerde admin.');
-          }
-        });
+        if (!snapshot.exists()) {
+          throw new Error('Geen admin gevonden voor deze Discord ID.');
+        }
+
+        const adminData = snapshot.val();
+
+        // Controle: discordId key === veld & email match
+        if (
+          adminData.discordId !== discordId ||
+          adminData.email?.toLowerCase() !== email.toLowerCase()
+        ) {
+          await auth.signOut();
+          throw new Error('Toegang geweigerd: gegevens komen niet overeen met geregistreerde admin.');
+        }
+
+        // ✅ Alles klopt, toegang verlenen
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        loadServers();
+        telActieveServers();
+        telonderhoudactive();
+        teluitgeschakeldServers();
+
       } catch (err) {
-        showError('Inloggen mislukt: ' + err.message);
+        const errorEl = document.getElementById('loginError');
+        errorEl.textContent = err.message || 'Fout bij inloggen';
+        errorEl.classList.remove('hidden');
       }
     });
 
@@ -347,6 +368,21 @@
       const errorEl = document.getElementById('loginError');
       errorEl.textContent = message;
       errorEl.classList.remove('hidden');
+    }
+
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+      }
     }
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
