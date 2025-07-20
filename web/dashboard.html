@@ -14,6 +14,36 @@
 </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        #notificationsContainer {
+          position: relative;
+          display: inline-block;
+        }
+        #notificationsList {
+          display: none;
+          position: absolute;
+          top: 110%;
+          right: 0;
+          width: 300px;
+          max-height: 400px;
+          overflow-y: auto;
+          background: white;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 1000;
+        }
+        #notificationsList.visible {
+          display: block;
+        }
+        #notificationsList li {
+          padding: 10px;
+          border-bottom: 1px solid #eee;
+          font-size: 14px;
+          color: #333;
+        }
+        #notificationsList li:last-child {
+          border-bottom: none;
+        }
         #map { height: 100%; border-radius: 0.5rem; }
         .emergency-marker {
             background-color: #ef4444;
@@ -81,10 +111,13 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="relative">
-                        <button id="notificationsBtn" class="relative">
-                            <i class="fas fa-bell"></i>
-                            <span id="notificationCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
-                        </button>
+                          <button id="notificationsBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                            Updates GMSNederland <span id="notificationsCount" style="background:#ef4444; padding: 2px 6px; border-radius: 50%; font-weight: bold; margin-left: 6px; font-size: 12px;">0</span>
+                          </button>
+
+                          <ul id="notificationsList">
+                            <!-- Notificaties komen hier -->
+                          </ul>
                     </div>
                     <div class="flex items-center space-x-2">
                         <div class="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center">
@@ -922,6 +955,7 @@ const mainMap = L.map('map', {
 });
 
         // Markers and data
+        let notifications = [];
         let availableUnits = [];
         let linkedUnits = [];
         let emergencyMarkers = {};
@@ -959,6 +993,14 @@ const mainMap = L.map('map', {
         document.getElementById('copyApiUrl').addEventListener('click', copyApiUrl);
         document.getElementById('generateApiKey').addEventListener('click', generateApiKey);
         document.getElementById('testConnection').addEventListener('click', testConnection);
+
+        // meldingen updates. 
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        const notificationsList = document.getElementById('notificationsList');
+        const notificationsCount = document.getElementById('notificationsCount');
+        notificationsBtn.addEventListener('click', () => {
+        notificationsList.classList.toggle('visible');
+        });
 
                 // Zorg ervoor dat de modal bovenop alles komt
         let modal = document.getElementById("callDetailsModal");
@@ -1007,10 +1049,28 @@ const mainMap = L.map('map', {
           const availableUnitsList = document.getElementById('availableUnitsList');
           const noUnitsMsg = document.getElementById('noUnitsMsg');
           const loadingUnitsMsg = document.getElementById('loadingUnitsMsg');
-          const errorUnitsMsg = document.getElementById('errorUnitsMsg');    
-        // Functions
+          const errorUnitsMsg = document.getElementById('errorUnitsMsg');
+          
+  // systemen meldingen.
+  function addNotification(text) {
+    notifications.push(text);
+    // Maak een nieuw <li> element aan
+    const li = document.createElement('li');
+    li.textContent = text;
+    // Voeg toe aan de lijst
+    notificationsList.appendChild(li);
+    // Update teller
+    notificationsCount.textContent = notifications.length;
+    // Optioneel: scroll naar onder
+    notificationsList.scrollTop = notificationsList.scrollHeight;
+  }
+  // Voorbeeld: Simuleer updates binnenkomen
+  setTimeout(() => addNotification('🚨 Nieuwe melding: Brand in Amsterdam. 12:30'), 2000);
+  setTimeout(() => addNotification('📢 Update: Wegen in Rotterdam tijdelijk afgesloten. 13:15'), 5000);
+  setTimeout(() => addNotification('✅ GMSNederland heeft zojuist nieuwe units toegevoegd. 14:00'), 9000);      
+    // Functions
 
-function copyCommunityId() {
+    function copyCommunityId() {
     const communityId = localStorage.getItem('serverName'); // of welke key jij gebruikt voor CommunityID
     if (!communityId) {
         showNotification('Community ID veld niet gevonden.', 3000);
