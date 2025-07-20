@@ -10,6 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -319,50 +320,48 @@
     }
   });
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const discordId = document.getElementById('discordId').value.trim();
+  // Zorg dat dit exact overeenkomt met wat de bot gebruikt
+  const SECRET_KEY = "12345678901234567890123456789012";
 
-      try {
-        // Firebase authenticatie
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
+  function encryptEmail(email) {
+    const lowercaseEmail = email.toLowerCase().trim();
+    return CryptoJS.AES.encrypt(lowercaseEmail, SECRET_KEY).toString();
+  }
 
-        // Haal admin gegevens op uit DB
-        const adminRef = db.ref('/admins/' + discordId);
-        const snapshot = await adminRef.once('value');
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const discordId = document.getElementById('discordId').value.trim();
 
-        if (!snapshot.exists()) {
-          throw new Error('Geen admin gevonden voor deze Discord ID.');
-        }
+    try {
+      const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+      const user = userCredential.user;
 
-        const adminData = snapshot.val();
+      const encryptedEmail = encryptEmail(email); // ⬅ versleuteld email
 
-        // Controle: discordId key === veld & email match
-        if (
-          adminData.discordId !== discordId ||
-          adminData.email?.toLowerCase() !== email.toLowerCase()
-        ) {
-          await auth.signOut();
-          throw new Error('Toegang geweigerd: gegevens komen niet overeen met geregistreerde admin.');
-        }
+      const adminRef = firebase.database().ref('/admins/' + discordId);
+      const snapshot = await adminRef.once('value');
 
-        // ✅ Alles klopt, toegang verlenen
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        loadServers();
-        telActieveServers();
-        telonderhoudactive();
-        teluitgeschakeldServers();
+      if (!snapshot.exists()) throw new Error('Geen admin gevonden voor deze Discord ID.');
 
-      } catch (err) {
-        const errorEl = document.getElementById('loginError');
-        errorEl.textContent = err.message || 'Fout bij inloggen';
-        errorEl.classList.remove('hidden');
+      const adminData = snapshot.val();
+
+      if (
+        adminData.discordId !== discordId ||
+        adminData.email !== encryptedEmail // ⬅ match controleren
+      ) {
+        await firebase.auth().signOut();
+        throw new Error('Toegang geweigerd: gegevens komen niet overeen met geregistreerde admin.');
       }
-    });
+
+      // ✅ Toegang verleend
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+    } catch (err) {
+      showError(err.message || 'Fout bij inloggen');
+    }
+  });
 
     function showError(message) {
       const errorEl = document.getElementById('loginError');
