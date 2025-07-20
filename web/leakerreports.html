@@ -102,6 +102,31 @@
     firebase.initializeApp(firebaseConfig);
 
     const db = firebase.database();
+    const auth = firebase.auth();
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // Gebruiker is ingelogd
+        console.log("Ingelogd als:", user.email);
+
+        // Pas hier eventueel admin-checks toe als je dat wilt,
+        // bijvoorbeeld controleer of de user admin is in jouw database.
+        
+        // Start met het ophalen van rapporten
+        fetchReports();
+
+        // Logout knop functionaliteit (als je dat wilt)
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+          auth.signOut().then(() => {
+            window.location.href = "admindeel.html";
+          });
+        });
+
+      } else {
+        // Niet ingelogd: stuur naar loginpagina
+        window.location.href = "admindeel.html";
+      }
+    });
+    
     const reportsList = document.getElementById("reportsList");
     const searchInput = document.getElementById("searchHistory");
 
