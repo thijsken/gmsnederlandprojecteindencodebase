@@ -944,11 +944,12 @@ auth.onAuthStateChanged(user => {
         
         // Initialize maps
         const dashboardMap = L.map('dashboardMap', {
-    crs: L.CRS.Simple,
-    minZoom: -5,
-    maxZoom: 5,
-    zoomSnap: 0.1
-}).setView([0, 0], 0);
+          crs: L.CRS.Simple,
+          minZoom: -5,
+          maxZoom: 5,
+          zoomSnap: 0.1
+      }).setView([0, 0], 0);
+
 const mainMap = L.map('map', {
   crs: L.CRS.Simple,
   minZoom: -5,
@@ -2465,7 +2466,7 @@ function fetchEmergencyReports() {
       Object.values(emergencyMarkers).forEach(marker => {
         if (marker) {
           mainMap.removeLayer(marker);
-          dashboardMap.removeLayer(marker);
+          // dashboardMap.removeLayer(marker);
         }
       });
 
