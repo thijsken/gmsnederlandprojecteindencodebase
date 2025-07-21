@@ -3077,6 +3077,8 @@ function addLuchtalarmPaal(paal) {
   `);
 }
 
+const postMarkers = {};
+
 function triggerLuchtalarm(actie, id) {
   fetch(`${API_URL}/api/apiluchtalarm/apiluchtalarmacties/actie`, {
     method: 'POST',
