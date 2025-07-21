@@ -3116,7 +3116,7 @@ function fetchPosten() {
 
         // Converteer Roblox coördinaten naar Leaflet coördinaten
         const [y, x] = robloxToLeafletCoords(post.lng, post.lat); // zelfde volgorde als bij units en meldingen
-        console.log("Post coords (Roblox):", post.lat, post.lng);
+        console.log("Post coords (Roblox):", post.lng, post.lat);
 
         const icon = L.divIcon({
           className: '',
