@@ -1314,12 +1314,65 @@ function closeP2000Modal() {
 }
 
 function laadPostenVoorP2000() {
+  console.log("📥 Functie laadPostenVoorP2000() gestart");
+
   const select = document.getElementById('p2000PostSelect');
   if (!select) {
     console.error("❌ Selectelement #p2000PostSelect niet gevonden!");
     showNotification("Selectielijst voor posten ontbreekt!", "error");
     return;
   }
+
+  if (typeof API_URL === 'undefined') {
+    console.error("❌ API_URL is niet gedefinieerd!");
+    showNotification("API URL ontbreekt", "error");
+    return;
+  }
+
+  if (typeof serverId === 'undefined') {
+    console.error("❌ serverId is niet gedefinieerd!");
+    showNotification("Server-ID ontbreekt", "error");
+    return;
+  }
+
+  const endpoint = `${API_URL}/api/apiposten/posten?serverId=${serverId}`;
+  console.log("🌍 API-aanroep naar:", endpoint);
+
+  select.innerHTML = '<option value="">-- Kies een post --</option>';
+
+  fetch(endpoint)
+    .then(res => {
+      console.log("📡 Antwoordstatus:", res.status);
+      if (!res.ok) throw new Error(`❌ Fout bij ophalen posten: ${res.status} ${res.statusText}`);
+      return res.json();
+    })
+    .then(posten => {
+      console.log("✅ Response JSON ontvangen:", posten);
+
+      if (!Array.isArray(posten) || posten.length === 0) {
+        console.warn("⚠️ Geen posten beschikbaar of onjuiste structuur:", posten);
+        showNotification("⚠️ Geen posten beschikbaar!", "info");
+        return;
+      }
+
+      posten.forEach(post => {
+        if (!post.x || !post.y) {
+          console.warn("⛔ Post zonder x/y overgeslagen:", post);
+          return;
+        }
+
+        const option = document.createElement('option');
+        option.value = post.id || post.name || "";
+        option.textContent = post.name || `Post ${post.id}`;
+        select.appendChild(option);
+      });
+
+      console.log("🎯 Posten succesvol geladen en toegevoegd aan select");
+    })
+    .catch(err => {
+      console.error("❌ Fout in laadPostenVoorP2000():", err);
+      showNotification("Fout bij laden van posten: " + err.message, "error");
+    });
 
   select.innerHTML = '<option value="">-- Kies een post --</option>';
 
@@ -3207,7 +3260,7 @@ function fetchPosten() {
       });
 
       // Start realtime status updates
-      listenToStatusUpdates(serverId);
+    listenToStatusUpdates(serverId);
       setTimeout(() => {
           console.log("Wacht 2 seconden klaar");
         }, 9000); // 2000 ms = 2 seconden
