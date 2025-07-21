@@ -944,12 +944,11 @@ auth.onAuthStateChanged(user => {
         
         // Initialize maps
         const dashboardMap = L.map('dashboardMap', {
-          crs: L.CRS.Simple,
-          minZoom: -5,
-          maxZoom: 5,
-          zoomSnap: 0.1
-      }).setView([0, 0], 0);
-
+    crs: L.CRS.Simple,
+    minZoom: -5,
+    maxZoom: 5,
+    zoomSnap: 0.1
+}).setView([0, 0], 0);
 const mainMap = L.map('map', {
   crs: L.CRS.Simple,
   minZoom: -5,
@@ -1723,6 +1722,13 @@ function robloxToLeafletCoords(robloxX, robloxY) {
 
           mapUploaded = true; // Stel de vlag in op true
           showNotification('📌 Kaart succesvol geladen!', 'success');
+
+          // 🔴 Testmarker op (0, 0) in Roblox-wereld
+          setTimeout(() => {
+            const [y, x] = robloxToLeafletCoords(0, 0);
+            L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
+          }, 500);
+
           // Laad alle markers opnieuw nadat de kaart is geüpload
           fetchEmergencyReports();
           fetchUnits(serverId); // Zorg dat serverId beschikbaar is
@@ -2464,15 +2470,12 @@ function fetchEmergencyReports() {
       }));
 
       Object.values(emergencyMarkers).forEach(marker => {
-          if (marker) {
-              if (marker._map === mainMap) {
-                  mainMap.removeLayer(marker);
-              } else if (marker._map === dashboardMap) {
-                  dashboardMap.removeLayer(marker);
-              }
-          }
+        if (marker) {
+          mainMap.removeLayer(marker);
+          dashboardMap.removeLayer(marker);
+        }
       });
- 
+
       emergencyMarkers = {};
       calls = [];
 
