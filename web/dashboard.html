@@ -3143,8 +3143,9 @@ function fetchPosten() {
         `;
 
         const marker = L.marker([y, x], { icon }).addTo(mainMap)
-          .bindPopup(popup);
-
+          .bindPopup(popup, {
+            offset: L.point(0, -42)  // schuift de popup 42 pixels omhoog
+          });
         marker.on('popupopen', () => {
           setTimeout(() => {
             const btn = document.getElementById(`alarm-${name}`);
