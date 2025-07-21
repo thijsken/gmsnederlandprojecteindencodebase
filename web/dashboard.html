@@ -689,8 +689,7 @@
     <input type="text" id="p2000Adres" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Bijv. Dorpsstraat 15">
 
     <label class="block text-sm font-medium mb-1">Voertuignummers (gescheiden door komma)</label>
-    <input type="text" id="p2000Voertuigen" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-1" placeholder="Bijv. 06-1234, 07-5678">
-    <div id="voertuigenSuggestions" class="bg-gray-700 border border-gray-600 rounded max-h-40 overflow-auto mb-3 hidden"></div>
+    <input type="text" id="p2000Voertuigen" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Bijv. 06-1234, 07-5678">
 
     <label class="block text-sm font-medium mb-1">Wat is er aan de hand?</label>
     <textarea id="p2000Situatie" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" rows="3" placeholder="Bijv. brand in woning, rookontwikkeling bij zolder"></textarea>
@@ -1490,73 +1489,39 @@ if (!postId || postId === "undefined") {
 
   console.log("📦 Payload die wordt verstuurd naar /api/apiposten/apialarmposten/alarm:", payload);
 
-  fetch(`${API_URL}/api/apiposten/apialarmposten/alarm?serverId=${serverId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(async res => {
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      data = { message: await res.text() };
-    }
-    if (!res.ok) {
-      console.error("❌ Serverfout bij POST:", data);
-      throw new Error(data.message || "Onbekende fout");
-    }
-    console.log("✅ Serverresponse:", data);
-    showNotification("🚨 P2000 Alarm verstuurd!", "success");
-    updateStatusenVoorVoertuigen(postId, voertuigen);
-    closeP2000Modal();
-  })
-  .catch(err => {
-    console.error("❌ Fout bij verzenden van P2000:", err);
-    showNotification("❌ Fout bij verzenden: " + err.message, "error");
-    });
+fetch(`${API_URL}/api/apiposten/apialarmposten/alarm?serverId=${serverId}`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+})
+.then(async res => {
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = { message: await res.text() };
   }
-
-function updateStatusenVoorVoertuigen(postId, voertuigenStr) {
-  const voertuigenLijst = voertuigenStr.split(',').map(v => v.trim().toLowerCase()).filter(v => v.length > 0);
-
-  fetch(`${API_URL}/api/apiposten/posten/${postId}?serverId=${serverId}`)
-    .then(res => res.json())
-    .then(post => {
-      if (!post || !post.statusen) return;
-
-      const nieuweStatusen = post.statusen.map(status => {
-        if (voertuigenLijst.includes(status.name.toLowerCase())) {
-          return { ...status, state: true };
-        }
-        return status;
-      });
-
-      return fetch(`${API_URL}/api/apiposten/posten/${postId}/statusen?serverId=${serverId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ statusen: nieuweStatusen })
-      });
-    })
-    .then(res => {
-      if (!res.ok) {
-        console.error("❌ Fout bij updaten statusen");
-      } else {
-        console.log("✅ Statusen succesvol geüpdatet naar bezig voor voertuigen:", voertuigenLijst);
-      }
-    })
-    .catch(err => {
-      console.error("❌ Fout bij status update:", err);
-    });
+  if (!res.ok) {
+    console.error("❌ Serverfout bij POST:", data);
+    throw new Error(data.message || "Onbekende fout");
+  }
+  console.log("✅ Serverresponse:", data);
+  showNotification("🚨 P2000 Alarm verstuurd!", "success");
+  closeP2000Modal();
+})
+.catch(err => {
+  console.error("❌ Fout bij verzenden van P2000:", err);
+  showNotification("❌ Fout bij verzenden: " + err.message, "error");
+});
 }
 
-  function openNLAlertModal() {
-      document.getElementById('nlalertModal').classList.remove('hidden');
-  }
+function openNLAlertModal() {
+    document.getElementById('nlalertModal').classList.remove('hidden');
+}
 
-  function closeNLAlertModal() {
-      document.getElementById('nlalertModal').classList.add('hidden');
-  }
+function closeNLAlertModal() {
+    document.getElementById('nlalertModal').classList.add('hidden');
+}
 
 function saveNLAlert() {
   const title = document.getElementById('nlalertTitle').value.trim();
