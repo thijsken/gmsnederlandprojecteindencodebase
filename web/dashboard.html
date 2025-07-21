@@ -2365,6 +2365,7 @@ function plaatsEmergencyMarker(call) {
 
             // Toon visuele notificatie
             showNotification("📟 Nieuwe melding ontvangen!", "info");
+            plaatsEmergencyMarker(call);
 
              // ✅ Geluid afspelen bij nieuwe melding
             const audio = document.getElementById('notificationSound');
