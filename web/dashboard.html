@@ -1723,12 +1723,6 @@ function robloxToLeafletCoords(robloxX, robloxY) {
           mapUploaded = true; // Stel de vlag in op true
           showNotification('📌 Kaart succesvol geladen!', 'success');
 
-          // 🔴 Testmarker op (0, 0) in Roblox-wereld
-          setTimeout(() => {
-            const [y, x] = robloxToLeafletCoords(0, 0);
-            L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
-          }, 500);
-
           // Laad alle markers opnieuw nadat de kaart is geüpload
           fetchEmergencyReports();
           fetchUnits(serverId); // Zorg dat serverId beschikbaar is
@@ -2472,7 +2466,7 @@ function fetchEmergencyReports() {
       Object.values(emergencyMarkers).forEach(marker => {
         if (marker) {
           mainMap.removeLayer(marker);
-          dashboardMap.removeLayer(marker);
+          // dashboardMap.removeLayer(marker);
         }
       });
 
