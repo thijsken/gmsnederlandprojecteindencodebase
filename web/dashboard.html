@@ -3146,7 +3146,7 @@ function fetchPosten() {
           </div>
         `;
 
-        const marker = L.marker([y, x], { icon }).addTo(mainMap)
+        const marker = L.marker([post.lng, post.lat], { icon }).addTo(mainMap)
           .bindPopup(popup);
 
         marker.on('popupopen', () => {
