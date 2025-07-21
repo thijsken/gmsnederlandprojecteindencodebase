@@ -3198,11 +3198,13 @@ function fetchPosten() {
 
         const iconUrl = typeToIconUrl[type.toLowerCase()] || "https://cdn-icons-png.flaticon.com/512/565/565547.png"; // 🔁 fallback icoon
 
-        const pointerColor = {
-          ambulance: "#3b82f6", // blauw
+        const typeColors = {
+          ambulance: "#fde047", // geel
           brandweer: "#ef4444", // rood
-          politie: "#10b981"    // groen
-        }[type.toLowerCase()] || "#ef4444"; // standaard rood
+          politie: "#3b82f6",   // blauw
+        };
+
+        const bgColor = typeColors[type.toLowerCase()] || "#9ca3af"; // standaard: grijs
 
         const icon = L.divIcon({
           className: '',
@@ -3212,33 +3214,32 @@ function fetchPosten() {
               flex-direction: column;
               align-items: center;
               transform: translate(-50%, -100%);
+              font-family: sans-serif;
             ">
               <div style="
-                background: white;
+                background-color: ${bgColor};
                 border-radius: 50%;
-                padding: 6px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-                border: 2px solid #e5e7eb;
-                width: 42px;
-                height: 42px;
+                width: 40px;
+                height: 40px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                border: 2px solid white;
               ">
-                <img src="${iconUrl}" style="width: 24px; height: 24px;" />
+                <img src="${iconUrl}" style="width: 22px; height: 22px;" />
               </div>
               <div style="
                 width: 0;
                 height: 0;
-                border-left: 8px solid transparent;
-                border-right: 8px solid transparent;
-                border-top: 12px solid ${pointerColor};
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 10px solid ${bgColor};
                 margin-top: -1px;
               "></div>
             </div>
           `,
-          iconSize: [42, 54],
-          iconAnchor: [21, 54]
+          iconSize: [40, 50],
+          iconAnchor: [20, 50]
         });
 
         const popup = genereerPopupVoorPost(post);
