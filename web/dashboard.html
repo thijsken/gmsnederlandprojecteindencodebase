@@ -3053,20 +3053,20 @@ function addLuchtalarmPaal(paal) {
     return;
   }
 
-  const { id, x, y } = paal;
+  // const { id, x, y } = paal;
 
-  if (typeof x !== 'number' || typeof y !== 'number') {
-    console.warn("❌ Ongeldige locatie voor paal:", paal);
-    return;
-  }
+  // if (typeof x !== 'number' || typeof y !== 'number') {
+  //   console.warn("❌ Ongeldige locatie voor paal:", paal);
+  //   return;
+  // }
 
   console.log("📍 Voeg marker toe voor:", paal);
 
   // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
-  const [leafletY, leafletX] = robloxToLeafletCoords(x, y); // Gebruik robloxToLeafletCoords
+  const [y, x] = robloxToLeafletCoords(paal.lat, paal.lng); // zelfde volgorde als bij units en meldingen
 
   // Voeg marker toe op de juiste locatie
-  const marker = L.marker([leafletY, leafletX]).addTo(mainMap);
+  const marker = L.marker([y, x], { icon }).addTo(mainMap)
 
   // Voeg popup met knoppen toe
   marker.bindPopup(`
@@ -3120,7 +3120,7 @@ function fetchPosten() {
 
         // Converteer Roblox coördinaten naar Leaflet coördinaten
         const [y, x] = robloxToLeafletCoords(post.lat, post.lng); // zelfde volgorde als bij units en meldingen
-        console.log("Post coords (Roblox):", post.y, post.x);
+        console.log("Post coords (Roblox):", post.lat, post.lng);
 
         const icon = L.divIcon({
           className: '',
