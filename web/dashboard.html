@@ -3147,7 +3147,7 @@ function fetchPosten() {
           </div>
         `;
 
-        const marker = L.marker([leafletY, leafletX], { icon }) // Gebruik de omgezette coördinaten
+        const marker = L.marker([y, x], { icon }) // Gebruik de omgezette coördinaten
           .addTo(mainMap)
           .bindPopup(popup);
 
