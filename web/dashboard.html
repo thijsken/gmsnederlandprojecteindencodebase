@@ -1356,7 +1356,7 @@ function laadPostenVoorP2000() {
       }
 
       posten.forEach(post => {
-        if (!post.x || !post.y) {
+        if (!post.lat || !post.lng) {
           console.warn("⛔ Post zonder x/y overgeslagen:", post);
           return;
         }
@@ -1389,7 +1389,7 @@ function laadPostenVoorP2000() {
 
       posten.forEach(post => {
         // Alleen posten met x en y laten zien
-        if (!post.x || !post.y) return;
+        if (!post.lat || !post.lng) return;
 
         const option = document.createElement('option');
         option.value = post.id || post.name || "";  // fallback op id of name
