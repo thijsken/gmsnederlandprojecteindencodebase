@@ -3114,10 +3114,9 @@ function fetchPosten() {
       postArray.forEach(post => {
         const { name, statusen = [] } = post;
 
-        if (typeof x !== 'number' || typeof y !== 'number') {
-          console.warn("❌ Ongeldige locatie voor post:", post);
-          return;
-        }
+        // if (typeof x !== 'number' || typeof y !== 'number') {
+        //   console.warn("❌ Ongeldige locatie voor post:", post);
+        //   return;
 
         // Converteer Roblox coördinaten naar Leaflet coördinaten
         const [y, x] = robloxToLeafletCoords(post.x, post.y); // zelfde volgorde als bij units en meldingen
