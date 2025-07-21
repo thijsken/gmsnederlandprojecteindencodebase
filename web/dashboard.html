@@ -2626,6 +2626,7 @@ function createMarker(unit, map) { // Accept map as a parameter
   });
 
   // Gebruik robloxToLeafletCoords voor de conversie
+    console.log(`📍 Unit ${id} locatie (origineel): lat=${location.lat}, lng=${location.lng}`);
   const [y, x] = robloxToLeafletCoords(location.lng, location.lat); // Let op: Roblox X is vaak lng, Y is lat
     console.log(`🗺️ Unit ${id} Leaflet-coords: x=${x}, y=${y}`);
 
