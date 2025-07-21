@@ -3096,20 +3096,35 @@ function triggerLuchtalarm(actie, id) {
 }
 
 function listenToStatusUpdates(serverId) {
-  const db = getDatabase();
-  const postenRef = ref(db, `servers/${serverId}/posten`);
+  const statusenRef = db.ref(`servers/${serverId}/posten`);
 
-  onValue(postenRef, (snapshot) => {
-    const data = snapshot.val();
-    if (!data) return;
+  statusenRef.on('child_changed', (snapshot) => {
+    const updatedPost = snapshot.val();
+    const postId = snapshot.key;
 
-    Object.values(data).forEach(post => {
-      const marker = postMarkers[post.name];
-      if (marker && post.statusen) {
-        const nieuwePopup = genereerPopupVoorPost(post);
-        marker.setPopupContent(nieuwePopup);
-      }
-    });
+    const marker = postMarkers[updatedPost.name];
+    if (!marker) return;
+
+    // Nieuwe popup content genereren
+    const newPopup = `
+      <div style="min-width:150px">
+        <strong>${updatedPost.name}</strong><br>
+        ${updatedPost.statusen.map(s => `
+          <div>
+            ${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    // Update popup inhoud
+    marker.setPopupContent(newPopup);
+
+    // Als popup open is, heropenen voor update-effect
+    if (marker.isPopupOpen()) {
+      marker.closePopup();
+      marker.openPopup();
+    }
   });
 }
 
@@ -3189,6 +3204,7 @@ function fetchPosten() {
 
       // Start realtime status updates
       listenToStatusUpdates(serverId);
+      fetchPosten();
     })
     .catch(err => console.error("❌ Fout bij ophalen posten:", err));
 }
