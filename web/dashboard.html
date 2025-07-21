@@ -3112,7 +3112,7 @@ function fetchPosten() {
         : Object.entries(posten).map(([id, post]) => ({ id, ...post }));
 
       postArray.forEach(post => {
-        const { name, post, statusen = [] } = post;
+        const { name, statusen = [] } = post;
 
         // if (typeof x !== 'number' || typeof y !== 'number') {
         //   console.warn("❌ Ongeldige locatie voor post:", post);
@@ -3120,7 +3120,7 @@ function fetchPosten() {
 
         // Converteer Roblox coördinaten naar Leaflet coördinaten
         const [y, x] = robloxToLeafletCoords(post.lng, post.lat); // zelfde volgorde als bij units en meldingen
-        console.log("Post coords (Roblox):", y, x);
+        console.log("Post coords (Roblox):", post.lng, post.lat);
 
         const icon = L.divIcon({
           className: '',
