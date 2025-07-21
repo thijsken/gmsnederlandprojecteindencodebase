@@ -3121,10 +3121,26 @@ function fetchPosten() {
         const icon = L.divIcon({
           className: '',
           html: `
-            <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+            <div style="
+              position: relative; 
+              transform: translate(-50%, -50%);
+              text-align: center;
+              background: white;
+              border-radius: 50%;
+              padding: 4px;
+              box-shadow: 0 0 5px rgba(0,0,0,0.2);
+              display: inline-block;
+            ">
               <img src="https://112maasalert.nl/wp-content/uploads/Brandweer.png"
-                   style="width: 28px; height: 28px;" />
-              <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+                  style="width: 28px; height: 28px; border-radius: 50%;" />
+              <div style="
+                width: 0; 
+                height: 0; 
+                border-left: 6px solid transparent; 
+                border-right: 6px solid transparent; 
+                border-top: 10px solid #ef4444; 
+                margin: auto;
+              "></div>
             </div>
           `,
           iconSize: [32, 42],
