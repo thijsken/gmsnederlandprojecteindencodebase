@@ -689,7 +689,8 @@
     <input type="text" id="p2000Adres" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Bijv. Dorpsstraat 15">
 
     <label class="block text-sm font-medium mb-1">Voertuignummers (gescheiden door komma)</label>
-    <input type="text" id="p2000Voertuigen" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Bijv. 06-1234, 07-5678">
+    <input type="text" id="p2000Voertuigen" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-1" placeholder="Bijv. 06-1234, 07-5678">
+    <div id="voertuigenSuggestions" class="bg-gray-700 border border-gray-600 rounded max-h-40 overflow-auto mb-3 hidden"></div>
 
     <label class="block text-sm font-medium mb-1">Wat is er aan de hand?</label>
     <textarea id="p2000Situatie" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" rows="3" placeholder="Bijv. brand in woning, rookontwikkeling bij zolder"></textarea>
