@@ -3063,10 +3063,10 @@ function addLuchtalarmPaal(paal) {
   console.log("📍 Voeg marker toe voor:", paal);
 
   // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
-  const [y, x] = robloxToLeafletCoords(paal.lat, paal.lng); // zelfde volgorde als bij units en meldingen
+  const [y, x] = robloxToLeafletCoords(paal.lng, paal.lat); // Gebruik robloxToLeafletCoords
 
   // Voeg marker toe op de juiste locatie
-  const marker = L.marker([y, x], { icon }).addTo(mainMap)
+  const marker = L.marker([y, x]).addTo(mainMap);
 
   // Voeg popup met knoppen toe
   marker.bindPopup(`
