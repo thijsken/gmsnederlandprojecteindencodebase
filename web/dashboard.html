@@ -3093,8 +3093,39 @@ function triggerLuchtalarm(actie, id) {
   });
 }
 
+function listenToStatusUpdates(serverId) {
+  const db = getDatabase();
+  const postenRef = ref(db, `servers/${serverId}/posten`);
+
+  onValue(postenRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    Object.values(data).forEach(post => {
+      const marker = postMarkers[post.name];
+      if (marker && post.statusen) {
+        const nieuwePopup = genereerPopupVoorPost(post);
+        marker.setPopupContent(nieuwePopup);
+      }
+    });
+  });
+}
+
+function genereerPopupVoorPost(post) {
+  return `
+    <div style="min-width:150px">
+      <strong>${post.name}</strong><br>
+      ${post.statusen.map(s => `
+        <div>
+          ${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function fetchPosten() {
-  if (!mapUploaded) { // Controleer of de kaart is geüpload
+  if (!mapUploaded) {
     console.log("Kaart is nog niet geüpload, posten worden niet geladen.");
     return;
   }
@@ -3113,10 +3144,7 @@ function fetchPosten() {
 
       postArray.forEach(post => {
         const { name, statusen = [] } = post;
-
-        // Converteer Roblox coördinaten naar Leaflet coördinaten
-        const [y, x] = robloxToLeafletCoords(post.lng, post.lat); // zelfde volgorde als bij units en meldingen
-        console.log("Post coords (Roblox):", post.lng, post.lat);
+        const [y, x] = robloxToLeafletCoords(post.lng, post.lat);
 
         const icon = L.divIcon({
           className: '',
@@ -3131,19 +3159,12 @@ function fetchPosten() {
           iconAnchor: [16, 42]
         });
 
-        const popup = `
-          <div style="min-width:150px">
-            <strong>${name}</strong><br>
-            ${statusen.map(s => `
-              <div>
-                ${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>
-              </div>
-            `).join("")}
-          </div>
-        `;
+        const popup = genereerPopupVoorPost(post);
 
         const marker = L.marker([y, x], { icon }).addTo(mainMap)
-          .bindPopup(popup, { autoPan: true ,offset: L.point(-1, -42) });  // popup 42px omhoog plaatsen
+          .bindPopup(popup, { autoPan: true, offset: L.point(-1, -42) });
+
+        postMarkers[post.name] = marker; // 🔐 Opslaan voor later realtime updates
 
         marker.on('popupopen', () => {
           setTimeout(() => {
@@ -3155,18 +3176,21 @@ function fetchPosten() {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ postId: name, trigger: true })
                 })
-                .then(res => res.json())
-                .then(data => console.log('🚨 Alarm getriggerd:', data))
-                .catch(err => console.error('❌ Fout bij alarm:', err));
+                  .then(res => res.json())
+                  .then(data => console.log('🚨 Alarm getriggerd:', data))
+                  .catch(err => console.error('❌ Fout bij alarm:', err));
               });
             }
           }, 200);
         });
       });
+
+      // Start realtime status updates
+      listenToStatusUpdates(serverId);
     })
     .catch(err => console.error("❌ Fout bij ophalen posten:", err));
 }
-      // Voorbeeld veilige verwijdering van markers
+     // Voorbeeld veilige verwijdering van markers
     function clearMarkers() {
       markers.forEach(marker => {
         if (marker && mainMap.hasLayer(marker)) {
