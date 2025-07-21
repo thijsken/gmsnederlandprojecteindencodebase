@@ -1733,7 +1733,7 @@ function robloxToLeafletCoords(robloxX, robloxY) {
           fetchEmergencyReports();
           fetchUnits(serverId); // Zorg dat serverId beschikbaar is
           fetchLuchtalarmPalen();
-          fetchPosten(serverId);
+          fetchPosten();
         };
 
         img.src = imageUrl;
@@ -2637,6 +2637,7 @@ function createMarker(unit, map) { // Accept map as a parameter
 
 // Haal eenheden elke 5 seconden op
 setInterval(() => {
+  console.log("Unit coords:", unit.x, unit.y);
   const currentServerId = localStorage.getItem("serverId");
   fetchUnits(currentServerId);
 }, 1000);
