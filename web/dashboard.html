@@ -3127,17 +3127,14 @@ function listenToStatusUpdates(serverId) {
     const marker = postMarkers[updatedPost.name];
     if (!marker) return;
 
-    // Popup element van de marker ophalen
     const popupEl = marker.getPopup().getElement();
     if (!popupEl) return;
 
-    // Container met status-items in de popup
     const statusContainer = popupEl.querySelector(`#status-container-${updatedPost.name}`);
     if (!statusContainer) return;
 
     updatedPost.statusen.forEach(s => {
-      // Zoek naar div met juiste data-status-name attribuut
-      let line = statusContainer.querySelector(`div[data-status-name="${s.name}"]`);
+      const line = statusContainer.querySelector(`div[data-status-name="${s.name}"]`);
       
       if (line) {
         const span = line.querySelector('span');
@@ -3145,13 +3142,9 @@ function listenToStatusUpdates(serverId) {
           span.style.color = s.state ? 'red' : 'green';
           span.textContent = s.state ? 'bezet' : 'vrij';
         }
-      } else {
-        // Als nieuw status item, toevoegen aan container
-        const newDiv = document.createElement('div');
-        newDiv.setAttribute('data-status-name', s.name);
-        newDiv.innerHTML = `${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>`;
-        statusContainer.appendChild(newDiv);
       }
+
+      // Geen nieuwe elementen toevoegen als ze niet bestaan
     });
   });
 }
