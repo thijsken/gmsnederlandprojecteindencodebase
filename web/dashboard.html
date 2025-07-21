@@ -3167,6 +3167,14 @@ function fetchPosten() {
     return;
   }
 
+  // 🔄 Mapping van type → bijbehorend logo
+  const typeToIconUrl = {
+    ambulance: "https://images.seeklogo.com/logo-png/18/1/ambulance-ua-logo-png_seeklogo-184754.png",
+    brandweer: "https://dbdzm869oupei.cloudfront.net/img/sticker/preview/82436.png",
+    politie: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png"
+    // Voeg hier extra types toe zoals ziekenhuis, reddingsbrigade etc.
+  };
+
   fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
     .then(res => res.json())
     .then(posten => {
@@ -3180,15 +3188,16 @@ function fetchPosten() {
         : Object.entries(posten).map(([id, post]) => ({ id, ...post }));
 
       postArray.forEach(post => {
-        const { name, statusen = [] } = post;
+        const { name, type = "default", statusen = [] } = post;
         const [y, x] = robloxToLeafletCoords(post.lng, post.lat);
+
+        const iconUrl = typeToIconUrl[type.toLowerCase()] || "https://cdn-icons-png.flaticon.com/512/565/565547.png"; // 🔁 fallback icoon
 
         const icon = L.divIcon({
           className: '',
           html: `
             <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
-              <img src="https://dbdzm869oupei.cloudfront.net/img/sticker/preview/82436.png"
-                   style="width: 28px; height: 28px;" />
+              <img src="${iconUrl}" style="width: 28px; height: 28px;" />
               <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
             </div>
           `,
@@ -3201,7 +3210,7 @@ function fetchPosten() {
         const marker = L.marker([y, x], { icon }).addTo(mainMap)
           .bindPopup(popup, { autoPan: true, offset: L.point(1, -42) });
 
-        postMarkers[post.name] = marker; // 🔐 Opslaan voor later realtime updates
+        postMarkers[post.name] = marker;
 
         marker.on('popupopen', () => {
           setTimeout(() => {
@@ -3222,11 +3231,11 @@ function fetchPosten() {
         });
       });
 
-      // Start realtime status updates
-    listenToStatusUpdates(serverId);
+      listenToStatusUpdates(serverId);
       setTimeout(() => {
-          console.log("Wacht 2 seconden klaar");
-        }, 9000); // 2000 ms = 2 seconden
+        console.log("Wacht 2 seconden klaar");
+      }, 9000);
+
       fetchPosten();
     })
     .catch(err => console.error("❌ Fout bij ophalen posten:", err));
