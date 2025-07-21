@@ -3122,6 +3122,7 @@ function fetchPosten() {
         // Converteer Roblox coördinaten naar Leaflet coördinaten
         const [y, x] = robloxToLeafletCoords(post.x, post.y); // zelfde volgorde als bij units en meldingen
         console.log("Post coords (Roblox):", x, y);
+        console.log("Post coords (Leaflet):", leafletX, leafletY);
 
         const icon = L.divIcon({
           className: '',
@@ -3147,7 +3148,7 @@ function fetchPosten() {
           </div>
         `;
 
-        const marker = L.marker([y, x], { icon }) // Gebruik de omgezette coördinaten
+        const marker = L.marker([leafletY, leafletX], { icon })
           .addTo(mainMap)
           .bindPopup(popup);
 
