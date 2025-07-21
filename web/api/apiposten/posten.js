@@ -23,6 +23,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'serverId is verplicht' });
   }
 
+  if (!isValidServerId(serverId)) {
+    return res.status(400).json({ error: 'serverId is ongeldig' });
+  }
+
   try {
     if (req.method === 'GET') {
       const snapshot = await db.ref(`servers/${serverId}/posten`).once('value');
@@ -38,12 +42,11 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Payload moet een array zijn' });
       }
 
-       // Check of de server bestaat
-  const serverSnapshot = await db.ref(`servers/${serverId}`).once('value');
-  if (!serverSnapshot.exists()) {
-    // Server bestaat niet, doe niks en geef een waarschuwing
-    return res.status(404).json({ error: `Server met id ${serverId} bestaat niet` });
-  }
+      // Check of de server bestaat
+      const serverSnapshot = await db.ref(`servers/${serverId}`).once('value');
+      if (!serverSnapshot.exists()) {
+        return res.status(404).json({ error: `Server met id ${serverId} bestaat niet` });
+      }
 
       const snapshot = await db.ref(`servers/${serverId}/posten`).once('value');
       const bestaandeData = snapshot.val() || {};
@@ -69,7 +72,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ message: 'Alle posten verwijderd' });
     }
 
-    res.setHeader('Allow', ['GET', 'POST']);
+    res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
     return res.status(405).json({ error: `Method ${req.method} not allowed` });
 
   } catch (error) {
