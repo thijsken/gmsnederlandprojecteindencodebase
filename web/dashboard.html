@@ -3183,7 +3183,7 @@ function fetchPosten() {
         const popup = genereerPopupVoorPost(post);
 
         const marker = L.marker([y, x], { icon }).addTo(mainMap)
-          .bindPopup(popup, { autoPan: true, offset: L.point(5, -42) });
+          .bindPopup(popup, { autoPan: true, offset: L.point(1, -42) });
 
         postMarkers[post.name] = marker; // 🔐 Opslaan voor later realtime updates
 
