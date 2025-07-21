@@ -2627,6 +2627,7 @@ function createMarker(unit, map) { // Accept map as a parameter
 
   // Gebruik robloxToLeafletCoords voor de conversie
   const [y, x] = robloxToLeafletCoords(location.lng, location.lat); // Let op: Roblox X is vaak lng, Y is lat
+    console.log(`🗺️ Unit ${id} Leaflet-coords: x=${x}, y=${y}`);
 
   const marker = L.marker([y, x], {
     icon: divIcon
@@ -2637,7 +2638,6 @@ function createMarker(unit, map) { // Accept map as a parameter
 
 // Haal eenheden elke 5 seconden op
 setInterval(() => {
-  console.log("Unit coords:", unit.x, unit.y);
   const currentServerId = localStorage.getItem("serverId");
   fetchUnits(currentServerId);
 }, 1000);
