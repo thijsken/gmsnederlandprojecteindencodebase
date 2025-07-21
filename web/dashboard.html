@@ -1314,8 +1314,6 @@ function closeP2000Modal() {
 }
 
 function laadPostenVoorP2000() {
-  console.log("📥 Functie laadPostenVoorP2000() gestart");
-
   const select = document.getElementById('p2000PostSelect');
   if (!select) {
     console.error("❌ Selectelement #p2000PostSelect niet gevonden!");
@@ -1323,60 +1321,9 @@ function laadPostenVoorP2000() {
     return;
   }
 
-  if (typeof API_URL === 'undefined') {
-    console.error("❌ API_URL is niet gedefinieerd!");
-    showNotification("API URL ontbreekt", "error");
-    return;
-  }
-
-  if (typeof serverId === 'undefined') {
-    console.error("❌ serverId is niet gedefinieerd!");
-    showNotification("Server-ID ontbreekt", "error");
-    return;
-  }
-
-  const endpoint = `${API_URL}/api/apiposten/posten?serverId=${serverId}`;
-  console.log("🌍 API-aanroep naar:", endpoint);
-
   select.innerHTML = '<option value="">-- Kies een post --</option>';
 
-  fetch(endpoint)
-    .then(res => {
-      console.log("📡 Antwoordstatus:", res.status);
-      if (!res.ok) throw new Error(`❌ Fout bij ophalen posten: ${res.status} ${res.statusText}`);
-      return res.json();
-    })
-    .then(posten => {
-      console.log("✅ Response JSON ontvangen:", posten);
-
-      if (!Array.isArray(posten) || posten.length === 0) {
-        console.warn("⚠️ Geen posten beschikbaar of onjuiste structuur:", posten);
-        showNotification("⚠️ Geen posten beschikbaar!", "info");
-        return;
-      }
-
-      posten.forEach(post => {
-        if (!post.lat || !post.lng) {
-          console.warn("⛔ Post zonder x/y overgeslagen:", post);
-          return;
-        }
-
-        const option = document.createElement('option');
-        option.value = post.id || post.name || "";
-        option.textContent = post.name || `Post ${post.id}`;
-        select.appendChild(option);
-      });
-
-      console.log("🎯 Posten succesvol geladen en toegevoegd aan select");
-    })
-    .catch(err => {
-      console.error("❌ Fout in laadPostenVoorP2000():", err);
-      showNotification("Fout bij laden van posten: " + err.message, "error");
-    });
-
-  select.innerHTML = '<option value="">-- Kies een post --</option>';
-
-  fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)  // LET OP: hier api/posten i.p.v. api/meldingen
+  fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
     .then(res => {
       if (!res.ok) throw new Error(`Fout bij ophalen posten: ${res.status} ${res.statusText}`);
       return res.json();
@@ -1387,17 +1334,33 @@ function laadPostenVoorP2000() {
         return;
       }
 
+      const uniekePosten = new Set();
+
       posten.forEach(post => {
-        // Alleen posten met x en y laten zien
-        if (!post.lat || !post.lng) return;
+        const uniekeId = post.id || post.name;
+        if (!uniekeId) return;
+
+        // Dubbele posten overslaan
+        if (uniekePosten.has(uniekeId)) {
+          console.warn(`⚠️ Dubbele post overgeslagen: ${uniekeId}`);
+          return;
+        }
+
+        // Check op lat/lng
+        if (typeof post.lat !== "number" || typeof post.lng !== "number") {
+          console.warn("⛔ Post zonder lat/lng overgeslagen:", post);
+          return;
+        }
+
+        uniekePosten.add(uniekeId);
 
         const option = document.createElement('option');
-        option.value = post.id || post.name || "";  // fallback op id of name
+        option.value = uniekeId;
         option.textContent = post.name || `Post ${post.id}`;
         select.appendChild(option);
       });
 
-      console.log("✅ Posten geladen:", posten);
+      console.log("✅ Posten geladen (uniek):", Array.from(uniekePosten));
     })
     .catch(err => {
       console.error("❌ Fout bij ophalen posten:", err);
@@ -1504,13 +1467,13 @@ function verstuurP2000Alarm() {
   const adres = document.getElementById('p2000Adres').value.trim();
   const voertuigen = document.getElementById('p2000Voertuigen').value.trim();
   const situatie = document.getElementById('p2000Situatie').value.trim();
-const postSelect = document.getElementById('p2000PostSelect');
-if (!postSelect) {
-  console.error("❌ Selectelement #p2000PostSelect bestaat niet!");
-  showNotification("Er is een probleem met het laden van de postenlijst.", "error");
-  return;
-}
-const postId = postSelect.value;
+  const postSelect = document.getElementById('p2000PostSelect');
+  if (!postSelect) {
+    console.error("❌ Selectelement #p2000PostSelect bestaat niet!");
+    showNotification("Er is een probleem met het laden van de postenlijst.", "error");
+    return;
+  }
+  const postId = postSelect.value;
 
 if (!postId || postId === "undefined") {
   showNotification("❌ Geen post geselecteerd! Kies een post uit de lijst.", "error");
