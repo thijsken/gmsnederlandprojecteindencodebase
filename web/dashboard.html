@@ -1508,13 +1508,39 @@ fetch(`${API_URL}/api/apiposten/apialarmposten/alarm?serverId=${serverId}`, {
   }
   console.log("✅ Serverresponse:", data);
   showNotification("🚨 P2000 Alarm verstuurd!", "success");
+  updateStatusenVoorVoertuigen(postId, voertuigen);
   closeP2000Modal();
 })
 .catch(err => {
   console.error("❌ Fout bij verzenden van P2000:", err);
   showNotification("❌ Fout bij verzenden: " + err.message, "error");
-});
+  });
 }
+
+function updateStatusenVoorVoertuigen(postId, voertuigen) {
+  const voertuigen = voertuigenStr.split(',').map(v => v.trim().toLowerCase()).filter(v => v.length > 0);
+  fetch(`${API_URL}/api/apiposten/posten/${postId}?serverId=${serverId}`)
+      .then(res => res.json())
+      .then(post => {
+        if (!post || !post.statusen) return;
+          const nieuweStatusen = post.statusen.map(status => {
+            if (voertuigen.includes(state.name.toLowerCase())) {
+              return { ...status, state: true};
+            }
+            return status;
+          });
+      })
+      .then(res => {
+        if (!res.ok) {
+          console.error("❌ Fout bij updaten statusen");
+        } else {
+          console.log("✅ Statusen succesvol geüpdatet naar bezig voor voertuigen:", voertuigen);
+        }
+      })
+      .catch(err => {
+        console.error("❌ Fout bij status update:", err);
+      });
+    }
 
 function openNLAlertModal() {
     document.getElementById('nlalertModal').classList.remove('hidden');
