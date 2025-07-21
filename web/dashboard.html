@@ -2533,11 +2533,6 @@ function fetchEmergencyReports() {
 
 // Voeg dit toe aan je JS-bestand (na initialisatie van maps)
 function fetchUnits(serverId) {
-  if (!mapUploaded) {
-    console.log("Kaart is nog niet geüpload, units worden niet geladen.");
-    return;
-  }
-
   if (!serverId) {
     console.error("❌ serverId is verplicht om units op te halen");
     return;
@@ -2573,17 +2568,16 @@ function fetchUnits(serverId) {
       }
     });
     unitMarkers = {};
-    units = []; // Leeg de units array
 
     // Voeg nieuwe markers toe
     data.forEach(unit => {
-      units.push(unit); // Voeg de unit toe aan de lokale array
-      const marker = createMarker(unit, mainMap); // Pass the map instance
+      const marker = createMarker(unit);
       if (marker) {
+        const maps = [mainMap].filter(Boolean);
+        maps.forEach(map => marker.addTo(map));
         unitMarkers[unit.id] = marker;
       }
     });
-    updateUnits(); // Update de weergave van eenheden
   })
   .catch(err => {
     console.error("❌ Eenheden ophalen mislukt:", err);
