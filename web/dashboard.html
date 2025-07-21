@@ -3103,28 +3103,22 @@ function listenToStatusUpdates(serverId) {
     const postId = snapshot.key;
 
     const marker = postMarkers[updatedPost.name];
-    if (!marker) return;
+    if (!marker || !updatedPost.statusen) return;
 
-    // Nieuwe popup content genereren
-    const newPopup = `
-      <div style="min-width:150px">
-        <strong>${updatedPost.name}</strong><br>
-        ${updatedPost.statusen.map(s => `
-          <div>
-            ${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>
-          </div>
-        `).join("")}
-      </div>
-    `;
+    // Zoek de popup DOM direct en update alleen status-kleuren
+    const popupEl = marker.getPopup().getElement();
+    if (!popupEl) return;
 
-    // Update popup inhoud
-    marker.setPopupContent(newPopup);
-
-    // Als popup open is, heropenen voor update-effect
-    if (marker.isPopupOpen()) {
-      marker.closePopup();
-      marker.openPopup();
-    }
+    updatedPost.statusen.forEach(s => {
+      const line = [...popupEl.querySelectorAll('div')].find(div => div.textContent.includes(s.name));
+      if (line) {
+        const span = line.querySelector('span');
+        if (span) {
+          span.style.color = s.state ? 'red' : 'green';
+          span.textContent = s.state ? 'bezet' : 'vrij';
+        }
+      }
+    });
   });
 }
 
