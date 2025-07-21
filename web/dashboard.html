@@ -3208,6 +3208,9 @@ function fetchPosten() {
 
       // Start realtime status updates
       listenToStatusUpdates(serverId);
+      setTimeout(() => {
+          console.log("Wacht 2 seconden klaar");
+        }, 9000); // 2000 ms = 2 seconden
       fetchPosten();
     })
     .catch(err => console.error("❌ Fout bij ophalen posten:", err));
