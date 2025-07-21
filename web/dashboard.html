@@ -2464,10 +2464,13 @@ function fetchEmergencyReports() {
       }));
 
       Object.values(emergencyMarkers).forEach(marker => {
-        if (marker) {
-          mainMap.removeLayer(marker);
-          // dashboardMap.removeLayer(marker);
-        }
+          if (marker) {
+              if (marker._map === mainMap) {
+                  mainMap.removeLayer(marker);
+              } else if (marker._map === dashboardMap) {
+                  dashboardMap.removeLayer(marker);
+              }
+          }
       });
 
       emergencyMarkers = {};
