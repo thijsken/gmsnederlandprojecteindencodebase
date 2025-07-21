@@ -3100,23 +3100,35 @@ function listenToStatusUpdates(serverId) {
 
   statusenRef.on('child_changed', (snapshot) => {
     const updatedPost = snapshot.val();
-    const postId = snapshot.key;
+    if (!updatedPost || !updatedPost.name || !updatedPost.statusen) return;
 
     const marker = postMarkers[updatedPost.name];
-    if (!marker || !updatedPost.statusen) return;
+    if (!marker) return;
 
-    // Zoek de popup DOM direct en update alleen status-kleuren
+    // Popup element van de marker ophalen
     const popupEl = marker.getPopup().getElement();
     if (!popupEl) return;
 
+    // Container met status-items in de popup
+    const statusContainer = popupEl.querySelector(`#status-container-${updatedPost.name}`);
+    if (!statusContainer) return;
+
     updatedPost.statusen.forEach(s => {
-      const line = [...popupEl.querySelectorAll('div')].find(div => div.textContent.includes(s.name));
+      // Zoek naar div met juiste data-status-name attribuut
+      let line = statusContainer.querySelector(`div[data-status-name="${s.name}"]`);
+      
       if (line) {
         const span = line.querySelector('span');
         if (span) {
           span.style.color = s.state ? 'red' : 'green';
           span.textContent = s.state ? 'bezet' : 'vrij';
         }
+      } else {
+        // Als nieuw status item, toevoegen aan container
+        const newDiv = document.createElement('div');
+        newDiv.setAttribute('data-status-name', s.name);
+        newDiv.innerHTML = `${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>`;
+        statusContainer.appendChild(newDiv);
       }
     });
   });
