@@ -1346,6 +1346,11 @@ function laadPostenVoorP2000() {
           return;
         }
 
+        if (post.type && post.type.toLowerCase() === "politie") {
+          console.log(`🚫 Politiepost overgeslagen: ${uniekeId}`);
+          return;
+        }
+
         // Check op lat/lng
         if (typeof post.lat !== "number" || typeof post.lng !== "number") {
           console.warn("⛔ Post zonder lat/lng overgeslagen:", post);
@@ -3171,7 +3176,7 @@ function fetchPosten() {
   const typeToIconUrl = {
     ambulance: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Star_of_life2.svg/800px-Star_of_life2.svg.png",
     brandweer: "https://dbdzm869oupei.cloudfront.net/img/sticker/preview/82436.png",
-    politie: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png"
+    politie: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Patch_of_the_Dutch_Police.svg/640px-Patch_of_the_Dutch_Police.svg.png"
     // Voeg hier extra types toe zoals ziekenhuis, reddingsbrigade etc.
   };
 
