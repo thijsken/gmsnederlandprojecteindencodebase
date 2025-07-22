@@ -1842,7 +1842,7 @@ function robloxToLeafletCoords(robloxX, robloxY) {
           // Laad alle markers opnieuw nadat de kaart is geüpload
           fetchEmergencyReports();
           fetchUnits(serverId); // Zorg dat serverId beschikbaar is
-          fetchPosten(serverId);
+          fetchPosten();
         };
 
         img.src = imageUrl;
@@ -3213,7 +3213,7 @@ function genereerPopupVoorPost(post) {
   `;
 }
 
-function fetchPosten(serverId) {
+function fetchPosten() {
   if (!mapUploaded) {
     console.log("Kaart is nog niet geüpload, posten worden niet geladen.");
     return;
@@ -3318,7 +3318,8 @@ function fetchPosten(serverId) {
       });
       setTimeout(() => {
         listenToStatusUpdates(serverId);
-        fetchPosten(serverId);
+        fetchPosten();
+        console.log("Wacht 2 seconden klaar");
       }, 2000);
     })
     .catch(err => console.error("❌ Fout bij ophalen posten:", err));
