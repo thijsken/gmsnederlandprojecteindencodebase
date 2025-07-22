@@ -3267,10 +3267,9 @@ function fetchPosten() {
       });
       setTimeout(() => {
         listenToStatusUpdates(serverId);
+        fetchPosten();
         console.log("Wacht 2 seconden klaar");
       }, 9000);
-
-      fetchPosten();
     })
     .catch(err => console.error("❌ Fout bij ophalen posten:", err));
 }
