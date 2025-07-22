@@ -714,7 +714,8 @@
 
     <div class="flex justify-end space-x-2">
       <button onclick="closeLuchtalarmModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
-      <button onclick="confirmLuchtalarm()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Start Luchtalarm</button>
+      <button onclick="confirmLuchtalarm('start')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Start Luchtalarm</button>
+      <button onclick="confirmLuchtalarm('stop')" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded">Stop Luchtalarm</button>
     </div>
   </div>
 </div>
@@ -1217,7 +1218,7 @@ const mainMap = L.map('map', {
 
     function sendLuchtalarm() {
       // Statisch ID 'all' meegeven
-      triggerLuchtalarm('start', 'all');
+      triggerLuchtalarm(gekozenActie, 'all');
 
       closeConfirmLuchtalarmPopup();
       closeLuchtalarmModal();
