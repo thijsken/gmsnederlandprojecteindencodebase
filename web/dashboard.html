@@ -3118,71 +3118,65 @@ function meerInfo(callId) {
 
     
 // 🛰️ Ophalen en tonen van luchtalarm-palen via echte Roblox API data
-// function fetchLuchtalarmPalen() {
-//   if (!mapUploaded) { // Controleer of de kaart is geüpload
-//     console.log("Kaart is nog niet geüpload, luchtalarm palen worden niet geladen.");
-//     return;
-//   }
-
-//   fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
-//     .then(res => {
-//       if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
-//       return res.json();
-//     })
-//     .then(palen => {
-//       console.log("✅ Ontvangen paaldata:", palen);
-
-//       // Verwijder oude luchtalarm markers (indien bijgehouden in een aparte array/object)
-//       // Voor dit voorbeeld, als je geen specifieke array hebt, moet je een manier vinden om ze te identificeren en te verwijderen.
-//       // Bijvoorbeeld, als je ze allemaal in 'markers' array hebt en ze een specifieke eigenschap hebben.
-//       // Voor nu, gaan we ervan uit dat ze opnieuw worden getekend en de oude worden overschreven/verwijderd door de algemene clearMarkers() als die bestaat.
-//       // Als je geen clearMarkers() hebt die alle markers verwijdert, moet je hier een specifieke loop toevoegen.
-
-//       if (typeof palen === 'object' && palen !== null) {
-//         const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
-//         palenArray.forEach(paal => {
-//           console.log("🧭 Verwerk paal:", paal);
-//           addLuchtalarmPaal(paal);
-//         });
-//       } else {
-//         console.warn("⚠️ Geen object met palen ontvangen:", palen);
-//       }
-//     })
-//     .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
-// }
-
-function addLuchtalarmPaal(paal) {
+function fetchLuchtalarmPalen() {
   if (!mapUploaded) { // Controleer of de kaart is geüpload
-    console.warn("Kaart is nog niet geüpload, kan geen luchtalarm paal toevoegen.");
-    return;
-  }
-  if (!paal || typeof paal !== 'object') {
-    console.warn("❌ Ongeldige paaldata:", paal);
+    console.log("Kaart is nog niet geüpload, luchtalarm palen worden niet geladen.");
     return;
   }
 
-  const { id} = paal;
+  fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
+      return res.json();
+    })
+    .then(palen => {
+      console.log("✅ Ontvangen paaldata:", palen);
 
-  // if (typeof x !== 'number' || typeof y !== 'number') {
-  //   console.warn("❌ Ongeldige locatie voor paal:", paal);
-  //   return;
-  // }
+      // Verwijder oude luchtalarm markers (indien bijgehouden in een aparte array/object)
+      // Voor dit voorbeeld, als je geen specifieke array hebt, moet je een manier vinden om ze te identificeren en te verwijderen.
+      // Bijvoorbeeld, als je ze allemaal in 'markers' array hebt en ze een specifieke eigenschap hebben.
+      // Voor nu, gaan we ervan uit dat ze opnieuw worden getekend en de oude worden overschreven/verwijderd door de algemene clearMarkers() als die bestaat.
+      // Als je geen clearMarkers() hebt die alle markers verwijdert, moet je hier een specifieke loop toevoegen.
 
-  console.log("📍 Voeg marker toe voor:", paal);
+      if (typeof palen === 'object' && palen !== null) {
+        const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
+        palenArray.forEach(paal => {
+          console.log("🧭 Verwerk paal:", paal);
+          addLuchtalarmPaal(paal);
+        });
+      } else {
+        console.warn("⚠️ Geen object met palen ontvangen:", palen);
+      }
+    })
+    .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
+}
 
-  // Zet de Roblox-coördinaten om naar Leaflet-coördinaten
-  const [y, x] = robloxToLeafletCoords(paal.lng, paal.lat); // Gebruik robloxToLeafletCoords
+function fetchLuchtalarmPalen() {
+  if (!mapUploaded) { 
+    console.log("Kaart is nog niet geüpload, luchtalarm palen worden niet geladen.");
+    return;
+  }
 
-  // Voeg marker toe op de juiste locatie
-  const marker = L.marker([y, x]).addTo(mainMap);
+  fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
+      return res.json();
+    })
+    .then(palen => {
+      console.log("✅ Ontvangen paaldata:", palen);
 
-  // Voeg popup met knoppen toe
-  marker.bindPopup(`
-    <b>Luchtalarm: ${id || 'onbekend'}</b><br/>
-    <button onclick="triggerLuchtalarm('start', '${id}')">Start</button>
-    <button onclick="triggerLuchtalarm('stop', '${id}')">Stop</button>
-    <button onclick="triggerLuchtalarm('test', '${id}')">Test</button>
-  `);
+      // Paaldata ophalen en eventueel loggen, maar niet meer op de kaart zetten
+      if (typeof palen === 'object' && palen !== null) {
+        const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
+        palenArray.forEach(paal => {
+          console.log("📡 API Paal ontvangen:", paal);
+          // Geen kaart-functie meer aanroepen zoals addLuchtalarmPaal(paal);
+        });
+      } else {
+        console.warn("⚠️ Geen object met palen ontvangen:", palen);
+      }
+    })
+    .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
 }
 
 const postMarkers = {};
