@@ -135,31 +135,97 @@
             <!-- Content Area -->
             <div class="flex-1 overflow-hidden">
                 <!-- Dashboard View -->
-                <div id="dashboardView" class="h-full p-4 flex flex-col">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div class="bg-gray-800 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold mb-2">Actieve meldingen</h3>
-                            <div id="activeCallsCount" class="text-3xl font-bold text-red-500">0</div>
-                        </div>
-                        <div class="bg-gray-800 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold mb-2">Ingeschakelde eenheden</h3>
-                            <div id="activeUnitsCount" class="text-3xl font-bold text-blue-500">0</div>
-                        </div>
+                 <div id="dashboardView" class="h-full p-4 flex flex-col space-y-4">
+
+                  <!-- Statistiek: Actieve meldingen -->
+                  <div class="flex items-start gap-4 mb-4 flex-wrap h-40">
+                    <div class="meldingenintake flex flex-col gap-3 h-full">
+                      <button
+                        id="openNewCallPopupBtn"
+                        class="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded font-semibold whitespace-nowrap"
+                      >
+                        Nieuwe melding aanmaken
+                      </button>
+                      <div class="bg-gray-800 rounded-lg p-4 w-64 flex-shrink-0">
+                        <h3 class="text-lg font-semibold mb-2">Actieve meldingen</h3>
+                        <div id="activeCallsCount" class="text-3xl font-bold text-red-500">0</div>
+                      </div>
                     </div>
 
-                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden">
-                        <div class="bg-gray-800 rounded-lg p-4 overflow-hidden flex flex-col">
-                            <h3 class="text-lg font-semibold mb-2">Recente meldingen</h3>
-                            <div id="recentCalls" class="overflow-y-auto sidebar flex-1">
-                                <!-- Dynamisch ingeladen meldingen -->
-                            </div>
-                        </div>
+                    <!--de eenheiden-->
+                    <div class="bg-gray-800 rounded-lg p-4 w-64 flex-shrink-0 h-full flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold mb-4">Diensten online</h3>
+                        <table class="w-full text-left text-gray-300 text-sm">
+                          <thead>
+                            <tr>
+                              <th class="pb-1">Dienst</th>
+                              <th class="pb-1 text-right">Aantal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Politie</td>
+                              <td class="text-right font-semibold" id="policeUnitsCount">0</td>
+                            </tr>
+                            <tr>
+                              <td>Brandweer</td>
+                              <td class="text-right font-semibold" id="fireUnitsCount">0</td>
+                            </tr>
+                            <tr>
+                              <td>Ambulance</td>
+                              <td class="text-right font-semibold" id="ambulanceUnitsCount">0</td>
+                            </tr>
+                            <tr class="border-t border-gray-700">
+                              <td class="font-semibold">Totaal</td>
+                              <td class="text-right font-bold" id="totalUnitsCount">0</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                  </div>
 
-                        <div class="bg-gray-800 rounded-lg p-4 overflow-hidden flex flex-col lg:col-span-2">
-                            <h3 class="text-lg font-semibold mb-2">Live Kaart</h3>
-                            <div id="dashboardMap" class="flex-1 rounded-lg"></div>
-                        </div>
+                  <!-- Hoofd content: drie kolommen -->
+                  <div class="flex-1 flex gap-4 overflow-hidden">
+
+                    <!-- Links: Live Kaart -->
+                    <div class="flex-1 bg-gray-800 rounded-lg p-4 flex flex-col">
+                      <h3 class="text-lg font-semibold mb-2 text-white">Live Kaart</h3>
+                      <div id="dashboardMap" class="flex-1 rounded-lg bg-gray-700"></div>
                     </div>
+
+                    <!-- Midden: Nieuwe meldingen + wachttijd tabel -->
+                    <div class="w-96 bg-gray-800 rounded-lg p-4 flex flex-col">
+
+                      <div class="flex justify-between items-center mb-4">
+                        <!-- Tabel wachttijden -->
+                        <table class="text-white text-sm table-auto border border-gray-600">
+                          <thead>
+                            <tr>
+                              <th class="border border-gray-600 px-2">Melding</th>
+                              <th class="border border-gray-600 px-2">Wachttijd</th>
+                            </tr>
+                          </thead>
+                          <tbody id="waitTimesTableBody">
+                            <!-- Dynamisch vullen -->
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <h3 class="text-lg font-semibold mb-2 text-white">Nieuwe Bellers (in wacht)</h3>
+                      <div id="newCallsList" class="overflow-y-auto flex-1 space-y-2 text-white">
+                        <!-- Dynamisch ingeladen nieuwe meldingen -->
+                      </div>
+                    </div>
+
+                    <!-- Rechts: Recente meldingen -->
+                    <div class="w-96 bg-gray-800 rounded-lg p-4 flex flex-col">
+                      <h3 class="text-lg font-semibold mb-2 text-white">Recente meldingen</h3>
+                      <div id="recentCalls" class="overflow-y-auto flex-1 space-y-2 text-white">
+                        <!-- Dynamisch ingeladen recente meldingen -->
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
 
                   <!-- Map View -->
