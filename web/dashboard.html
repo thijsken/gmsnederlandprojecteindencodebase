@@ -1209,10 +1209,8 @@ const mainMap = L.map('map', {
     }
 
     function sendLuchtalarm() {
-      const locatie = document.getElementById('luchtalarmLocation').value;
-
-      // API trigger met geselecteerde locatie (id)
-      triggerLuchtalarm('start', locatie);
+      // Statisch ID 'all' meegeven
+      triggerLuchtalarm('start', 'all');
 
       closeConfirmLuchtalarmPopup();
       closeLuchtalarmModal();
