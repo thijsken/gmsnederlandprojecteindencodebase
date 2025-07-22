@@ -190,7 +190,7 @@
                               <i class="fas fa-bullhorn mr-2"></i>Start NL-Alert
                           </button>
                           <button onclick="openLuchtalarmModula()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded w-full">
-                              <i class="fas fa-bullhorn mr-2"></i>Start NL-Alert
+                              <i class="fas fa-bullhorn mr-2"></i>Start Luchtalarm
                           </button>
                           <div id="amberTable" class="space-y-2">
                           <!-- Dynamisch gevulde Amber Alerts -->
@@ -701,7 +701,15 @@
     <textarea id="luchtalarmMessage" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3 text-white" rows="3"></textarea>
 
     <label class="block text-sm font-medium mb-1 text-white">Locatie</label>
-    <input type="text" id="luchtalarmLocation" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3 text-white">
+    <select id="luchtalarmLocation" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3 text-white">
+      <option value="all">All Sirens</option>
+      <option value="603">Asd Adm. Helfrichstr (J)</option>
+      <option value="648">Asd Amstelveenseweg (S)</option>
+      <option value="609">Asd Apollolaan (K)</option>
+      <option value="634">Asd Australiëhavenweg (B)</option>
+      <option value="645">Asd Aziehavenweg (B)</option>
+      <option value="603">Asd Baarsjesweg (J)</option>
+    </select>
 
     <div class="flex justify-end space-x-2">
       <button onclick="closeLuchtalarmModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
