@@ -1208,8 +1208,8 @@ const mainMap = L.map('map', {
       document.getElementById('popupMessage').innerText = actie === 'start'
         ? 'Weet je zeker dat je het luchtalarm wilt STARTEN?'
         : 'Weet je zeker dat je het luchtalarm wilt STOPPEN?';
-      document.getElementById('luchtalarmModal').classList.add('luchtalarmModal');
       document.getElementById('confirmLuchtalarmPopup').classList.remove('hidden');
+      closeLuchtalarmModal();
     }
 
     function closeConfirmLuchtalarmPopup() {
