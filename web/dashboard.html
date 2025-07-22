@@ -1199,6 +1199,24 @@ const mainMap = L.map('map', {
     function closeLuchtalarmModal() {
       document.getElementById('luchtalarmModal').classList.add('hidden');
     }
+
+    function confirmLuchtalarm() {
+      document.getElementById('confirmLuchtalarmPopup').classList.remove('hidden');
+    }
+
+    function closeConfirmLuchtalarmPopup() {
+      document.getElementById('confirmLuchtalarmPopup').classList.add('hidden');
+    }
+
+    function sendLuchtalarm() {
+      const locatie = document.getElementById('luchtalarmLocation').value;
+
+      // API trigger met geselecteerde locatie (id)
+      triggerLuchtalarm('start', locatie);
+
+      closeConfirmLuchtalarmPopup();
+      closeLuchtalarmModal();
+    }
     // database funtions
 
     // helicopter popup
