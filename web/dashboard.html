@@ -3265,9 +3265,8 @@ function fetchPosten() {
           }, 200);
         });
       });
-
-      listenToStatusUpdates(serverId);
       setTimeout(() => {
+        listenToStatusUpdates(serverId);
         console.log("Wacht 2 seconden klaar");
       }, 9000);
 
