@@ -3151,33 +3151,33 @@ function meerInfo(callId) {
 //     .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
 // }
 
-function fetchLuchtalarmPalen() {
-  if (!mapUploaded) { 
-    console.log("Kaart is nog niet geüpload, luchtalarm palen worden niet geladen.");
-    return;
-  }
+// function fetchLuchtalarmPalen() {
+//   if (!mapUploaded) { 
+//     console.log("Kaart is nog niet geüpload, luchtalarm palen worden niet geladen.");
+//     return;
+//   }
 
-  fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
-      return res.json();
-    })
-    .then(palen => {
-      console.log("✅ Ontvangen paaldata:", palen);
+//   fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
+//     .then(res => {
+//       if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
+//       return res.json();
+//     })
+//     .then(palen => {
+//       console.log("✅ Ontvangen paaldata:", palen);
 
-      // Paaldata ophalen en eventueel loggen, maar niet meer op de kaart zetten
-      if (typeof palen === 'object' && palen !== null) {
-        const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
-        palenArray.forEach(paal => {
-          console.log("📡 API Paal ontvangen:", paal);
-          // Geen kaart-functie meer aanroepen zoals addLuchtalarmPaal(paal);
-        });
-      } else {
-        console.warn("⚠️ Geen object met palen ontvangen:", palen);
-      }
-    })
-    .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
-}
+//       // Paaldata ophalen en eventueel loggen, maar niet meer op de kaart zetten
+//       if (typeof palen === 'object' && palen !== null) {
+//         const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
+//         palenArray.forEach(paal => {
+//           console.log("📡 API Paal ontvangen:", paal);
+//           // Geen kaart-functie meer aanroepen zoals addLuchtalarmPaal(paal);
+//         });
+//       } else {
+//         console.warn("⚠️ Geen object met palen ontvangen:", palen);
+//       }
+//     })
+//     .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
+// }
 
 const postMarkers = {};
 
