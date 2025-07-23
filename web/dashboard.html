@@ -14,13 +14,6 @@
 </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        #latestAlert {
-          opacity: 0;
-          transition: opacity 0.7s ease;
-        }
-        #latestAlert.opacity-100 {
-          opacity: 1;
-        }
         .leaflet-popup-tip {
         display: none !important;
         }
@@ -1121,8 +1114,6 @@ const mainMap = L.map('map', {
         let customMapOverlay = null;
         let actievePostId = null;
         let mapUploaded = false; // Nieuwe vlag om bij te houden of de kaart is geüpload
-        const melding = [];/* de melding die je wil tonen, bv laatste geaccepteerde melding uit je data */
-
 
         // DOM Elements
         const apiKeyInput = document.getElementById('apiKey');
@@ -1972,6 +1963,12 @@ function robloxToLeafletCoords(robloxX, robloxY) {
           mapUploaded = true; // Stel de vlag in op true
           showNotification('📌 Kaart succesvol geladen!', 'success');
 
+          // 🔴 Testmarker op (0, 0) in Roblox-wereld
+          setTimeout(() => {
+            const [y, x] = robloxToLeafletCoords(0, 0);
+            L.marker([y, x]).addTo(mainMap).bindPopup("Roblox (0,0)").openPopup();
+          }, 500);
+
           // Laad alle markers opnieuw nadat de kaart is geüpload
           fetchEmergencyReports();
           fetchUnits(serverId); // Zorg dat serverId beschikbaar is
@@ -2262,6 +2259,33 @@ function robloxToLeafletCoords(robloxX, robloxY) {
                 Status: ${getStatusName(unit.status)}
             `);
         }
+
+  async function fetchAndShowLatestAlert() {
+    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(await res.text());
+
+      const meldingen = await res.json();
+
+      const sorted = Object.entries(meldingen)
+        .map(([id, data]) => ({ id, ...data }))
+        .sort((a, b) => b.timestamp - a.timestamp); // meest recente eerst
+
+      if (sorted.length === 0) return;
+
+      const laatste = sorted[0];
+      showLatestAlert(laatste.titel || 'Nieuwe melding');
+    } catch (err) {
+      console.error("Fout bij ophalen:", err);
+    }
+  }
+
+
+  // Start direct en herhaal elke 10 seconden
+  fetchAndShowLatestAlert();
+  setInterval(fetchAndShowLatestAlert, 10000);
 
         function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
@@ -2899,7 +2923,6 @@ function accepteerMelding(timestamp) {
         </div>
     `;
     callListContainer.appendChild(div);
-        showLatestAlert(call);
 }
 
 function loadMeldingenToCallList() {
@@ -3105,72 +3128,6 @@ function renderRecentCalls() {
         container.appendChild(div);
     });
 }
-
-  async function fetchAndShowLatestAlert() {
-    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`;
-
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(await res.text());
-
-      const meldingen = await res.json();
-
-      const sorted = Object.entries(meldingen)
-        .map(([id, data]) => ({ id, ...data }))
-        .sort((a, b) => b.timestamp - a.timestamp); // meest recente eerst
-
-      if (sorted.length === 0) return;
-
-      const laatste = sorted[0];
-      showLatestAlert(laatste.titel || 'Nieuwe melding');
-    } catch (err) {
-      console.error("Fout bij ophalen:", err);
-    }
-  }
-
-function showLatestAlert(melding, duration = 7000) {
-  const el = document.getElementById("latestAlert");
-  if (!el) return;
-
-  // Zorg dat timestamp een geldig getal is
-  const tijd = melding.timestamp ? new Date(Number(melding.timestamp)) : null;
-  const tijdString = tijd && !isNaN(tijd.getTime())
-    ? tijd.toLocaleString()
-    : 'Onbekend';
-
-  const html = `
-    <div class="max-w-md mx-auto bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded shadow-md" role="alert">
-      <strong class="font-bold">${melding.type || 'Melding'}</strong>
-      <span class="block sm:inline"> — ${melding.description || ''}</span>
-      <div class="text-sm mt-1">
-        <em>Speler:</em> ${melding.playerName || 'Onbekend'}<br/>
-        <em>Locatie:</em> ${melding.location || 'Onbekend'}<br/>
-        <em>Tijd:</em> ${tijdString}
-      </div>
-    </div>
-  `;
-
-  el.innerHTML = html;
-  el.classList.remove("hidden");
-  void el.offsetWidth;
-  el.classList.add("opacity-100");
-  el.classList.remove("opacity-0");
-
-  setTimeout(() => {
-    el.classList.remove("opacity-100");
-    el.classList.add("opacity-0");
-
-    setTimeout(() => {
-      el.classList.add("hidden");
-      el.innerHTML = '';
-    }, 700);
-  }, duration);
-}
-
-  // Start direct en herhaal elke 10 seconden
-  fetchAndShowLatestAlert();
-  setInterval(fetchAndShowLatestAlert, 10000);
-
 
 // Functie om meer informatie over een melding te tonen
 function meerInfo(callId) {
