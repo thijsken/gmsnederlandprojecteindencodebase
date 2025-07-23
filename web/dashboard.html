@@ -1150,7 +1150,7 @@ const mainMap = L.map('map', {
           container.innerHTML = `
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-semibold">Laatste geaccepteerde melding</h3>
-              <span class="text-sm text-gray-500">${new Date(melding.timestamp).toLocaleString()}</span>
+              <span class="text-sm text-gray-500">${new Date(calls.timestamp).toLocaleString()}</span>
             </div>
             <p class="mt-2"><strong>${melding.titel || "Geen titel"}</strong></p>
             <p class="text-sm">${melding.beschrijving || "Geen beschrijving beschikbaar."}</p>
