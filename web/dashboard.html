@@ -1140,6 +1140,37 @@ const mainMap = L.map('map', {
         notificationsBtn.addEventListener('click', () => {
           notificationsList.classList.toggle('visible');
         });
+        function updateTimeAndDate() {
+          const now = new Date();
+
+          // Haal uren en minuten los, zodat we de dubbele punt zelf kunnen regelen
+          const uren = now.getHours().toString().padStart(2, '0');
+          const minuten = now.getMinutes().toString().padStart(2, '0');
+
+          // Knipper-effect voor dubbele punt: aan bij even seconde, uit bij oneven
+          const toonDubbelePunt = now.getSeconds() % 2 === 0;
+          const dubbelePunt = toonDubbelePunt ? ':' : ' ';
+
+          // Bouw de tijdstring zelf
+          const time = `${uren}${dubbelePunt}${minuten}`;
+
+          // Datum updaten, kan elke minuut (of 10 sec) want datum verandert langzaam
+          const date = now.toLocaleDateString('nl-NL', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          });
+
+          document.getElementById("currentTime").textContent = time;
+          document.getElementById("currentDate").textContent = date;
+        }
+
+        // Elke seconde updaten voor knipperende dubbele punt
+        setInterval(updateTimeAndDate, 1000);
+
+        // Direct ook meteen uitvoeren
+        updateTimeAndDate();
 
         async function fetchListId() {
           const url = `https://api.trello.com/1/boards/${BOARD_ID}/lists?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`;
