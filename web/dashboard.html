@@ -109,7 +109,7 @@
                     <h1 class="text-xl font-bold">112 Systeem van GMS_Nederland</h1>
                     <div class="flex items-center space-x-2">
                         <span id="connectionStatus" class="h-3 w-3 bg-green-500 rounded-full"></span>
-                        <span class="text-sm">Online</span>
+                        <span id="textstatus" class="text-sm">Online</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -1969,6 +1969,7 @@ function robloxToLeafletCoords(robloxX, robloxY) {
         
         async function testConnection() {
         const statusEl = document.getElementById('connectionStatus');
+        const textstatushow = document.getElementById('textstatus');
         const endpoints = [
             '/',
             `/api/apiamber/amber?serverId=${serverId}`,
@@ -2004,10 +2005,12 @@ function robloxToLeafletCoords(robloxX, robloxY) {
         if (allOk) {
             showNotification('✅ Alle API-endpoints zijn bereikbaar!', 'success');
             statusEl.classList.remove('bg-red-500');
+            textstatushow.textContent = 'Online';
             statusEl.classList.add('bg-green-500');
         } else {
             showNotification('❌ Sommige API-endpoints zijn niet bereikbaar!', 'error');
             statusEl.classList.remove('bg-green-500');
+            textstatushow.textContent = 'Offline';
             statusEl.classList.add('bg-red-500');
         }
         }
