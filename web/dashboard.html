@@ -103,46 +103,44 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-          <!-- Top Bar -->
-          <div class="bg-gray-800 p-4 flex justify-between items-center border-b border-gray-700">
-            <!-- Links: Titel + status -->
-            <div class="flex items-center space-x-4">
-              <h1 class="text-xl font-bold">112 Systeem van GMS_Nederland</h1>
-              <div class="flex items-center space-x-2">
-                <span id="connectionStatus" class="h-3 w-3 bg-green-500 rounded-full"></span>
-                <span id="textstatus" class="text-sm text-white">Online</span>
-              </div>
-            </div>
-
-            <!-- Middenblok: Tijd en datum -->
-            <div class="bg-gray-800 rounded-lg p-1 w-64 flex-shrink-0 h-full flex flex-col justify-center items-center text-white">
-              <div id="currentTime" class="text-3xl font-bold text-blue-400">--:--</div>
-              <div id="currentDate" class="text-sm text-gray-400 mt-1 text-center">-- -- ----</div>
-            </div>
-
-            <!-- Rechts: Notificaties en account -->
-            <div class="flex items-center space-x-4">
-              <div class="relative">
-                <button id="notificationsBtn" class="text-white px-4 py-2 rounded">
-                  🔔
-                  <span id="notificationsCount" style="background:#ef4444; padding: 2px 6px; border-radius: 50%; font-weight: bold; margin-left: 6px; font-size: 12px;">0</span>
-                </button>
-                <ul id="notificationsList">
-                  <!-- Notificaties komen hier -->
-                </ul>
-              </div>
-              <div class="flex items-center space-x-2 cursor-pointer hover:bg-blue-700 rounded px-2 py-1 transition">
-                <div class="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
-                  <i class="fas fa-user"></i>
+            <!-- Top Bar -->
+            <div class="bg-gray-800 p-4 flex justify-between items-center border-b border-gray-700">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold">112 Systeem van GMS_Nederland</h1>
+                    <div class="flex items-center space-x-2">
+                        <span id="connectionStatus" class="h-3 w-3 bg-green-500 rounded-full"></span>
+                        <span id="onlinestatus" class="text-sm">Online</span>
+                    </div>
                 </div>
-                <span class="text-white font-medium">Meldkamer</span>
-              </div>
+                  <!-- Middenblok: Tijd en datum -->
+                    <div class="bg-gray-800 rounded-lg p-1 w-64 flex-shrink-0 h-full flex flex-col justify-center items-center text-white">
+                      <div id="currentTime" class="text-3xl font-bold text-blue-400">--:--</div>
+                      <div id="currentDate" class="text-sm text-gray-400 mt-1 text-center">-- -- ----</div>
+                    </div>
+                <div class="flex items-center space-x-4">
+                  <div class="relative">
+                        <button id="notificationsBtn" class="text-white px-4 py-2 rounded">
+                          🔔
+                          <span id="notificationsCount" style="background:#ef4444; padding: 2px 6px; border-radius: 50%; font-weight: bold; margin-left: 6px; font-size: 12px;">0</span>
+                        </button>
+
+                        <ul id="notificationsList">
+                          <!-- Notificaties komen hier -->
+                        </ul>
+                      </div>
+                      <!--is voor het account van mensen-->
+                      <button class="flex items-center space-x-2 bg-transparent hover:bg-blue-100 rounded px-2 py-1 transition" onclick="alert('Klik gedetecteerd!')">
+                          <div class="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                              <i class="fas fa-user"></i>
+                          </div>
+                            <span class="font-medium text-black">Meldkamer</span>
+                      </button>
+                </div>
             </div>
-          </div>
 
             <!-- Content Area -->
             <div class="flex-1 overflow-hidden">
-                <!-- Dashboard View -->
+              <!-- Dashboard View -->
                  <div id="dashboardView" class="h-full p-4 flex flex-col space-y-4">
 
                   <!-- Statistiek: Actieve meldingen -->
@@ -160,7 +158,6 @@
                       </div>
                     </div>
 
-                    
                     <!-- Middenblok: Meldingen met fallback card -->
                     <div class="bg-gray-800 rounded-lg p-6 w-[889px] flex-shrink-0 h-full flex flex-col justify-center items-center text-white">
                       <div id="noAlertsCard" class="text-lg text-gray-400 font-semibold text-center px-4">
@@ -246,7 +243,179 @@
 
                   </div>
                 </div>
+        <!-- Popup voor nieuwe melding -->
+        <div
+          id="newCallPopup"
+          class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden"
+        >
+          <div class="bg-gray-900 rounded-lg p-6 w-[50rem] relative">
+            <h2 class="text-xl font-semibold mb-4 text-white">Nieuwe melding aanmaken</h2>
+            <form id="newCallForm" class="flex flex-col space-y-4 text-white">
 
+              <!-- Eerste rij -->
+              <div class="flex gap-4">
+                <!-- Type melding -->
+                <label class="flex flex-col w-1/1">
+                  <span class="mb-1 text-right">Type melding:</span>
+                  <div class="flex gap-1">
+                                <button
+                      type="button"
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded h-[42px]"
+                    >
+                      Hints|Kar
+                    </button>
+                    <span class="bg-gray-700 text-gray-300 px-2 py-2 rounded-l select-none">CM</span>
+                    <select
+                      id="typeSelect"
+                      name="type"
+                      class="bg-gray-800 text-white p-2 rounded w-full h-[42px]">
+                      <option>Brand</option>
+                      <option>Politie</option>
+                      <option>Ambulance</option>
+                      <option>Overig</option>
+                    </select>
+                  </div>
+                </label>
+
+                <!-- Categorie -->
+                <label class="flex flex-col w-1/3">
+                  <span class="mb-1">Categorie:</span>
+                  <input
+                    type="text"
+                    name="categorie"
+                    placeholder="Categorie invoeren"
+                    list="categorieLijst"
+                    class="bg-gray-800 rounded p-2 w-full"
+                  />
+                  <datalist id="categorieLijst">
+                    <optgroup label="GRIPS">
+                        <option value="GRIP 0 – Dagelijks optreden van de Hulpdiensten">GRIP 0 – Dagelijks optreden van de Hulpdiensten</option>
+                        <option value="GRIP 1 – Gecoördineerde multidisciplinaire inzet (CTPI)">GRIP 1 – Gecoördineerde multidisciplinaire inzet (CTPI)</option>
+                        <option value="GRIP 2 – Grootschalig incident (CoPI + ROT)">GRIP 2 – Grootschalig incident (CoPI + ROT)</option>
+                        <option value="GRIP 3 – Ramp in één Gemeente (CoRT + ROT + GBT’s)">GRIP 3 – Ramp in één Gemeente (CoRT + ROT + GBT’s)</option>
+                        <option value="GRIP 4 – Ramp in meerdere gemeenten (CoRT + ROT + RBT)">GRIP 4 – Ramp in meerdere gemeenten (CoRT + ROT + RBT)</option>
+                        <option value="GRIP 5 – Crisis in meerdere provincies (NCC etc.)">GRIP 5 – Crisis in meerdere provincies (NCC etc.)</option>
+                    </optgroup>
+
+                    <optgroup label="Politiecodes">
+                        <option value="Overvalmelding">Overvalmelding</option>
+                        <option value="Auto te water met dodelijke afloop">Auto te water met dodelijke afloop</option>
+                        <option value="Brandmelding">Brandmelding</option>
+                        <option value="Personenzoektocht">Personenzoektocht</option>
+                        <option value="Verkeersongeval met letsel">Verkeersongeval met letsel</option>
+                        <option value="Geweldsincident">Geweldsincident</option>
+                    </optgroup>
+
+                    <optgroup label="Ambulance- en Brandweer meldingen">
+                        <option value="Medische noodsituatie">Medische noodsituatie</option>
+                        <option value="Brand in gebouw">Brand in gebouw</option>
+                        <option value="Ongeval met gevaarlijke stoffen">Ongeval met gevaarlijke stoffen</option>
+                        <option value="Waterongeval">Waterongeval</option>
+                        <option value="1 – Assistentie 2e ambulance">1 – Assistentie 2e ambulance</option>
+                        <option value="2 – Met spoed politie ter plaatse">2 – Met spoed politie ter plaatse</option>
+                        <option value="3 – Met spoed brandweer ter plaatse">3 – Met spoed brandweer ter plaatse</option>
+                        <option value="4 – idem (minder gecompliceerde reddingsoperatie)">4 – idem (minder gecompliceerde reddingsoperatie)</option>
+                        <option value="5 – Begrafenisondernemer ter plaatse">5 – Begrafenisondernemer ter plaatse</option>
+                        <option value="6 – Bijstand van brandweer of duikers">6 – Bijstand van brandweer of duikers</option>
+                        <option value="7 – Politiebegeleiding">7 – Politiebegeleiding</option>
+                        <option value="8 – Dokter ter plaatse">8 – Dokter ter plaatse</option>
+                        <option value="9 – Gevaar voor ambulance personeel">9 – Gevaar voor ambulance personeel</option>
+                        <option value="10 – Mobilofoon via rampenkanaal">10 – Mobilofoon via rampenkanaal</option>
+                        <option value="100 – Aanrijding met 1 gewonde">100 – Aanrijding met 1 gewonde</option>
+                        <option value="110 – Aanrijding met meerdere gewonden">110 – Aanrijding met meerdere gewonden</option>
+                        <option value="120 – Aanrijding met beknelling">120 – Aanrijding met beknelling</option>
+                        <option value="130 – Aanrijding met trein">130 – Aanrijding met trein</option>
+                        <option value="140 – Auto te water">140 – Auto te water</option>
+                    </optgroup>
+
+                    <optgroup label="Veelvoorkomende Spoedmeldingen">
+                        <option value="Reanimatie">Reanimatie</option>
+                        <option value="A1 – Spoed ambulance (levensbedreigend)">A1 – Spoed ambulance (levensbedreigend)</option>
+                        <option value="A2 – Spoed ambulance (niet levensbedreigend)">A2 – Spoed ambulance (niet levensbedreigend)</option>
+                        <option value="B – Vervoer zonder spoed">B – Vervoer zonder spoed</option>
+                        <option value="Assistentie ambulance">Assistentie ambulance</option>
+                        <option value="Brand in woning of gebouw">Brand in woning of gebouw</option>
+                        <option value="Brand voertuig">Brand voertuig</option>
+                        <option value="Ongeval met letsel">Ongeval met letsel</option>
+                        <option value="Ongeval met beknelling">Ongeval met beknelling</option>
+                        <option value="Ongeval met gevaarlijke stoffen">Ongeval met gevaarlijke stoffen</option>
+                        <option value="Persoon te water">Persoon te water</option>
+                        <option value="Persoon van hoogte gevallen">Persoon van hoogte gevallen</option>
+                        <option value="Melding AED ingezet">Melding AED ingezet</option>
+                        <option value="Persoon in problemen op hoogte of diepte">Persoon in problemen op hoogte of diepte</option>
+                        <option value="Rookmelder gaat af">Rookmelder gaat af</option>
+                    </optgroup>
+
+                  </datalist>
+                </label>
+
+                <!-- Betreft -->
+                <label class="flex flex-col w-1/3">
+                  <span class="mb-1">Betreft:</span>
+                  <select name="betreft" class="bg-gray-800 rounded p-2 w-full">
+                    <optgroup label="Dieren">
+                      <option>Dier</option>
+                    </optgroup>
+                    <optgroup label="Persoon">
+                      <option>Persoon</option>
+                    </optgroup>
+                    <optgroup label="voertuigen">
+                      <option>PersoonAuto</option>
+                      <option>Vrachtwagen</option>
+                      <option>Bus</option>
+                      <option>Tractor</option>
+                      <option>Schooter | Brommer</option>
+                      <option>Fiets</option>
+                      <option>Boot</option>
+                    </optgroup>
+                  </select>
+                </label>
+              </div>
+
+              <!-- Locatie -->
+              <label class="flex flex-col">
+                <span class="mb-1">Locatie:</span>
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Voer locatie in"
+                  class="w-full bg-gray-800 rounded p-2"
+                  required
+                />
+              </label>
+
+              <!-- Omschrijving -->
+              <label class="flex flex-col">
+                <span class="mb-1">Omschrijving:</span>
+                <textarea
+                  name="description"
+                  rows="3"
+                  placeholder="Geef een korte omschrijving"
+                  class="w-full bg-gray-800 rounded p-2"
+                  required
+                ></textarea>
+              </label>
+
+              <!-- Actieknoppen -->
+              <div class="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  id="closeNewCallPopupBtn"
+                  class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submit"
+                  class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+                >
+                  Toevoegen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+   
                   <!-- Map View -->
                   <div id="mapView" class="h-full hidden">
                   <div class="h-full flex">
@@ -570,44 +739,6 @@
                       </div>
                   </div>
               </div>
-        </div>
-    </div>
-
-    <!-- New Unit Modal -->
-    <div id="newUnitModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 rounded-lg w-full max-w-md">
-            <div class="p-4 border-b border-gray-700 flex justify-between items-center">
-                <h3 class="text-lg font-semibold">Nieuwe eenheid toevoegen</h3>
-                <button id="closeNewUnitModal" class="text-gray-400 hover:text-gray-300">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-4">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Eenheidstype</label>
-                    <select id="unitType" class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 w-full">
-                        <option value="police">Politie</option>
-                        <option value="ambulance">Ambulance</option>
-                        <option value="fire">Brandweer</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Kenteken</label>
-                    <input type="text" id="unitId" class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 w-full" placeholder="Bijv. AM-POL-001">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Bestuurder</label>
-                    <input type="text" id="unitDriver" class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 w-full" placeholder="Naam bestuurder">
-                </div>
-                <div class="flex justify-end space-x-2">
-                    <button id="cancelNewUnit" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">
-                        Annuleren
-                    </button>
-                    <button id="saveNewUnit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                        Opslaan
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1046,7 +1177,7 @@
 
 auth.onAuthStateChanged(user => {
   if (!user) {
-    window.location.href = 'index.html';
+    // window.location.href = 'index.html'; // allen voor het testen uit
   } else {
     const serverId = localStorage.getItem("serverId");
     const serverName = localStorage.getItem("serverName");
@@ -1087,16 +1218,16 @@ auth.onAuthStateChanged(user => {
         
         // Initialize maps
         const dashboardMap = L.map('dashboardMap', {
-    crs: L.CRS.Simple,
-    minZoom: -5,
-    maxZoom: 5,
-    zoomSnap: 0.1
-}).setView([0, 0], 0);
-const mainMap = L.map('map', {
-  crs: L.CRS.Simple,
-  minZoom: -5,
-  maxZoom: 5
-});
+            crs: L.CRS.Simple,
+            minZoom: -5,
+            maxZoom: 5,
+            zoomSnap: 0.1
+        }).setView([0, 0], 0);
+        const mainMap = L.map('map', {
+          crs: L.CRS.Simple,
+          minZoom: -5,
+          maxZoom: 5
+        });
 
         // Markers and data
         let notifications = [];
@@ -1105,9 +1236,7 @@ const mainMap = L.map('map', {
         let emergencyMarkers = {};
         let unitMarkers = {};
         let calls = [];
-        // let units = []; // Deze variabele wordt niet gebruikt in de provided code, maar is wel gedefinieerd in de context.
         let units = []; // Definieer 'units' array om fouten te voorkomen
-        // let amberAlerts = []; // Deze variabele wordt niet gebruikt in de provided code, maar is wel gedefinieerd in de context.
         let amberAlerts = []; // Definieer 'amberAlerts' array om fouten te voorkomen
         let verdachteKentekens  = [];
         let laatstVerzondenP2000 = null;
@@ -1138,20 +1267,6 @@ const mainMap = L.map('map', {
         document.getElementById('generateApiKey').addEventListener('click', generateApiKey);
         document.getElementById('testConnection').addEventListener('click', testConnection);
 
-        //laast melding laat zien.
-        const container = document.getElementById("latestAlert");
-          container.innerHTML = `
-            <div class="flex justify-between items-center">
-              <h3 class="text-lg font-semibold">Laatste geaccepteerde melding</h3>
-              <span class="text-sm text-gray-500">${new Date(melding.timestamp).toLocaleString()}</span>
-            </div>
-            <p class="mt-2"><strong>${melding.titel || "Geen titel"}</strong></p>
-            <p class="text-sm">${melding.beschrijving || "Geen beschrijving beschikbaar."}</p>
-          `;
-
-        container.classList.remove("hidden");
-
-
         // meldingen updates. 
         const notificationsBtn = document.getElementById('notificationsBtn');
         const notificationsList = document.getElementById('notificationsList');
@@ -1165,37 +1280,38 @@ const mainMap = L.map('map', {
         notificationsBtn.addEventListener('click', () => {
           notificationsList.classList.toggle('visible');
         });
-        function updateTimeAndDate() {
-          const now = new Date();
 
-          // Haal uren en minuten los, zodat we de dubbele punt zelf kunnen regelen
-          const uren = now.getHours().toString().padStart(2, '0');
-          const minuten = now.getMinutes().toString().padStart(2, '0');
+function updateTimeAndDate() {
+  const now = new Date();
 
-          // Knipper-effect voor dubbele punt: aan bij even seconde, uit bij oneven
-          const toonDubbelePunt = now.getSeconds() % 2 === 0;
-          const dubbelePunt = toonDubbelePunt ? ':' : ' ';
+  // Haal uren en minuten los, zodat we de dubbele punt zelf kunnen regelen
+  const uren = now.getHours().toString().padStart(2, '0');
+  const minuten = now.getMinutes().toString().padStart(2, '0');
 
-          // Bouw de tijdstring zelf
-          const time = `${uren}${dubbelePunt}${minuten}`;
+  // Knipper-effect voor dubbele punt: aan bij even seconde, uit bij oneven
+  const toonDubbelePunt = now.getSeconds() % 2 === 0;
+  const dubbelePunt = toonDubbelePunt ? ':' : ' ';
 
-          // Datum updaten, kan elke minuut (of 10 sec) want datum verandert langzaam
-          const date = now.toLocaleDateString('nl-NL', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-          });
+  // Bouw de tijdstring zelf
+  const time = `${uren}${dubbelePunt}${minuten}`;
 
-          document.getElementById("currentTime").textContent = time;
-          document.getElementById("currentDate").textContent = date;
-        }
+  // Datum updaten, kan elke minuut (of 10 sec) want datum verandert langzaam
+  const date = now.toLocaleDateString('nl-NL', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
 
-        // Elke seconde updaten voor knipperende dubbele punt
-        setInterval(updateTimeAndDate, 1000);
+  document.getElementById("currentTime").textContent = time;
+  document.getElementById("currentDate").textContent = date;
+}
 
-        // Direct ook meteen uitvoeren
-        updateTimeAndDate();
+// Elke seconde updaten voor knipperende dubbele punt
+setInterval(updateTimeAndDate, 1000);
+
+// Direct ook meteen uitvoeren
+updateTimeAndDate();
 
         async function fetchListId() {
           const url = `https://api.trello.com/1/boards/${BOARD_ID}/lists?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`;
@@ -1211,17 +1327,6 @@ const mainMap = L.map('map', {
           }
         }
         // end meldingenupdates.
-
-        // Zorg ervoor dat de modal bovenop alles komt
-        let modal = document.getElementById("callDetailsModal");
-        modal.style.zIndex = 9999; // Zet de z-index op 9999 of een andere hoge waarde
-        document.getElementById('closeNewUnitModal').addEventListener('click', () => {
-            document.getElementById('newUnitModal').classList.add('hidden');
-        });
-        document.getElementById('cancelNewUnit').addEventListener('click', () => {
-            document.getElementById('newUnitModal').classList.add('hidden');
-        });
-        document.getElementById('saveNewUnit').addEventListener('click', saveNewUnit);
 
         // Call management
         document.getElementById('closeCallDetails').addEventListener('click', () => {
@@ -1259,7 +1364,20 @@ const mainMap = L.map('map', {
           const noUnitsMsg = document.getElementById('noUnitsMsg');
           const loadingUnitsMsg = document.getElementById('loadingUnitsMsg');
           const errorUnitsMsg = document.getElementById('errorUnitsMsg');
+
+        // popupmeldingen document
+        const openPopupBtn = document.getElementById('openNewCallPopupBtn');
+        const popup = document.getElementById('newCallPopup');
+        const closePopupBtn = document.getElementById('closePopupBtn');
+        openPopupBtn.addEventListener('click', openPopup);
           
+
+  // meldingenpopup
+
+  function openPopup() {
+    popup.classList.remove('hidden');
+  }
+  //end
   // systemen meldingen.
     async function fetchMedelingen() {
     if (!LIST_ID) {
@@ -2033,7 +2151,7 @@ function robloxToLeafletCoords(robloxX, robloxY) {
         
         async function testConnection() {
         const statusEl = document.getElementById('connectionStatus');
-        const textstatushow = document.getElementById('textstatus');
+        const statustext = document.getElementById('onlinestatus');
         const endpoints = [
             '/',
             `/api/apiamber/amber?serverId=${serverId}`,
@@ -2069,48 +2187,14 @@ function robloxToLeafletCoords(robloxX, robloxY) {
         if (allOk) {
             showNotification('✅ Alle API-endpoints zijn bereikbaar!', 'success');
             statusEl.classList.remove('bg-red-500');
-            textstatushow.textContent = 'Online';
+            statustext.textContent = 'Online';
             statusEl.classList.add('bg-green-500');
         } else {
             showNotification('❌ Sommige API-endpoints zijn niet bereikbaar!', 'error');
             statusEl.classList.remove('bg-green-500');
-            textstatushow.textContent = 'Offline';
+            statustext.textContent = 'Offline';
             statusEl.classList.add('bg-red-500');
         }
-        }
-
-        function saveNewUnit() {
-            const unitType = document.getElementById('unitType').value;
-            const unitId = document.getElementById('unitId').value;
-            const unitDriver = document.getElementById('unitDriver').value;
-            
-            if (!unitId || !unitDriver) {
-                showNotification('Vul alle velden in!', 'error');
-                return;
-            }
-            
-            const newUnit = {
-                id: unitId,
-                type: unitType,
-                driver: unitDriver,
-                status: 'available',
-                location: {
-                lat: Math.floor(Math.random() * 1000),
-                lng: Math.floor(Math.random() * 1000)
-            }
-            };
-            
-            // In een echte implementatie zou je dit naar de backend sturen
-            units.push(newUnit);
-            updateUnits();
-            addUnitMarker(newUnit);
-            
-            document.getElementById('newUnitModal').classList.add('hidden');
-            showNotification('Eenheid toegevoegd!');
-            
-            // Reset form
-            document.getElementById('unitId').value = '';
-            document.getElementById('unitDriver').value = '';
         }
 
         function updateUnits() {
@@ -2259,33 +2343,6 @@ function robloxToLeafletCoords(robloxX, robloxY) {
                 Status: ${getStatusName(unit.status)}
             `);
         }
-
-  async function fetchAndShowLatestAlert() {
-    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}`;
-
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(await res.text());
-
-      const meldingen = await res.json();
-
-      const sorted = Object.entries(meldingen)
-        .map(([id, data]) => ({ id, ...data }))
-        .sort((a, b) => b.timestamp - a.timestamp); // meest recente eerst
-
-      if (sorted.length === 0) return;
-
-      const laatste = sorted[0];
-      showLatestAlert(laatste.titel || 'Nieuwe melding');
-    } catch (err) {
-      console.error("Fout bij ophalen:", err);
-    }
-  }
-
-
-  // Start direct en herhaal elke 10 seconden
-  fetchAndShowLatestAlert();
-  setInterval(fetchAndShowLatestAlert, 10000);
 
         function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
@@ -2540,6 +2597,47 @@ function robloxToLeafletCoords(robloxX, robloxY) {
             
             showNotification(`${getUnitTypeName(unitType)} eenheid ${availableUnit.id} toegewezen!`);
         }
+
+        // function closeCall() {
+        //     if (!currentCallId) return;
+            
+        //     // Find call and mark as closed
+        //     const call = calls.find(c => String(c.id) === String(currentCallId));
+        //     if (call) {
+        //         call.status = 'closed';
+        //     }
+            
+        //     // Free up assigned units
+        //     units.forEach(unit => {
+        //         if (unit.assignedCall === currentCallId) {
+        //             unit.status = 'available';
+        //             unit.assignedCall = null;
+                    
+        //             // Update marker
+        //             if (unitMarkers[unit.id]) {
+        //                 let color = '#3b82f6'; // Blue for police
+        //                 if (unit.type === 'ambulance') color = '#10b981'; // Green for ambulance
+        //                 if (unit.type === 'fire') color = '#f59e0b'; // Orange for fire
+                        
+        //                 unitMarkers[unit.id].setStyle({color: color});
+        //             }
+        //         }
+        //     });
+            
+        //     // Update UI
+        //     // updateUnits();
+        //     updateCalls();
+            
+        //     // Remove emergency marker
+        //     if (emergencyMarkers[currentCallId]) {
+        //         mainMap.removeLayer(emergencyMarkers[currentCallId]);
+        //         dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
+        //         delete emergencyMarkers[currentCallId];
+        //     }
+            
+        //     showNotification(`Melding ${currentCallId} afgehandeld!`);
+        //     document.getElementById('callDetailsModal').classList.add('hidden');
+        // }
 
         function sluitMelding(callId) {
           if (!callId) {
