@@ -2264,7 +2264,7 @@ function robloxToLeafletCoords(robloxX, robloxY) {
         }
 
   async function fetchAndShowLatestAlert() {
-    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}`;
+    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`;
 
     try {
       const res = await fetch(url);
