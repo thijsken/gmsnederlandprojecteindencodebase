@@ -1138,6 +1138,20 @@ const mainMap = L.map('map', {
         document.getElementById('generateApiKey').addEventListener('click', generateApiKey);
         document.getElementById('testConnection').addEventListener('click', testConnection);
 
+        //laast melding laat zien.
+        const container = document.getElementById("latestAlert");
+          container.innerHTML = `
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-semibold">Laatste geaccepteerde melding</h3>
+              <span class="text-sm text-gray-500">${new Date(melding.timestamp).toLocaleString()}</span>
+            </div>
+            <p class="mt-2"><strong>${melding.titel || "Geen titel"}</strong></p>
+            <p class="text-sm">${melding.beschrijving || "Geen beschrijving beschikbaar."}</p>
+          `;
+
+        container.classList.remove("hidden");
+
+
         // meldingen updates. 
         const notificationsBtn = document.getElementById('notificationsBtn');
         const notificationsList = document.getElementById('notificationsList');
@@ -2268,22 +2282,31 @@ function robloxToLeafletCoords(robloxX, robloxY) {
     }
   }
 
-  function showLatestAlert(message, duration = 5000) {
-    const el = document.getElementById("latestAlert");
-    el.textContent = message;
-    el.classList.remove("hidden");
+function showLatestAlert(melding, duration = 5000) {
+  const el = document.getElementById("latestAlert");
 
-    setTimeout(() => {
-      el.classList.add("opacity-100");
-      el.classList.remove("opacity-0");
-    }, 10);
+  el.innerHTML = `
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-semibold">Laatste geaccepteerde melding</h3>
+      <span class="text-sm text-gray-500">${new Date(melding.timestamp).toLocaleString()}</span>
+    </div>
+    <p class="mt-2"><strong>${melding.titel || "Geen titel"}</strong></p>
+    <p class="text-sm">${melding.beschrijving || "Geen beschrijving beschikbaar."}</p>
+  `;
 
-    setTimeout(() => {
-      el.classList.add("opacity-0");
-      el.classList.remove("opacity-100");
-      setTimeout(() => el.classList.add("hidden"), 700);
-    }, duration);
-  }
+  el.classList.remove("hidden");
+  el.classList.remove("opacity-0");
+  el.classList.add("opacity-100");
+
+  // Na duration fade out
+  setTimeout(() => {
+    el.classList.remove("opacity-100");
+    el.classList.add("opacity-0");
+
+    // Na fade duration verberg het element
+    setTimeout(() => el.classList.add("hidden"), 700);
+  }, duration);
+}
 
   // Start direct en herhaal elke 10 seconden
   fetchAndShowLatestAlert();
