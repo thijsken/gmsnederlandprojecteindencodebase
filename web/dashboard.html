@@ -2246,30 +2246,27 @@ function robloxToLeafletCoords(robloxX, robloxY) {
             `);
         }
 
-async function fetchAndShowLatestAlert(API_URL, serverId) {
-  const params = new URLSearchParams();
-  params.append('serverId', serverId);
+  async function fetchAndShowLatestAlert() {
+    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}`;
 
-  const url = `${API_URL}/api/servers/${serverId}/meldingen`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(await res.text());
 
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(await res.text());
+      const meldingen = await res.json();
 
-    const meldingen = await res.json();
+      const sorted = Object.entries(meldingen)
+        .map(([id, data]) => ({ id, ...data }))
+        .sort((a, b) => b.timestamp - a.timestamp); // meest recente eerst
 
-    const sorted = Object.entries(meldingen)
-      .map(([id, data]) => ({ id, ...data }))
-      .sort((a, b) => b.timestamp - a.timestamp); // meest recente eerst
+      if (sorted.length === 0) return;
 
-    if (sorted.length === 0) return;
-
-    const laatste = sorted[0];
-    showLatestAlert(laatste.titel || 'Nieuwe melding');
-  } catch (err) {
-    console.error("Fout bij ophalen:", err);
+      const laatste = sorted[0];
+      showLatestAlert(laatste.titel || 'Nieuwe melding');
+    } catch (err) {
+      console.error("Fout bij ophalen:", err);
+    }
   }
-}
 
   function showLatestAlert(message, duration = 5000) {
     const el = document.getElementById("latestAlert");
@@ -2284,18 +2281,13 @@ async function fetchAndShowLatestAlert(API_URL, serverId) {
     setTimeout(() => {
       el.classList.add("opacity-0");
       el.classList.remove("opacity-100");
-
-      setTimeout(() => {
-        el.classList.add("hidden");
-      }, 700);
+      setTimeout(() => el.classList.add("hidden"), 700);
     }, duration);
   }
 
-  // Vul hier je serverId in
-setInterval(() => {
-  fetchAndShowLatestAlert(API_URL, serverId);
-}, 10000);
-
+  // Start direct en herhaal elke 10 seconden
+  fetchAndShowLatestAlert();
+  setInterval(fetchAndShowLatestAlert, 10000);
 
         function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
