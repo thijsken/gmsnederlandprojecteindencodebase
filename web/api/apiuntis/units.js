@@ -11,7 +11,6 @@ export default async function handler(req, res) {
   const serverSnapshot = await db.ref(serverPath).once('value');
 
   if (!serverSnapshot.exists()) {
-    // Server bestaat niet → niets doen
     return res.status(404).json({ error: `Server met id ${serverId} bestaat niet` });
   }
 
@@ -34,13 +33,33 @@ export default async function handler(req, res) {
     }
 
     case 'DELETE': {
-      const { id } = req.body;
-      if (!id) {
-        return res.status(400).json({ error: 'Unit id is verplicht in body' });
-      }
+      const { id, playerId } = req.body;
 
-      await db.ref(`${serverPath}/units/${id}`).remove();
-      return res.status(200).json({ message: 'Unit verwijderd' });
+      if (id) {
+        // Verwijder specifieke unit
+        await db.ref(`${serverPath}/units/${id}`).remove();
+        return res.status(200).json({ message: `Unit met id ${id} verwijderd` });
+      } else if (playerId) {
+        // Verwijder alle units van een specifieke speler
+        const snapshot = await db.ref(`${serverPath}/units`).once('value');
+        const data = snapshot.val() || {};
+
+        const updates = {};
+        for (const [unitId, unitData] of Object.entries(data)) {
+          if (unitData.playerId === playerId) {
+            updates[unitId] = null; // null betekent verwijderen in Firebase
+          }
+        }
+
+        if (Object.keys(updates).length === 0) {
+          return res.status(404).json({ error: `Geen units gevonden voor playerId ${playerId}` });
+        }
+
+        await db.ref(`${serverPath}/units`).update(updates);
+        return res.status(200).json({ message: `Alle units van playerId ${playerId} verwijderd` });
+      } else {
+        return res.status(400).json({ error: 'Unit id of playerId is verplicht in body' });
+      }
     }
 
     default:
