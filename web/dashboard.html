@@ -2291,7 +2291,9 @@ function robloxToLeafletCoords(robloxX, robloxY) {
   }
 
   // Vul hier je serverId in
+setInterval(() => {
   fetchAndShowLatestAlert(API_URL);
+}, 10000);
 
         function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
