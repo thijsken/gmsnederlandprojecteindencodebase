@@ -1121,6 +1121,8 @@ const mainMap = L.map('map', {
         let customMapOverlay = null;
         let actievePostId = null;
         let mapUploaded = false; // Nieuwe vlag om bij te houden of de kaart is geüpload
+        const melding = [];/* de melding die je wil tonen, bv laatste geaccepteerde melding uit je data */
+
 
         // DOM Elements
         const apiKeyInput = document.getElementById('apiKey');
@@ -1150,7 +1152,7 @@ const mainMap = L.map('map', {
           container.innerHTML = `
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-semibold">Laatste geaccepteerde melding</h3>
-              <span class="text-sm text-gray-500">${new Date(calls.timestamp).toLocaleString()}</span>
+              <span class="text-sm text-gray-500">${new Date(melding.timestamp).toLocaleString()}</span>
             </div>
             <p class="mt-2"><strong>${melding.titel || "Geen titel"}</strong></p>
             <p class="text-sm">${melding.beschrijving || "Geen beschrijving beschikbaar."}</p>
