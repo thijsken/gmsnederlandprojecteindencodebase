@@ -2285,19 +2285,19 @@ function robloxToLeafletCoords(robloxX, robloxY) {
     }
   }
 
-function showLatestAlert(call, duration = 7000) {
+  function showLatestAlert(melding, duration = 7000) {
   const el = document.getElementById("latestAlert");
   if (!el) return;
 
   // Maak een mooie kaart HTML met melding info
   const html = `
     <div class="max-w-md mx-auto bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded shadow-md" role="alert">
-      <strong class="font-bold">${call.type || 'Melding'}</strong>
-      <span class="block sm:inline"> — ${call.description || ''}</span>
+      <strong class="font-bold">${melding.type || 'Melding'}</strong>
+      <span class="block sm:inline"> — ${melding.description || ''}</span>
       <div class="text-sm mt-1">
-        <em>Speler:</em> ${call.playerName || 'Onbekend'}<br/>
-        <em>Locatie:</em> ${call.location || 'Onbekend'}<br/>
-        <em>Tijd:</em> ${new Date(call.timestamp).toLocaleString() || 'Onbekend'}
+        <em>Speler:</em> ${melding.playerName || 'Onbekend'}<br/>
+        <em>Locatie:</em> ${melding.location || 'Onbekend'}<br/>
+        <em>Tijd:</em> ${new Date(melding.timestamp).toLocaleString() || 'Onbekend'}
       </div>
     </div>
   `;
@@ -2963,6 +2963,7 @@ function accepteerMelding(timestamp) {
         </div>
     `;
     callListContainer.appendChild(div);
+        showLatestAlert(call);
 }
 
 function loadMeldingenToCallList() {
