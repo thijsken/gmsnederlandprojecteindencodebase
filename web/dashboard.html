@@ -2246,29 +2246,30 @@ function robloxToLeafletCoords(robloxX, robloxY) {
             `);
         }
 
-  async function fetchAndShowLatestAlert(serverId) {
-    try {
-      const res = await fetch(`/api/servers/${serverId}/meldingen`);
-      const meldingen = await res.json();
+async function fetchAndShowLatestAlert(API_URL, serverId) {
+  const params = new URLSearchParams();
+  params.append('serverId', serverId);
 
-      if (!res.ok) {
-        console.error("Fout bij ophalen meldingen:", meldingen?.error);
-        return;
-      }
+  const url = `${API_URL}/api/servers/${serverId}/meldingen`;
 
-      // Zet alle meldingen om in array en sorteer op timestamp (optioneel)
-      const sorted = Object.entries(meldingen)
-        .map(([id, data]) => ({ id, ...data }))
-        .sort((a, b) => b.timestamp - a.timestamp); // Meest recente eerst
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(await res.text());
 
-      if (sorted.length === 0) return;
+    const meldingen = await res.json();
 
-      const laatste = sorted[0];
-      showLatestAlert(laatste.titel || 'Nieuwe melding'); // Pas aan afhankelijk van je data
-    } catch (err) {
-      console.error("Fout bij ophalen:", err);
-    }
+    const sorted = Object.entries(meldingen)
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.timestamp - a.timestamp); // meest recente eerst
+
+    if (sorted.length === 0) return;
+
+    const laatste = sorted[0];
+    showLatestAlert(laatste.titel || 'Nieuwe melding');
+  } catch (err) {
+    console.error("Fout bij ophalen:", err);
   }
+}
 
   function showLatestAlert(message, duration = 5000) {
     const el = document.getElementById("latestAlert");
@@ -2292,8 +2293,9 @@ function robloxToLeafletCoords(robloxX, robloxY) {
 
   // Vul hier je serverId in
 setInterval(() => {
-  fetchAndShowLatestAlert(API_URL);
+  fetchAndShowLatestAlert(API_URL, serverId);
 }, 10000);
+
 
         function updateCalls() {
     const recentCalls = document.getElementById('recentCalls');
@@ -2548,47 +2550,6 @@ setInterval(() => {
             
             showNotification(`${getUnitTypeName(unitType)} eenheid ${availableUnit.id} toegewezen!`);
         }
-
-        // function closeCall() {
-        //     if (!currentCallId) return;
-            
-        //     // Find call and mark as closed
-        //     const call = calls.find(c => String(c.id) === String(currentCallId));
-        //     if (call) {
-        //         call.status = 'closed';
-        //     }
-            
-        //     // Free up assigned units
-        //     units.forEach(unit => {
-        //         if (unit.assignedCall === currentCallId) {
-        //             unit.status = 'available';
-        //             unit.assignedCall = null;
-                    
-        //             // Update marker
-        //             if (unitMarkers[unit.id]) {
-        //                 let color = '#3b82f6'; // Blue for police
-        //                 if (unit.type === 'ambulance') color = '#10b981'; // Green for ambulance
-        //                 if (unit.type === 'fire') color = '#f59e0b'; // Orange for fire
-                        
-        //                 unitMarkers[unit.id].setStyle({color: color});
-        //             }
-        //         }
-        //     });
-            
-        //     // Update UI
-        //     // updateUnits();
-        //     updateCalls();
-            
-        //     // Remove emergency marker
-        //     if (emergencyMarkers[currentCallId]) {
-        //         mainMap.removeLayer(emergencyMarkers[currentCallId]);
-        //         dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
-        //         delete emergencyMarkers[currentCallId];
-        //     }
-            
-        //     showNotification(`Melding ${currentCallId} afgehandeld!`);
-        //     document.getElementById('callDetailsModal').classList.add('hidden');
-        // }
 
         function sluitMelding(callId) {
           if (!callId) {
