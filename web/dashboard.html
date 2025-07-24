@@ -2649,19 +2649,17 @@ function robloxToLeafletCoords(robloxX, robloxY) {
 
           // 2. Marker verwijderen
           if (emergencyMarkers[callId]) {
-            console.log("Verwijder marker:", emergencyMarkers[callId]);
-            mainMap.removeLayer(emergencyMarkers[marker]);
-            if (emergencyMarkers[marker]) {
-              mainMap.removeLayer(emergencyMarkers[marker]);
-              dashboardMap.removeLayer(emergencyMarkers[marker]);
-              delete emergencyMarkers[callId];
-            } else {
-              console.warn(`⚠️ Geen marker gevonden voor callId: ${callId}`);
-            }
-            delete emergencyMarkers[currentCallId];
-            } else {
-              console.warn(`Geen marker gevonden voor callId ${currentCallId}`);
-          }
+          const marker = emergencyMarkers[callId];  // ✅ marker ophalen
+
+          console.log("🗑️ Verwijder marker:", marker);
+
+          if (mainMap.hasLayer(marker)) mainMap.removeLayer(marker);
+          if (dashboardMap.hasLayer(marker)) dashboardMap.removeLayer(marker);
+
+          delete emergencyMarkers[callId];
+        } else {
+          console.warn(`⚠️ Geen marker gevonden voor callId ${callId}`);
+        }
 
           // 3. Units vrijmaken (optioneel, als je dat wil)
           units.forEach(unit => {
