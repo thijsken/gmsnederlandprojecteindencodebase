@@ -1369,10 +1369,10 @@ updateTimeAndDate();
         const openPopupBtn = document.getElementById('openNewCallPopupBtn');
         const popup = document.getElementById('newCallPopup');
         const closePopupBtn = document.getElementById('closeNewCallPopupBtn');
-        const sendMeldingPopupbutton = document.getElementById('submitpopupmelding');
+        // const sendMeldingPopupbutton = document.getElementById('submitpopupmelding');
         openPopupBtn.addEventListener('click', openPopup);
         closePopupBtn.addEventListener('click', sluitpopup);
-        sendMeldingPopupbutton.addEventListener('click', verstuurdmelding)
+        // sendMeldingPopupbutton.addEventListener('click', verstuurdmelding)
           
 
   // meldingenpopup
@@ -1383,51 +1383,51 @@ updateTimeAndDate();
     popup.classList.remove('hidden');
   }
 
-    function verstuurdmelding() {
-  // 🔁 Uniek ID genereren
-  const callId = db.ref().child('meldingen').push().key;
+  //   function verstuurdmelding() {
+  // // 🔁 Uniek ID genereren
+  // const callId = db.ref().child('meldingen').push().key;
 
-  // 🕒 Huidige tijd
-  const timestamp = new Date().toISOString();
+  // // 🕒 Huidige tijd
+  // const timestamp = new Date().toISOString();
 
-  // 📝 Data ophalen uit formulier
-  const type = document.getElementById('typeSelect')?.value || 'Onbekend';
-  const categorie = document.querySelector('input[name="categorie"]')?.value || 'Onbekend';
-  const location = document.querySelector('input[name="location"]')?.value || 'Onbekend';
-  const description = document.querySelector('textarea[name="description"]')?.value || 'Geen omschrijving';
-  const betreft = document.querySelector('select[name="betreft"]')?.value || 'Onbekend';
+  // // 📝 Data ophalen uit formulier
+  // const type = document.getElementById('typeSelect')?.value || 'Onbekend';
+  // const categorie = document.querySelector('input[name="categorie"]')?.value || 'Onbekend';
+  // const location = document.querySelector('input[name="location"]')?.value || 'Onbekend';
+  // const description = document.querySelector('textarea[name="description"]')?.value || 'Geen omschrijving';
+  // const betreft = document.querySelector('select[name="betreft"]')?.value || 'Onbekend';
 
-  // Eventueel extra data toevoegen (bijv. ingelogde gebruiker, coords)
-  const meldingData = {
-    id: callId,
-    type: type,
-    categorie: categorie,
-    location: location,
-    description: description,
-    betreft: betreft,
-    time: timestamp,
-    status: "nieuw",
-    speler: {
-      naam: "Onbekend", // Hier kun je eventueel de ingelogde naam zetten
-      userId: "Onbekend" // Of Roblox id koppelen als je die hebt
-    },
-    serverId: serverId || 'onbekend'
-  };
+  // // Eventueel extra data toevoegen (bijv. ingelogde gebruiker, coords)
+  // const meldingData = {
+  //   id: callId,
+  //   type: type,
+  //   categorie: categorie,
+  //   location: location,
+  //   description: description,
+  //   betreft: betreft,
+  //   time: timestamp,
+  //   status: "nieuw",
+  //   speler: {
+  //     naam: "Onbekend", // Hier kun je eventueel de ingelogde naam zetten
+  //     userId: "Onbekend" // Of Roblox id koppelen als je die hebt
+  //   },
+  //   serverId: serverId || 'onbekend'
+  // };
 
-  // 🔥 Verstuur naar Firebase
-  db.ref(`meldingen/${callId}`).set(meldingData)
-    .then(() => {
-      console.log("✅ Melding opgeslagen:", meldingData);
-      showNotification("✅ Melding succesvol opgeslagen", "success");
+  // // 🔥 Verstuur naar Firebase
+  // db.ref(`meldingen/${callId}`).set(meldingData)
+  //   .then(() => {
+  //     console.log("✅ Melding opgeslagen:", meldingData);
+  //     showNotification("✅ Melding succesvol opgeslagen", "success");
 
-      // Formulier sluiten of resetten
-      document.getElementById('newCallPopup').classList.add('hidden');
-    })
-    .catch((error) => {
-      console.error("❌ Fout bij opslaan melding:", error);
-      showNotification("❌ Fout bij opslaan melding", "error");
-    });
-  }
+  //     // Formulier sluiten of resetten
+  //     document.getElementById('newCallPopup').classList.add('hidden');
+  //   })
+  //   .catch((error) => {
+  //     console.error("❌ Fout bij opslaan melding:", error);
+  //     showNotification("❌ Fout bij opslaan melding", "error");
+  //   });
+  // }
 
   //end
   // systemen meldingen.
