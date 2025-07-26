@@ -7,11 +7,14 @@ export default async function handler(req, res) {
     return res.status(405).end('Method Not Allowed');
   }
 
-  const { packageName, price, frequency, customerName, customerEmail } = req.body;
+  const { packageName, price, frequency, customerEmail } = req.body;
 
   try {
+    // Bepaal of het om een eenmalige betaling of een abonnement gaat
+    const isSubscription = frequency.toLowerCase() === 'maandelijks';
+
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['ideal', 'card'],
+      payment_method_types: ['card', 'ideal'],
       line_items: [
         {
           price_data: {
@@ -19,12 +22,18 @@ export default async function handler(req, res) {
             product_data: {
               name: packageName,
             },
-            unit_amount: price * 100, // Stripe werkt met centen
+            unit_amount: price * 100, // In centen
+
+            ...(isSubscription && {
+              recurring: {
+                interval: 'month', // Kan eventueel 'year' worden
+              },
+            }),
           },
           quantity: 1,
         },
       ],
-      mode: frequency === 'eenmalig' ? 'payment' : 'subscription',
+      mode: isSubscription ? 'subscription' : 'payment',
       customer_email: customerEmail,
       success_url: `${req.headers.origin}/betaling-succes`,
       cancel_url: `${req.headers.origin}/betaling-geannuleerd`,
@@ -32,7 +41,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ sessionId: session.id });
   } catch (error) {
-    console.error(error);
+    console.error('Stripe fout:', error);
     res.status(500).json({ error: 'Kon checkout sessie niet aanmaken' });
   }
 }
