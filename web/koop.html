@@ -509,55 +509,56 @@
         </div>
     </footer>
 
-    <!-- Payment Modal -->
-    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden">
-            <div class="bg-primary text-white px-6 py-4">
-                <h3 class="text-xl font-bold" id="modal-title">Beginnerspakket - €15 eenmalig</h3>
-            </div>
-            <div class="p-6">
-                <div class="mb-6">
-                    <h4 class="font-bold mb-3">Betaalmethode</h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
-                            <i class="fab fa-ideal text-2xl mr-2"></i>
-                            <span>iDEAL</span>
-                        </button>
-                        <button class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
-                            <i class="fab fa-paypal text-2xl mr-2"></i>
-                            <span>PayPal</span>
-                        </button>
-                        <button class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
-                            <i class="fab fa-cc-visa text-2xl mr-2"></i>
-                            <span>Creditcard</span>
-                        </button>
-                        <button class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
-                            <i class="fas fa-credit-card text-2xl mr-2"></i>
-                            <span>Bancontact</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="mb-6">
-                    <h4 class="font-bold mb-3">Persoonlijke Gegevens</h4>
-                    <div class="space-y-3">
-                        <input type="text" placeholder="Volledige naam" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <input type="email" placeholder="E-mailadres" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    </div>
-                </div>
-                
-                <div class="flex items-center mb-6">
-                    <input type="checkbox" id="terms" class="mr-2">
-                    <label for="terms" class="text-sm text-gray-600">Ik ga akkoord met de <a href="#" class="text-primary hover:underline">Algemene Voorwaarden</a></label>
-                </div>
-                
-                <div class="flex justify-between">
-                    <button onclick="closePaymentModal()" class="border border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-100 transition">Annuleren</button>
-                    <button class="bg-primary text-white py-2 px-6 rounded-lg hover:bg-accent transition">Nu Betalen</button>
-                </div>
-            </div>
-        </div>
+<!-- Payment Modal -->
+<div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden">
+    <div class="bg-primary text-white px-6 py-4">
+      <h3 class="text-xl font-bold" id="modal-title">Beginnerspakket - €15 eenmalig</h3>
     </div>
+    <form id="payment-form" class="p-6">
+      <div class="mb-6">
+        <h4 class="font-bold mb-3">Betaalmethode</h4>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
+            <i class="fab fa-ideal text-2xl mr-2"></i>
+            <span>iDEAL</span>
+          </button>
+          <button type="button" class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
+            <i class="fab fa-paypal text-2xl mr-2"></i>
+            <span>PayPal</span>
+          </button>
+          <button type="button" class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
+            <i class="fab fa-cc-visa text-2xl mr-2"></i>
+            <span>Creditcard</span>
+          </button>
+          <button type="button" class="border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center hover:border-primary transition">
+            <i class="fas fa-credit-card text-2xl mr-2"></i>
+            <span>Bancontact</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h4 class="font-bold mb-3">Persoonlijke Gegevens</h4>
+        <div class="space-y-3">
+          <input type="text" placeholder="Volledige naam" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+          <input type="email" placeholder="E-mailadres" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+        </div>
+      </div>
+
+      <div class="flex items-center mb-6">
+        <input type="checkbox" id="terms" class="mr-2" required>
+        <label for="terms" class="text-sm text-gray-600">Ik ga akkoord met de <a href="#" class="text-primary hover:underline">Algemene Voorwaarden</a></label>
+      </div>
+
+      <div class="flex justify-between">
+        <button type="button" onclick="closePaymentModal()" class="border border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-100 transition">Annuleren</button>
+        <button type="submit" class="bg-primary text-white py-2 px-6 rounded-lg hover:bg-accent transition">Nu Betalen</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
     <button id="test-code-btn" onclick="showCodeModal()" 
         class="fixed bottom-6 right-6 bg-primary text-white py-2 px-4 rounded-full shadow-lg hover:bg-accent transition">
@@ -586,30 +587,60 @@
     const stripe = Stripe('pk_test_51Rp6SrEMCnPRPJupVUXypKza8Vf3DNI7vM5sqeboFZRDtN954KT3RzqVKOrssYQqTTw384wazi3nijRtfPEHveQY00kqY4e9lE');
         function initStripeForm(formId) {
         const form = document.getElementById(formId);
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             try {
-            const pakket = form.querySelector('input[name="pakket"]').value;
-            const prijs = form.querySelector('input[name="prijs"]').value;
+            // Pakketnaam en prijs uit modal-titel halen
+            const modalTitle = document.getElementById('modal-title').textContent;
+            const pakket = modalTitle.split(' - ')[0]; // bv "Beginnerspakket"
+            const prijsTekst = modalTitle.split(' - ')[1]; // bv "€15 eenmalig"
+            const prijs = parseFloat(prijsTekst.match(/€(\d+)/)[1]); // 15
+            const frequency = prijsTekst.includes('eenmalig') ? 'eenmalig' : 'abonnement';
 
+            // Klantgegevens uit inputvelden
+            const klantNaam = form.querySelector('input[type="text"][placeholder="Volledige naam"]').value.trim();
+            const klantEmail = form.querySelector('input[type="email"][placeholder="E-mailadres"]').value.trim();
+            const termsChecked = form.querySelector('input[type="checkbox"]#terms').checked;
+
+            if (!klantNaam || !klantEmail) {
+                alert('Vul je volledige naam en e-mailadres in.');
+                return;
+            }
+            if (!termsChecked) {
+                alert('Je moet akkoord gaan met de Algemene Voorwaarden.');
+                return;
+            }
+
+            // API call naar backend
             const res = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pakket, prijs }),
+                body: JSON.stringify({ 
+                packageName: pakket, 
+                price: prijs, 
+                frequency, 
+                customerName: klantNaam, 
+                customerEmail: klantEmail 
+                }),
             });
 
-            const { id } = await res.json();
+            const data = await res.json();
 
-            const { error } = await stripe.redirectToCheckout({ sessionId: id });
-            if (error) alert(error.message);
+            if (data.sessionId) {
+                // Redirect naar Stripe Checkout
+                const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+                if (error) alert(error.message);
+            } else {
+                alert('Kon geen betaal sessie starten, probeer het later opnieuw.');
+            }
             } catch (err) {
             console.error('Betalingsfout:', err);
             alert('Er ging iets mis. Probeer het opnieuw.');
             }
         });
         }
-
         // Initialiseer alle formulieren
         initStripeForm('form-beginner');
         initStripeForm('form-standaard');
@@ -638,46 +669,11 @@
         });
 
         // Payment modal functions
-let selectedPackage = null;
-let selectedPrice = null;
-let selectedFrequency = null;
-
-function openPaymentModal(packageName, price, frequency) {
-    selectedPackage = packageName;
-    selectedPrice = price;
-    selectedFrequency = frequency;
-
-    document.getElementById('modal-title').textContent = `${packageName} - €${price} ${frequency}`;
-    document.getElementById('payment-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-// Event listener voor bevestigen in de modal
-document.getElementById('confirm-payment-btn').addEventListener('click', () => {
-    // Verstuur data naar backend om Stripe checkout sessie te maken
-    fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            packageName: selectedPackage,
-            price: selectedPrice,
-            frequency: selectedFrequency,
-        }),
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.sessionId) {
-            stripe.redirectToCheckout({ sessionId: data.sessionId });
-        } else {
-            alert('Er ging iets mis bij het aanmaken van de betaling.');
+        function openPaymentModal(packageName, price, frequency) {
+            document.getElementById('modal-title').textContent = `${packageName} - €${price} ${frequency}`;
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Er ging iets mis. Probeer het opnieuw.');
-    });
-});
-
 
         function closePaymentModal() {
             document.getElementById('payment-modal').classList.add('hidden');
