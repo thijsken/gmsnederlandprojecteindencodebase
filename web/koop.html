@@ -581,7 +581,39 @@
     </div>
 
     <script>
-        const stripe = Stripe('pk_test_...'); // <-- Je Publishable Key hier
+
+    // ⚠️ Vervang met je eigen publishable key
+    const stripe = Stripe('pk_test_51Rp6SrEMCnPRPJupVUXypKza8Vf3DNI7vM5sqeboFZRDtN954KT3RzqVKOrssYQqTTw384wazi3nijRtfPEHveQY00kqY4e9lE');
+        function initStripeForm(formId) {
+        const form = document.getElementById(formId);
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+            const pakket = form.querySelector('input[name="pakket"]').value;
+            const prijs = form.querySelector('input[name="prijs"]').value;
+
+            const res = await fetch('/api/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pakket, prijs }),
+            });
+
+            const { id } = await res.json();
+
+            const { error } = await stripe.redirectToCheckout({ sessionId: id });
+            if (error) alert(error.message);
+            } catch (err) {
+            console.error('Betalingsfout:', err);
+            alert('Er ging iets mis. Probeer het opnieuw.');
+            }
+        });
+        }
+
+        // Initialiseer alle formulieren
+        initStripeForm('form-beginner');
+        initStripeForm('form-standaard');
+        initStripeForm('form-full');
         // Mobile menu toggle
         document.getElementById('menu-btn').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
