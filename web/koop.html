@@ -552,7 +552,7 @@
                 </div>
                 
                 <div class="flex justify-between">
-                    <button id="submit" onclick="closePaymentModal()" class="border border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-100 transition">Annuleren</button>
+                    <button onclick="closePaymentModal()" class="border border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-100 transition">Annuleren</button>
                     <button class="bg-primary text-white py-2 px-6 rounded-lg hover:bg-accent transition">Nu Betalen</button>
                 </div>
             </div>
@@ -638,11 +638,46 @@
         });
 
         // Payment modal functions
-        function openPaymentModal(packageName, price, frequency) {
-            document.getElementById('modal-title').textContent = `${packageName} - €${price} ${frequency}`;
-            document.getElementById('payment-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+let selectedPackage = null;
+let selectedPrice = null;
+let selectedFrequency = null;
+
+function openPaymentModal(packageName, price, frequency) {
+    selectedPackage = packageName;
+    selectedPrice = price;
+    selectedFrequency = frequency;
+
+    document.getElementById('modal-title').textContent = `${packageName} - €${price} ${frequency}`;
+    document.getElementById('payment-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Event listener voor bevestigen in de modal
+document.getElementById('confirm-payment-btn').addEventListener('click', () => {
+    // Verstuur data naar backend om Stripe checkout sessie te maken
+    fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            packageName: selectedPackage,
+            price: selectedPrice,
+            frequency: selectedFrequency,
+        }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.sessionId) {
+            stripe.redirectToCheckout({ sessionId: data.sessionId });
+        } else {
+            alert('Er ging iets mis bij het aanmaken van de betaling.');
         }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Er ging iets mis. Probeer het opnieuw.');
+    });
+});
+
 
         function closePaymentModal() {
             document.getElementById('payment-modal').classList.add('hidden');
