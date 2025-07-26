@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Betaling Geslaagd</title>
   <style>
-    /* Eenvoudige styles voor de modal */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -55,6 +54,10 @@
       background-color: #005bb5;
     }
   </style>
+
+  <!-- Firebase SDK's -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <div id="code-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -68,19 +71,37 @@
   </div>
 
   <script>
+    // Jouw Firebase configuratie
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+      authDomain: "gmsnederland.firebaseapp.com",
+      projectId: "gmsnederland",
+      databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+
+    // Firebase initialiseren
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     function generateUniqueCode() {
       return Math.random().toString(36).substring(2, 12).toUpperCase();
     }
 
     function showCodeModal() {
       const code = generateUniqueCode();
+      const timestamp = Date.now();
       const codeElement = document.getElementById('unique-code');
       codeElement.textContent = code;
       document.getElementById('code-modal').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
-
-      // Focus op code voor toegankelijkheid
       codeElement.focus();
+
+      // Code opslaan in Firebase
+      db.ref('aankopencode/' + timestamp).set({
+        code: code,
+        gebruikt: false,
+        aangemaaktOp: new Date().toISOString()
+      });
     }
 
     function closeCodeModal() {
