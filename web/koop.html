@@ -585,18 +585,23 @@
 
     // ⚠️ Vervang met je eigen publishable key
     const stripe = Stripe('pk_test_51Rp6SrEMCnPRPJupVUXypKza8Vf3DNI7vM5sqeboFZRDtN954KT3RzqVKOrssYQqTTw384wazi3nijRtfPEHveQY00kqY4e9lE');
-        function initStripeForm(formId) {
-        const form = document.getElementById(formId);
+function initStripeForm(formId) {
+    const form = document.getElementById(formId);
+    if (!form) {
+        console.warn(`Formulier met id "${formId}" niet gevonden.`);
+        return;
+    }
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            try {
+        try {
             // Pakketnaam en prijs uit modal-titel halen
             const modalTitle = document.getElementById('modal-title').textContent;
             const pakket = modalTitle.split(' - ')[0]; // bv "Beginnerspakket"
             const prijsTekst = modalTitle.split(' - ')[1]; // bv "€15 eenmalig"
-            const prijs = parseFloat(prijsTekst.match(/€(\d+)/)[1]); // 15
+            const prijsMatch = prijsTekst.match(/€(\d+(\.\d+)?)/);
+            const prijs = prijsMatch ? parseFloat(prijsMatch[1]) : 0;
             const frequency = prijsTekst.includes('eenmalig') ? 'eenmalig' : 'abonnement';
 
             // Klantgegevens uit inputvelden
@@ -617,12 +622,12 @@
             const res = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                packageName: pakket, 
-                price: prijs, 
-                frequency, 
-                customerName: klantNaam, 
-                customerEmail: klantEmail 
+                body: JSON.stringify({
+                    packageName: pakket,
+                    price: prijs,
+                    frequency,
+                    customerName: klantNaam,
+                    customerEmail: klantEmail
                 }),
             });
 
@@ -635,16 +640,22 @@
             } else {
                 alert('Kon geen betaal sessie starten, probeer het later opnieuw.');
             }
-            } catch (err) {
+        } catch (err) {
             console.error('Betalingsfout:', err);
             alert('Er ging iets mis. Probeer het opnieuw.');
-            }
-        });
         }
-        // Initialiseer alle formulieren
-        initStripeForm('form-beginner');
-        initStripeForm('form-standaard');
-        initStripeForm('form-full');
+    });
+}
+
+// Aanroepen nadat DOM geladen is
+document.addEventListener('DOMContentLoaded', () => {
+    initStripeForm('payment-form');
+});
+
+        // // Initialiseer alle formulieren
+        // initStripeForm('form-beginner');
+        // initStripeForm('form-standaard');
+        // initStripeForm('form-full');
         // Mobile menu toggle
         document.getElementById('menu-btn').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
