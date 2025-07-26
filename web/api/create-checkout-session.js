@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       ],
       mode: isSubscription ? 'subscription' : 'payment',
       customer_email: customerEmail,
-      success_url: `${req.headers.origin}/betaling-succes`,
+      success_url: `${req.headers.origin}/betaling-succes.html`,
       cancel_url: `${req.headers.origin}/betaling-geannuleerd`,
     });
 
