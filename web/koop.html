@@ -559,6 +559,27 @@
         </div>
     </div>
 
+    <button id="test-code-btn" onclick="showCodeModal()" 
+        class="fixed bottom-6 right-6 bg-primary text-white py-2 px-4 rounded-full shadow-lg hover:bg-accent transition">
+  Toon Test Code
+</button>
+
+
+    <!--de popup voor aankoop.-->
+    <div id="code-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden p-6 text-center">
+    <h3 class="text-2xl font-bold mb-4">Jouw Unieke Code</h3>
+    <div class="bg-gray-100 rounded-lg p-4 mb-4">
+      <span id="unique-code" class="text-lg font-mono text-primary">ABC123DEF4</span>
+    </div>
+    <button onclick="copyCode()" class="bg-primary text-white py-2 px-4 rounded-lg hover:bg-accent transition mb-4">
+      Code Kopiëren
+    </button>
+    <p class="text-gray-600 text-sm mb-6">Ga naar de GMSNederland Bot zijn DM en doe <b>/aankoop</b>. Voer deze code in.</p>
+    <button onclick="closeCodeModal()" class="border border-gray-300 py-2 px-6 rounded-lg hover:bg-gray-100 transition">Sluiten</button>
+  </div>
+    </div>
+
     <script>
         const stripe = Stripe('pk_test_...'); // <-- Je Publishable Key hier
         // Mobile menu toggle
@@ -594,6 +615,38 @@
         function closePaymentModal() {
             document.getElementById('payment-modal').classList.add('hidden');
             document.body.style.overflow = 'auto';
+        }
+
+                // Genereer een random 10-karakter code
+        function generateUniqueCode() {
+            return Math.random().toString(36).substring(2, 12).toUpperCase();
+        }
+
+        // Open de code-popup
+        function showCodeModal() {
+            const code = generateUniqueCode();
+            document.getElementById('unique-code').textContent = code;
+            document.getElementById('code-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Sluit de code-popup
+        function closeCodeModal() {
+            document.getElementById('code-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Kopieer de code
+        function copyCode() {
+            const code = document.getElementById('unique-code').textContent;
+            navigator.clipboard.writeText(code);
+            alert("Code gekopieerd!");
+        }
+
+        // Simuleer een betaling (voor test)
+        function simulatePayment() {
+            closePaymentModal();
+            showCodeModal();
         }
 
         // Close modal when clicking outside
