@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       mode: isSubscription ? 'subscription' : 'payment',
       customer_email: customerEmail,
       success_url: `${req.headers.origin}/betaling-succes.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/betaling-geannuleerd`,
+      cancel_url: `${req.headers.origin}/koop.html`, //betaling-geannuleerd
     });
 
     res.status(200).json({ sessionId: session.id });
