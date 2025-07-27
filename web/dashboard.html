@@ -3379,39 +3379,37 @@ function meerInfo(callId) {
         };
 
     
-// 🛰️ Ophalen en tonen van luchtalarm-palen via echte Roblox API data
-// function fetchLuchtalarmPalen() {
-//   if (!mapUploaded) { // Controleer of de kaart is geüpload
-//     console.log("Kaart is nog niet geüpload, luchtalarm palen worden niet geladen.");
-//     return;
-//   }
+// Alleen ophalen van straatnamen via de API
+function fetchStraatnamen() {
+  if (!mapUploaded) {
+    console.log("⏳ Kaart is nog niet geüpload, straatnamen worden niet geladen.");
+    return;
+  }
 
-//   fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
-//     .then(res => {
-//       if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
-//       return res.json();
-//     })
-//     .then(palen => {
-//       console.log("✅ Ontvangen paaldata:", palen);
+  fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
+      return res.json();
+    })
+    .then(data => {
+      if (!data || typeof data !== "object") {
+        console.warn("⚠️ Ongeldige data ontvangen:", data);
+        return;
+      }
 
-//       // Verwijder oude luchtalarm markers (indien bijgehouden in een aparte array/object)
-//       // Voor dit voorbeeld, als je geen specifieke array hebt, moet je een manier vinden om ze te identificeren en te verwijderen.
-//       // Bijvoorbeeld, als je ze allemaal in 'markers' array hebt en ze een specifieke eigenschap hebben.
-//       // Voor nu, gaan we ervan uit dat ze opnieuw worden getekend en de oude worden overschreven/verwijderd door de algemene clearMarkers() als die bestaat.
-//       // Als je geen clearMarkers() hebt die alle markers verwijdert, moet je hier een specifieke loop toevoegen.
-
-//       if (typeof palen === 'object' && palen !== null) {
-//         const palenArray = Object.entries(palen).map(([id, data]) => ({ id, ...data }));
-//         palenArray.forEach(paal => {
-//           console.log("🧭 Verwerk paal:", paal);
-//           addLuchtalarmPaal(paal);
-//         });
-//       } else {
-//         console.warn("⚠️ Geen object met palen ontvangen:", palen);
-//       }
-//     })
-//     .catch(err => console.error("❌ Fout bij ophalen paaldata:", err));
-// }
+      const straatnamen = data.straatnamen;
+      if (Array.isArray(straatnamen)) {
+        window.beschikbareStraatnamen = straatnamen;
+        console.log("📄 Straatnamen succesvol geladen:", straatnamen);
+        // Je kunt hier bijvoorbeeld een dropdown vullen met straatnamen
+      } else {
+        console.warn("⚠️ Geen straatnamen-array ontvangen:", straatnamen);
+      }
+    })
+    .catch(err => {
+      console.error("❌ Fout bij ophalen van straatnamen:", err);
+    });
+}
 
 const postMarkers = {};
 
