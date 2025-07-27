@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
             ...(isSubscription && {
               recurring: {
-                interval: 'month', // Kan eventueel 'year' worden
+                interval: 'month',
               },
             }),
           },
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       ],
       mode: isSubscription ? 'subscription' : 'payment',
       customer_email: customerEmail,
-      success_url: `${req.headers.origin}/betaling-succes.html`,
+      success_url: `${req.headers.origin}/betaling-succes.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin}/betaling-geannuleerd`,
     });
 

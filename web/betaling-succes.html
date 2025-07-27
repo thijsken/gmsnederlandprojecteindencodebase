@@ -68,75 +68,93 @@
       <button onclick="closeCodeModal()">Sluiten</button>
     </div>
   </div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+    authDomain: "gmsnederland.firebaseapp.com",
+    projectId: "gmsnederland",
+    databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+  };
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
-      authDomain: "gmsnederland.firebaseapp.com",
-      projectId: "gmsnederland",
-      databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
-    };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  function showCodeModalWith(code) {
+    const codeElement = document.getElementById('unique-code');
+    codeElement.textContent = code;
+    document.getElementById('code-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    codeElement.focus();
+  }
 
-    function generateUniqueCode() {
-      return Math.random().toString(36).substring(2, 12).toUpperCase();
+  function closeCodeModal() {
+    document.getElementById('code-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    window.location.href = 'koop.html';
+  }
+
+  function copyCode() {
+    const code = document.getElementById('unique-code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      alert("Code gekopieerd!");
+    }).catch(() => {
+      alert("Kopiëren niet gelukt.");
+    });
+  }
+
+  function generateSessionId() {
+    return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+  }
+
+  async function init() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+
+    if (!sessionId) {
+      alert("Geen sessie-ID gevonden. Ongeldige toegang.");
+      return;
     }
 
-    function showCodeModalWith(code) {
-      const codeElement = document.getElementById('unique-code');
-      codeElement.textContent = code;
-      document.getElementById('code-modal').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      codeElement.focus();
+    const userSession = sessionStorage.getItem('secure-session') || generateSessionId();
+    sessionStorage.setItem('secure-session', userSession);
+
+    const snapshot = await db.ref('aankopencode/' + sessionId).once('value');
+    const data = snapshot.val();
+
+    if (!data) {
+      alert("Geen geldige aankoop gevonden.");
+      return;
     }
 
-    function closeCodeModal() {
-      document.getElementById('code-modal').classList.add('hidden');
-      document.body.style.overflow = 'auto';
-      window.location.href = 'koop.html';
+    // Als al bekeken door andere sessie
+    if (data.bekekenDoor && data.bekekenDoor !== userSession) {
+      alert("Deze code is al opgehaald door een andere sessie.");
+      return;
     }
 
-    function copyCode() {
-      const code = document.getElementById('unique-code').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        alert("Code gekopieerd!");
-      }).catch(() => {
-        alert("Kopiëren niet gelukt.");
-      });
-    }
-
-    async function init() {
-      const existingCode = sessionStorage.getItem('uniekeAankoopCode');
-
-      if (existingCode) {
-        // Code al opgehaald deze sessie
-        showCodeModalWith(existingCode);
-        return;
-      }
-
-      // Check via server of betaling net gedaan is, of via een verificatie-token.
-      // Dit is optioneel als je Stripe Webhooks gebruikt en een flag in Firebase zet.
-      // Hier simuleren we dat betaling is gelukt en we toestemming hebben een code te maken:
-
-      const code = generateUniqueCode();
-      const timestamp = Date.now();
-
-      // Voorkom dubbel genereren in database
-      await db.ref('aankopencode/' + timestamp).set({
-        code: code,
-        gebruikt: false,
+    // Als nog geen code toegekend is, maak en koppel een code
+    if (!data.code) {
+      const newCode = Math.random().toString(36).substring(2, 12).toUpperCase();
+      await db.ref('aankopencode/' + sessionId).update({
+        code: newCode,
+        bekekenDoor: userSession,
         aangemaaktOp: new Date().toISOString()
       });
-
-      sessionStorage.setItem('uniekeAankoopCode', code);
-      showCodeModalWith(code);
+      sessionStorage.setItem('uniekeAankoopCode', newCode);
+      showCodeModalWith(newCode);
+    } else {
+      // Koppel alleen als sessie klopt
+      await db.ref('aankopencode/' + sessionId).update({
+        bekekenDoor: userSession
+      });
+      sessionStorage.setItem('uniekeAankoopCode', data.code);
+      showCodeModalWith(data.code);
     }
+  }
 
-    window.addEventListener('load', () => {
-      init();
-    });
-  </script>
+  window.addEventListener('load', () => {
+    init();
+  });
+</script>
 </body>
 </html>
