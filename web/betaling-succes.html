@@ -55,7 +55,6 @@
     }
   </style>
 
-  <!-- Firebase SDK's -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
@@ -71,7 +70,6 @@
   </div>
 
   <script>
-    // Jouw Firebase configuratie
     const firebaseConfig = {
       apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
       authDomain: "gmsnederland.firebaseapp.com",
@@ -79,7 +77,6 @@
       databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
     };
 
-    // Firebase initialiseren
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -87,21 +84,12 @@
       return Math.random().toString(36).substring(2, 12).toUpperCase();
     }
 
-    function showCodeModal() {
-      const code = generateUniqueCode();
-      const timestamp = Date.now();
+    function showCodeModalWith(code) {
       const codeElement = document.getElementById('unique-code');
       codeElement.textContent = code;
       document.getElementById('code-modal').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       codeElement.focus();
-
-      // Code opslaan in Firebase
-      db.ref('aankopencode/' + timestamp).set({
-        code: code,
-        gebruikt: false,
-        aangemaaktOp: new Date().toISOString()
-      });
     }
 
     function closeCodeModal() {
@@ -114,12 +102,39 @@
       navigator.clipboard.writeText(code).then(() => {
         alert("Code gekopieerd!");
       }).catch(() => {
-        alert("Kopiëren niet gelukt, probeer handmatig te kopiëren.");
+        alert("Kopiëren niet gelukt.");
       });
     }
 
+    async function init() {
+      const existingCode = sessionStorage.getItem('uniekeAankoopCode');
+
+      if (existingCode) {
+        // Code al opgehaald deze sessie
+        showCodeModalWith(existingCode);
+        return;
+      }
+
+      // Check via server of betaling net gedaan is, of via een verificatie-token.
+      // Dit is optioneel als je Stripe Webhooks gebruikt en een flag in Firebase zet.
+      // Hier simuleren we dat betaling is gelukt en we toestemming hebben een code te maken:
+
+      const code = generateUniqueCode();
+      const timestamp = Date.now();
+
+      // Voorkom dubbel genereren in database
+      await db.ref('aankopencode/' + timestamp).set({
+        code: code,
+        gebruikt: false,
+        aangemaaktOp: new Date().toISOString()
+      });
+
+      sessionStorage.setItem('uniekeAankoopCode', code);
+      showCodeModalWith(code);
+    }
+
     window.addEventListener('load', () => {
-      showCodeModal();
+      init();
     });
   </script>
 </body>
