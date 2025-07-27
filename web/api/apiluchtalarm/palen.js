@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Controleer of de server bestaat voordat iets wordt gedaan
+    // Controleer of de server bestaat
     const serverSnapshot = await db.ref(`servers/${serverId}`).once('value');
     if (!serverSnapshot.exists()) {
       return res.status(404).json({ error: `Server met id ${serverId} bestaat niet` });
@@ -16,32 +16,32 @@ export default async function handler(req, res) {
 
     switch (req.method) {
       case 'GET': {
-        const snapshot = await db.ref(`servers/${serverId}/palendata`).once('value');
-        const palen = snapshot.val() || {};
-        return res.status(200).json(palen);
+        const snapshot = await db.ref(`servers/${serverId}/straatnamen`).once('value');
+        const straatnamen = snapshot.val() || [];
+        return res.status(200).json(straatnamen);
       }
 
       case 'POST': {
-        const palenBody = req.body;
+        const straatnamen = req.body;
 
-        if (!Array.isArray(palenBody) || palenBody.length === 0) {
-          return res.status(400).json({ error: 'Body moet een array van palen zijn' });
+        if (!Array.isArray(straatnamen)) {
+          return res.status(400).json({ error: 'Body moet een array van straatnaam-strings zijn' });
         }
 
-        const updates = {};
-        palenBody.forEach(paal => {
-          const newKey = db.ref().push().key;
-          updates[`servers/${serverId}/palendata/${newKey}`] = paal;
-        });
+        // Extra validatie: alles moet een string zijn
+        const zijnAllemaalStrings = straatnamen.every(item => typeof item === 'string');
+        if (!zijnAllemaalStrings) {
+          return res.status(400).json({ error: 'Alle straatnamen moeten strings zijn' });
+        }
 
-        await db.ref().update(updates);
+        await db.ref(`servers/${serverId}/straatnamen`).set(straatnamen);
 
-        return res.status(201).json({ message: 'Palendata opgeslagen', toegevoegd: palenBody.length });
+        return res.status(201).json({ message: 'Straatnamen opgeslagen', aantal: straatnamen.length });
       }
 
       case 'DELETE': {
-        await db.ref(`servers/${serverId}/palendata`).remove();
-        return res.status(200).json({ message: `Alle palen verwijderd voor server ${serverId}` });
+        await db.ref(`servers/${serverId}/straatnamen`).remove();
+        return res.status(200).json({ message: `Alle straatnamen verwijderd voor server ${serverId}` });
       }
 
       default:
@@ -49,6 +49,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: `Method ${req.method} not allowed` });
     }
   } catch (error) {
+    console.error('Fout bij straatnamen-handler:', error);
     return res.status(500).json({ error: 'Er is iets misgegaan', details: error.message });
   }
 }
