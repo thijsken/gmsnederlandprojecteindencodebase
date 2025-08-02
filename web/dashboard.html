@@ -965,7 +965,7 @@
     <textarea id="p2000Situatie" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" rows="3" placeholder="Bijv. brand in woning, rookontwikkeling bij zolder"></textarea>
 
     <label class="block text-sm font-medium mb-1">Selecteer post</label>
-    <select id="p2000PostSelect" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-4">
+    <select id="p2000PostSelect" multiple size="5" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-4">
       <option value="">-- Kies een post --</option>
     </select>
     <div id="p2000PostCheckboxes" class="mb-4"></div>
@@ -1705,20 +1705,13 @@ function closeP2000Modal() {
 
 function laadPostenVoorP2000() {
   const select = document.getElementById('p2000PostSelect');
-  const checkboxContainer = document.getElementById('p2000PostCheckboxes');
   if (!select) {
     console.error("❌ Selectelement #p2000PostSelect niet gevonden!");
     showNotification("Selectielijst voor posten ontbreekt!", "error");
     return;
   }
-  if (!checkboxContainer) {
-    console.error("❌ Checkbox container #p2000PostCheckboxes niet gevonden!");
-    showNotification("Checkbox container ontbreekt!", "error");
-    return;
-  }
 
   select.innerHTML = '<option value="">-- Kies een post --</option>';
-  checkboxContainer.innerHTML = '';
 
   fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
     .then(res => {
@@ -1760,15 +1753,6 @@ function laadPostenVoorP2000() {
         option.value = uniekeId;
         option.textContent = post.name || `Post ${post.id}`;
         select.appendChild(option);
-
-        const label = document.createElement('label');
-        label.style.display = 'block';
-        label.style.marginBottom = '4px';
-        label.innerHTML = `
-          <input type="checkbox" name="p2000PostCheckbox" value="${uniekeId}" style="margin-right:6px;" />
-          ${post.name || `Post ${post.id}`}
-        `;
-        checkboxContainer.appendChild(label);
       });
 
       console.log("✅ Posten geladen (uniek):", Array.from(uniekePosten));
@@ -1884,12 +1868,13 @@ function verstuurP2000Alarm() {
     showNotification("Er is een probleem met het laden van de postenlijst.", "error");
     return;
   }
-  const postId = postSelect.value;
+  const geselecteerdePosten = Array.from(postSelect.selectedOptions).map(opt => opt.value);
 
-if (!postId || postId === "undefined") {
-  showNotification("❌ Geen post geselecteerd! Kies een post uit de lijst.", "error");
-  return;
-}
+  if (geselecteerdePosten.length === 0) {
+    showNotification("❌ Geen post geselecteerd! Kies minstens één post.", "error");
+    return;
+  }
+
   if (!adres || !voertuigen || !situatie || !postId) {
     showNotification("❌ Vul alle velden in!", "error");
     return;
@@ -1906,7 +1891,7 @@ if (!postId || postId === "undefined") {
   laatstVerzondenP2000 = volledigMelding;
 
   const payload = {
-    postId,
+    postId: geselecteerdePosten,
     trigger: true,
     omroep: true,
     adres,
