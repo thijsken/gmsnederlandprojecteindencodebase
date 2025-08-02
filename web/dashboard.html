@@ -1705,13 +1705,20 @@ function closeP2000Modal() {
 
 function laadPostenVoorP2000() {
   const select = document.getElementById('p2000PostSelect');
+  const checkboxContainer = document.getElementById('p2000PostCheckboxes');
   if (!select) {
     console.error("❌ Selectelement #p2000PostSelect niet gevonden!");
     showNotification("Selectielijst voor posten ontbreekt!", "error");
     return;
   }
+  if (!checkboxContainer) {
+    console.error("❌ Checkbox container #p2000PostCheckboxes niet gevonden!");
+    showNotification("Checkbox container ontbreekt!", "error");
+    return;
+  }
 
   select.innerHTML = '<option value="">-- Kies een post --</option>';
+  checkboxContainer.innerHTML = '';
 
   fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
     .then(res => {
@@ -1753,6 +1760,15 @@ function laadPostenVoorP2000() {
         option.value = uniekeId;
         option.textContent = post.name || `Post ${post.id}`;
         select.appendChild(option);
+
+        const label = document.createElement('label');
+        label.style.display = 'block';
+        label.style.marginBottom = '4px';
+        label.innerHTML = `
+          <input type="checkbox" name="p2000PostCheckbox" value="${uniekeId}" style="margin-right:6px;" />
+          ${post.name || `Post ${post.id}`}
+        `;
+        checkboxContainer.appendChild(label);
       });
 
       console.log("✅ Posten geladen (uniek):", Array.from(uniekePosten));
