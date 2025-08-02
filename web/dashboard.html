@@ -1765,9 +1765,8 @@ function laadPostenVoorP2000() {
 
 function genereerP2000Code(beschrijving) {
   const tekst = beschrijving.toLowerCase();
-  const codes = [];
+  const meldingen = [];
 
-  // Helper functie om meerdere keywords te checken
   function bevatEenVan(woorden) {
     return woorden.some(w => tekst.includes(w));
   }
@@ -1775,87 +1774,87 @@ function genereerP2000Code(beschrijving) {
   // Brandmeldingen
   if (bevatEenVan(["brand", "brandmelding"])) {
     if (bevatEenVan(["woning", "huis", "gebouw", "pand"])) {
-      codes.push("P1 BR (Woningen)");
+      meldingen.push({code: "P1 BR (Woningen)", categorie: "Brand"});
     }
     if (bevatEenVan(["auto", "voertuig", "bus", "truck"])) {
-      codes.push("P1 BR (Voertuig)");
+      meldingen.push({code: "P1 BR (Voertuig)", categorie: "Brand"});
     }
     if (bevatEenVan(["bos", "natuur", "gras", "heide"])) {
-      codes.push("P2 BR (Natuurbrand)");
+      meldingen.push({code: "P2 BR (Natuurbrand)", categorie: "Brand"});
     }
     if (bevatEenVan(["schuur", "loods", "schuurbrand"])) {
-      codes.push("P1 BR (Schuur)");
+      meldingen.push({code: "P1 BR (Schuur)", categorie: "Brand"});
     }
     if (bevatEenVan(["container", "vuilnisbak", "afval"])) {
-      codes.push("P2 BR (Containerbrand)");
+      meldingen.push({code: "P2 BR (Containerbrand)", categorie: "Brand"});
     }
     if (bevatEenVan(["fabriek", "industrie", "loods", "bedrijf"])) {
-      codes.push("P1 BR (Industrie)");
+      meldingen.push({code: "P1 BR (Industrie)", categorie: "Brand"});
     }
   }
 
   // Ongevallen en trauma
   if (bevatEenVan(["ongeval", "botsing", "aanrijding", "verkeersongeval"])) {
-    codes.push("P1 Ongeval Wegverkeer");
+    meldingen.push({code: "P1 Ongeval Wegverkeer", categorie: "Ongeval"});
   }
   if (bevatEenVan(["val"]) && bevatEenVan(["trap", "hoogte", "loods", "steiger"])) {
-    codes.push("P1 Valincident");
+    meldingen.push({code: "P1 Valincident", categorie: "Ongeval"});
   }
   if (bevatEenVan(["snijwond", "mes", "messteek", "steekwond"])) {
-    codes.push("P1 Steekincident");
+    meldingen.push({code: "P1 Steekincident", categorie: "Ongeval"});
   }
   if (bevatEenVan(["schotwond", "wapen", "schieten"])) {
-    codes.push("P1 Schietincident");
+    meldingen.push({code: "P1 Schietincident", categorie: "Ongeval"});
   }
 
   // Medische noodsituaties
   if (bevatEenVan(["reanimatie", "hartstilstand", "bewusteloos", "noodmedische", "admeniet"])) {
-    codes.push("P1 Reanimatie");
+    meldingen.push({code: "P1 Reanimatie", categorie: "Medisch"});
   }
   if (bevatEenVan(["beroerte", "stroke", "hersenbloeding", "hartinfarct"])) {
-    codes.push("P1 Medische Noodsituatie");
+    meldingen.push({code: "P1 Medische Noodsituatie", categorie: "Medisch"});
   }
   if (bevatEenVan(["epilepsie", "stuipen", "convulsies"])) {
-    codes.push("P1 Epileptisch aanval");
+    meldingen.push({code: "P1 Epileptisch aanval", categorie: "Medisch"});
   }
   if (bevatEenVan(["astma", "ademnood", "benauwd"])) {
-    codes.push("P1 Ademnood");
+    meldingen.push({code: "P1 Ademnood", categorie: "Medisch"});
   }
   if (bevatEenVan(["baby", "zuigeling", "kind"]) && bevatEenVan(["nood", "niet ademen", "problemen"])) {
-    codes.push("P1 Kindernood");
+    meldingen.push({code: "P1 Kindernood", categorie: "Medisch"});
   }
 
   // Gevaarlijke stoffen en milieu
   if (bevatEenVan(["gas", "lekkage", "chemicaliën", "brandstof", "benzine", "diesel"])) {
-    codes.push("P1 Gaslekkage");
+    meldingen.push({code: "P1 Gaslekkage", categorie: "Milieu"});
   }
   if (bevatEenVan(["explosie", "ontploffing"])) {
-    codes.push("P1 Explosie");
+    meldingen.push({code: "P1 Explosie", categorie: "Milieu"});
   }
-  if (bevatEenVan(["strom", "wind", "hoosbui", "hagel", "ijzel"])) {
-    codes.push("P2 Weersschade");
+  if (bevatEenVan(["storm", "wind", "hoosbui", "hagel", "ijzel"])) {
+    meldingen.push({code: "P2 Weersschade", categorie: "Milieu"});
   }
   if (bevatEenVan(["wateroverlast", "overstroming", "dijkdoorbraak"])) {
-    codes.push("P2 Wateroverlast");
+    meldingen.push({code: "P2 Wateroverlast", categorie: "Milieu"});
   }
 
   // Politie en veiligheid
   if (bevatEenVan(["inbraak", "diefstal", "overval", "overvalpoging"])) {
-    codes.push("P3 Politie Incident");
+    meldingen.push({code: "P3 Politie Incident", categorie: "Politie"});
   }
   if (bevatEenVan(["bedreiging", "geweld", "vechtpartij"])) {
-    codes.push("P3 Geweldsincident");
+    meldingen.push({code: "P3 Geweldsincident", categorie: "Politie"});
   }
   if (bevatEenVan(["hulp", "verleend"])) {
-    codes.push("P3 Algemene Hulpverlening");
+    meldingen.push({code: "P3 Algemene Hulpverlening", categorie: "Politie"});
   }
 
-  // Als er geen codes gevonden zijn
-  if (codes.length === 0) {
-    codes.push("P1 Onbekende Melding");
+  // Geen melding gevonden
+  if (meldingen.length === 0) {
+    meldingen.push({code: "P1 Onbekende Melding", categorie: "Onbekend"});
   }
 
-  return codes;
+  return meldingen;
 }
 
 function verstuurP2000Alarm() {
