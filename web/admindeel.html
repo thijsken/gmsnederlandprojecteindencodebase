@@ -336,6 +336,8 @@
       telActieveGebruikers(); // start de teller zodra ingelogd
     } else {
       document.getElementById('aantalActivegebruikers').textContent = 0;
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
     }
   });
 
