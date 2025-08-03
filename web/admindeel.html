@@ -282,14 +282,14 @@
   const SECRET_KEY = "12345678901234567890123456789012";
 
 // 🔐 Email decryptie functie
-    function decryptEmail(cipherText) {
-  try {
-    const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
-    return bytes.toString(CryptoJS.enc.Utf8);
-  } catch (e) {
-    return null;
+  function decryptEmail(cipherText) {
+    try {
+      const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (e) {
+      return null;
+    }
   }
-}
     
     const firebaseConfig = {
       apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
@@ -327,6 +327,12 @@
           });
       });
 
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        loadServers();
+        telActieveServers();
+        telonderhoudactive();
+        teluitgeschakeldServers();
       telActieveGebruikers(); // start de teller zodra ingelogd
     } else {
       document.getElementById('aantalActivegebruikers').textContent = 0;
