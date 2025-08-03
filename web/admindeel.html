@@ -327,16 +327,8 @@
           });
       });
 
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        loadServers();
-        telActieveServers();
-        telonderhoudactive();
-        teluitgeschakeldServers();
       telActieveGebruikers(); // start de teller zodra ingelogd
     } else {
-      document.getElementById('loginScreen').classList.remove('hidden');
-      document.getElementById('dashboard').classList.add('hidden');
       document.getElementById('aantalActivegebruikers').textContent = 0;
     }
   });
