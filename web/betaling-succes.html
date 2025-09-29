@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico.png" type="image/x-icon">
+  <title>Betaling Geslaagd</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+    #code-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #code-modal.hidden {
+      display: none;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    #unique-code {
+      font-weight: bold;
+      font-size: 2rem;
+      margin: 1rem 0;
+      letter-spacing: 3px;
+      user-select: all;
+    }
+    button {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #0070f3;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #005bb5;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div id="code-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <h2 id="modal-title">Bedankt voor je betaling!</h2>
+      <p>Hier is je unieke code:</p>
+      <div id="unique-code" tabindex="0" aria-label="Unieke code"></div>
+      <button onclick="copyCode()">Kopieer code</button>
+      <button onclick="closeCodeModal()">Sluiten</button>
+    </div>
+  </div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+    authDomain: "gmsnederland.firebaseapp.com",
+    projectId: "gmsnederland",
+    databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function showCodeModalWith(code) {
+    const codeElement = document.getElementById('unique-code');
+    codeElement.textContent = code;
+    document.getElementById('code-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    codeElement.focus();
+  }
+
+  function closeCodeModal() {
+    document.getElementById('code-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    window.location.href = 'koop.html';
+  }
+
+  function copyCode() {
+    const code = document.getElementById('unique-code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      alert("Code gekopieerd!");
+    }).catch(() => {
+      alert("Kopiëren niet gelukt.");
+    });
+  }
+
+  function generateSessionId() {
+    return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+  }
+
+  async function init() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+
+    if (!sessionId) {
+      alert("Geen sessie-ID gevonden. Ongeldige toegang.");
+      return;
+    }
+
+    const userSession = sessionStorage.getItem('secure-session') || generateSessionId();
+    sessionStorage.setItem('secure-session', userSession);
+
+    const snapshot = await db.ref('aankopencode/' + sessionId).once('value');
+    const data = snapshot.val();
+
+    if (!data) {
+      alert("Geen geldige aankoop gevonden.");
+      return;
+    }
+
+    // Als al bekeken door andere sessie
+    if (data.bekekenDoor && data.bekekenDoor !== userSession) {
+      alert("Deze code is al opgehaald door een andere sessie.");
+      return;
+    }
+
+    // Als nog geen code toegekend is, maak en koppel een code
+    if (!data.code) {
+      const newCode = Math.random().toString(36).substring(2, 12).toUpperCase();
+      await db.ref('aankopencode/' + sessionId).update({
+        code: newCode,
+        bekekenDoor: userSession,
+        aangemaaktOp: new Date().toISOString()
+      });
+      sessionStorage.setItem('uniekeAankoopCode', newCode);
+      showCodeModalWith(newCode);
+    } else {
+      // Koppel alleen als sessie klopt
+      await db.ref('aankopencode/' + sessionId).update({
+        bekekenDoor: userSession
+      });
+      sessionStorage.setItem('uniekeAankoopCode', data.code);
+      showCodeModalWith(data.code);
+    }
+  }
+
+  window.addEventListener('load', () => {
+    init();
+  });
+</script>
+</body>
+</html>

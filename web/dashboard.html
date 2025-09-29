@@ -1,0 +1,3601 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>112 GMS - Meldkamer</title>
+        <!-- ✅ Voeg dit toe: -->
+    <link rel="icon" href="favicon.ico.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com">
+
+</script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .leaflet-popup-tip {
+        display: none !important;
+        }
+        #notificationsContainer {
+          position: relative;
+          display: inline-block;
+        }
+        #notificationsList {
+          display: none;
+          position: absolute;
+          top: 110%;
+          right: 0;
+          width: 300px;
+          max-height: 400px;
+          overflow-y: auto;
+          background: white;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 1000;
+        }
+        #notificationsList.visible {
+          display: block;
+        }
+        #notificationsList li {
+          padding: 10px;
+          border-bottom: 1px solid #eee;
+          font-size: 14px;
+          color: #333;
+        }
+        #notificationsList li:last-child {
+          border-bottom: none;
+        }
+        #map { height: 100%; border-radius: 0.5rem; }
+        .emergency-marker {
+            background-color: #ef4444;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+        .unit-marker { border-radius: 50%; width: 15px; height: 15px; }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+        ::placeholder {
+            font-weight: bold;
+        }
+        #voertuigSelect {
+            background-color: #423b3b; /* Lichtgrijs */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="w-16 bg-gray-800 flex flex-col items-center py-4 space-y-4">
+            <div class="text-center">
+                <div class="bg-black-600 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto">
+                    <img src="logogmsnederland.png" alt="Telefoon" class="w-11 h-11" />                </div>
+            </div>
+            <button id="dashboardBtn" class="text-blue-400 bg-gray-700 p-2 rounded-lg">
+                <i class="fas fa-mobile-alt"></i>
+            </button>
+            <button id="mapBtn" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
+                <i class="fas fa-map"></i>
+            </button>
+            <button id="unitsBtn" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
+                <i class="fas fa-server"></i>
+            </button>
+            <button id="settingsBtn" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button id="helicopterBtn" class="text-gray-400 hover:text-blue-400 p-2 rounded-lg">
+                <i class="fas fa-helicopter"></i>
+            </button>
+            <div class="mt-auto">
+                <button id="logoutBtn" class="text-gray-400 hover:text-red-400 p-2 rounded-lg">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Bar -->
+            <div class="bg-gray-800 p-4 flex justify-between items-center border-b border-gray-700">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold">112 Systeem van GMS_Nederland</h1>
+                    <div class="flex items-center space-x-2">
+                        <span id="connectionStatus" class="h-3 w-3 bg-green-500 rounded-full"></span>
+                        <span id="onlinestatus" class="text-sm">Online</span>
+                    </div>
+                </div>
+                  <!-- Middenblok: Tijd en datum -->
+                    <div class="bg-gray-800 rounded-lg p-1 w-64 flex-shrink-0 h-full flex flex-col justify-center items-center text-white">
+                      <div id="currentTime" class="text-3xl font-bold text-blue-400">--:--</div>
+                      <div id="currentDate" class="text-sm text-gray-400 mt-1 text-center">-- -- ----</div>
+                    </div>
+                <div class="flex items-center space-x-4">
+                  <div class="relative">
+                        <button id="notificationsBtn" class="text-white px-4 py-2 rounded">
+                          🔔
+                          <span id="notificationsCount" style="background:#ef4444; padding: 2px 6px; border-radius: 50%; font-weight: bold; margin-left: 6px; font-size: 12px;">0</span>
+                        </button>
+
+                        <ul id="notificationsList">
+                          <!-- Notificaties komen hier -->
+                        </ul>
+                      </div>
+                      <!--is voor het account van mensen-->
+                      <button class="flex items-center space-x-2 bg-transparent hover:bg-blue-100 rounded px-2 py-1 transition" onclick="alert('Klik gedetecteerd!')">
+                          <div class="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                              <i class="fas fa-user"></i>
+                          </div>
+                            <span class="font-medium text-black">Meldkamer</span>
+                      </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-hidden">
+              <!-- Dashboard View -->
+                 <div id="dashboardView" class="h-full p-4 flex flex-col space-y-4">
+
+                  <!-- Statistiek: Actieve meldingen -->
+                  <div class="flex items-start gap-4 mb-4 flex-wrap h-40">
+                    <div class="meldingenintake flex flex-col gap-3 h-full">
+                      <button
+                        id="openNewCallPopupBtn"
+                        class="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded font-semibold whitespace-nowrap"
+                      >
+                        Nieuwe melding aanmaken
+                      </button>
+                      <div class="bg-gray-800 rounded-lg p-4 w-64 flex-shrink-0">
+                        <h3 class="text-lg font-semibold mb-2">Actieve meldingen</h3>
+                        <div id="activeCallsCount" class="text-3xl font-bold text-red-500">0</div>
+                      </div>
+                    </div>
+
+                    <!-- Middenblok: Meldingen met fallback card -->
+                    <div class="bg-gray-800 rounded-lg p-6 w-[889px] flex-shrink-0 h-full flex flex-col justify-center items-center text-white">
+                      <div id="noAlertsCard" class="text-lg text-gray-400 font-semibold text-center px-4">
+                        Geen meldingen
+                      </div>
+                      <div id="latestAlert" class="text-lg text-yellow-400 font-semibold text-center opacity-0 transition-opacity duration-700 px-4 hidden">
+                        <!-- Laatste melding komt hier -->
+                      </div>
+                    </div>
+
+                    <!--de eenheiden-->
+                    <div class="bg-gray-800 rounded-lg p-4 w-64 flex-shrink-0 h-full flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold mb-4">Diensten online</h3>
+                        <table class="w-full text-left text-gray-300 text-sm">
+                          <thead>
+                            <tr>
+                              <th class="pb-1">Dienst</th>
+                              <th class="pb-1 text-right">Aantal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Politie</td>
+                              <td class="text-right font-semibold" id="policeUnitsCount">0</td>
+                            </tr>
+                            <tr>
+                              <td>Brandweer</td>
+                              <td class="text-right font-semibold" id="fireUnitsCount">0</td>
+                            </tr>
+                            <tr>
+                              <td>Ambulance</td>
+                              <td class="text-right font-semibold" id="ambulanceUnitsCount">0</td>
+                            </tr>
+                            <tr class="border-t border-gray-700">
+                              <td class="font-semibold">Totaal</td>
+                              <td class="text-right font-bold" id="totalUnitsCount">0</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                  </div>
+
+                  <!-- Hoofd content: drie kolommen -->
+                  <div class="flex-1 flex gap-4 overflow-hidden">
+
+                    <!-- Links: Live Kaart -->
+                    <div class="flex-1 bg-gray-800 rounded-lg p-4 flex flex-col">
+                      <h3 class="text-lg font-semibold mb-2 text-white">Live Kaart</h3>
+                      <div id="dashboardMap" class="flex-1 rounded-lg bg-gray-700"></div>
+                    </div>
+
+                    <!-- Midden: Nieuwe meldingen + wachttijd tabel -->
+                    <div class="w-96 bg-gray-800 rounded-lg p-4 flex flex-col">
+
+                      <div class="flex justify-between items-center mb-4">
+                        <!-- Tabel wachttijden -->
+                        <table class="text-white text-sm table-auto border border-gray-600">
+                          <thead>
+                            <tr>
+                              <th class="border border-gray-600 px-2">Melding</th>
+                              <th class="border border-gray-600 px-2">Wachttijd</th>
+                            </tr>
+                          </thead>
+                          <tbody id="waitTimesTableBody">
+                            <!-- Dynamisch vullen -->
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <h3 class="text-lg font-semibold mb-2 text-white">Nieuwe Bellers (in wacht)</h3>
+                      <div id="newCallsList" class="overflow-y-auto flex-1 space-y-2 text-white">
+                        <!-- Dynamisch ingeladen nieuwe meldingen -->
+                      </div>
+                    </div>
+
+                    <!-- Rechts: Recente meldingen -->
+                    <div class="w-96 bg-gray-800 rounded-lg p-4 flex flex-col">
+                      <h3 class="text-lg font-semibold mb-2 text-white">Recente meldingen</h3>
+                      <div id="recentCalls" class="overflow-y-auto flex-1 space-y-2 text-white">
+                        <!-- Dynamisch ingeladen recente meldingen -->
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+        <!-- Popup voor nieuwe melding -->
+        <div
+          id="newCallPopup"
+          class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden"
+        >
+          <div class="bg-gray-900 rounded-lg p-6 w-[50rem] relative">
+            <h2 class="text-xl font-semibold mb-4 text-white">Nieuwe melding aanmaken</h2>
+            <form id="newCallForm" class="flex flex-col space-y-4 text-white">
+
+              <!-- Eerste rij -->
+              <div class="flex gap-4">
+                <!-- Type melding -->
+                <label class="flex flex-col w-1/1">
+                  <span class="mb-1 text-right">Type melding:</span>
+                  <div class="flex gap-1">
+                                <button
+                      type="button"
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded h-[42px]"
+                    >
+                      Hints|Kar
+                    </button>
+                    <span class="bg-gray-700 text-gray-300 px-2 py-2 rounded-l select-none">CM</span>
+                    <select
+                      id="typeSelect"
+                      name="type"
+                      class="bg-gray-800 text-white p-2 rounded w-full h-[42px]">
+                      <option>Brand</option>
+                      <option>Politie</option>
+                      <option>Ambulance</option>
+                      <option>Overig</option>
+                    </select>
+                  </div>
+                </label>
+
+                <!-- Categorie -->
+                <label class="flex flex-col w-1/3">
+                  <span class="mb-1">Categorie:</span>
+                  <input
+                    type="text"
+                    name="categorie"
+                    placeholder="Categorie invoeren"
+                    list="categorieLijst"
+                    class="bg-gray-800 rounded p-2 w-full"
+                  />
+                  <datalist id="categorieLijst">
+                    <optgroup label="GRIPS">
+                        <option value="GRIP 0 – Dagelijks optreden van de Hulpdiensten">GRIP 0 – Dagelijks optreden van de Hulpdiensten</option>
+                        <option value="GRIP 1 – Gecoördineerde multidisciplinaire inzet (CTPI)">GRIP 1 – Gecoördineerde multidisciplinaire inzet (CTPI)</option>
+                        <option value="GRIP 2 – Grootschalig incident (CoPI + ROT)">GRIP 2 – Grootschalig incident (CoPI + ROT)</option>
+                        <option value="GRIP 3 – Ramp in één Gemeente (CoRT + ROT + GBT’s)">GRIP 3 – Ramp in één Gemeente (CoRT + ROT + GBT’s)</option>
+                        <option value="GRIP 4 – Ramp in meerdere gemeenten (CoRT + ROT + RBT)">GRIP 4 – Ramp in meerdere gemeenten (CoRT + ROT + RBT)</option>
+                        <option value="GRIP 5 – Crisis in meerdere provincies (NCC etc.)">GRIP 5 – Crisis in meerdere provincies (NCC etc.)</option>
+                    </optgroup>
+
+                    <optgroup label="Politiecodes">
+                        <option value="Overvalmelding">Overvalmelding</option>
+                        <option value="Auto te water met dodelijke afloop">Auto te water met dodelijke afloop</option>
+                        <option value="Brandmelding">Brandmelding</option>
+                        <option value="Personenzoektocht">Personenzoektocht</option>
+                        <option value="Verkeersongeval met letsel">Verkeersongeval met letsel</option>
+                        <option value="Geweldsincident">Geweldsincident</option>
+                    </optgroup>
+
+                    <optgroup label="Ambulance- en Brandweer meldingen">
+                        <option value="Medische noodsituatie">Medische noodsituatie</option>
+                        <option value="Brand in gebouw">Brand in gebouw</option>
+                        <option value="Ongeval met gevaarlijke stoffen">Ongeval met gevaarlijke stoffen</option>
+                        <option value="Waterongeval">Waterongeval</option>
+                        <option value="1 – Assistentie 2e ambulance">1 – Assistentie 2e ambulance</option>
+                        <option value="2 – Met spoed politie ter plaatse">2 – Met spoed politie ter plaatse</option>
+                        <option value="3 – Met spoed brandweer ter plaatse">3 – Met spoed brandweer ter plaatse</option>
+                        <option value="4 – idem (minder gecompliceerde reddingsoperatie)">4 – idem (minder gecompliceerde reddingsoperatie)</option>
+                        <option value="5 – Begrafenisondernemer ter plaatse">5 – Begrafenisondernemer ter plaatse</option>
+                        <option value="6 – Bijstand van brandweer of duikers">6 – Bijstand van brandweer of duikers</option>
+                        <option value="7 – Politiebegeleiding">7 – Politiebegeleiding</option>
+                        <option value="8 – Dokter ter plaatse">8 – Dokter ter plaatse</option>
+                        <option value="9 – Gevaar voor ambulance personeel">9 – Gevaar voor ambulance personeel</option>
+                        <option value="10 – Mobilofoon via rampenkanaal">10 – Mobilofoon via rampenkanaal</option>
+                        <option value="100 – Aanrijding met 1 gewonde">100 – Aanrijding met 1 gewonde</option>
+                        <option value="110 – Aanrijding met meerdere gewonden">110 – Aanrijding met meerdere gewonden</option>
+                        <option value="120 – Aanrijding met beknelling">120 – Aanrijding met beknelling</option>
+                        <option value="130 – Aanrijding met trein">130 – Aanrijding met trein</option>
+                        <option value="140 – Auto te water">140 – Auto te water</option>
+                    </optgroup>
+
+                    <optgroup label="Veelvoorkomende Spoedmeldingen">
+                        <option value="Reanimatie">Reanimatie</option>
+                        <option value="A1 – Spoed ambulance (levensbedreigend)">A1 – Spoed ambulance (levensbedreigend)</option>
+                        <option value="A2 – Spoed ambulance (niet levensbedreigend)">A2 – Spoed ambulance (niet levensbedreigend)</option>
+                        <option value="B – Vervoer zonder spoed">B – Vervoer zonder spoed</option>
+                        <option value="Assistentie ambulance">Assistentie ambulance</option>
+                        <option value="Brand in woning of gebouw">Brand in woning of gebouw</option>
+                        <option value="Brand voertuig">Brand voertuig</option>
+                        <option value="Ongeval met letsel">Ongeval met letsel</option>
+                        <option value="Ongeval met beknelling">Ongeval met beknelling</option>
+                        <option value="Ongeval met gevaarlijke stoffen">Ongeval met gevaarlijke stoffen</option>
+                        <option value="Persoon te water">Persoon te water</option>
+                        <option value="Persoon van hoogte gevallen">Persoon van hoogte gevallen</option>
+                        <option value="Melding AED ingezet">Melding AED ingezet</option>
+                        <option value="Persoon in problemen op hoogte of diepte">Persoon in problemen op hoogte of diepte</option>
+                        <option value="Rookmelder gaat af">Rookmelder gaat af</option>
+                    </optgroup>
+
+                  </datalist>
+                </label>
+
+                <!-- Betreft -->
+                <label class="flex flex-col w-1/3">
+                  <span class="mb-1">Betreft:</span>
+                  <select name="betreft" class="bg-gray-800 rounded p-2 w-full">
+                    <optgroup label="Dieren">
+                      <option>Dier</option>
+                    </optgroup>
+                    <optgroup label="Persoon">
+                      <option>Persoon</option>
+                    </optgroup>
+                    <optgroup label="voertuigen">
+                      <option>PersoonAuto</option>
+                      <option>Vrachtwagen</option>
+                      <option>Bus</option>
+                      <option>Tractor</option>
+                      <option>Schooter | Brommer</option>
+                      <option>Fiets</option>
+                      <option>Boot</option>
+                    </optgroup>
+                  </select>
+                </label>
+              </div>
+
+              <!-- Locatie -->
+              <label class="flex flex-col">
+                <span class="mb-1">Locatie:</span>
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Voer locatie in"
+                  class="w-full bg-gray-800 rounded p-2"
+                  required
+                />
+              </label>
+
+              <!-- Omschrijving -->
+              <label class="flex flex-col">
+                <span class="mb-1">Omschrijving:</span>
+                <textarea
+                  name="description"
+                  rows="3"
+                  placeholder="Geef een korte omschrijving"
+                  class="w-full bg-gray-800 rounded p-2"
+                  required
+                ></textarea>
+              </label>
+
+              <!-- Actieknoppen -->
+              <div class="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  id="closeNewCallPopupBtn"
+                  class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submitpopupmelding"
+                  class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+                >
+                  Toevoegen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+   
+                  <!-- Map View -->
+                  <div id="mapView" class="h-full hidden">
+                  <div class="h-full flex">
+
+                      <!-- Kaart -->
+                      <div class="flex-1 p-4">
+                      <div id="map" class="h-full rounded-lg"></div>
+                      </div>
+
+                      <!-- Sidebar -->
+                      <div class="w-80 bg-gray-800 p-4 overflow-y-auto sidebar flex flex-col space-y-4">
+
+                      <!-- Titel -->
+                      <div>
+                          <h3 class="text-lg font-semibold text-white mb-2">🚨 Acties</h3>
+
+                          <!-- Knoppen -->
+                          <div class="flex flex-col space-y-2">
+                          <button onclick="openAmberModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded w-full">
+                              <i class="fas fa-exclamation-triangle mr-2"></i>Start Amber Alert
+                          </button>
+                          <button onclick="openP2000Modal()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded w-full">
+                              <i class="fas fa-bullhorn mr-2"></i>P2000 Alarm
+                          </button>
+                          <button onclick="openNLAlertModal()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded w-full">
+                              <i class="fas fa-bullhorn mr-2"></i>Start NL-Alert
+                          </button>
+                          <button onclick="openLuchtalarmModula()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded w-full">
+                              <i class="fas fa-bullhorn mr-2"></i>Start Luchtalarm
+                          </button>
+                          <div id="amberTable" class="space-y-2">
+                          <!-- Dynamisch gevulde Amber Alerts -->
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- Meldingenlijst -->
+                      <div>
+                          <h3 class="text-lg font-semibold text-white mt-4 mb-2">📋 Meldingen</h3>
+                          <div id="callList" class="space-y-2">
+                          <!-- Dynamisch ingeladen meldingen -->
+                          </div>
+                      </div>
+
+                      </div>
+                  </div>
+                  </div>
+
+                      <!-- database View -->
+                    <div id="unitsView" class="h-full p-6 overflow-y-auto max-w-6xl mx-auto">
+
+                      <h2 class="text-2xl font-bold mb-8 text-white text-center">📚 Database & Systemen</h2>
+
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        
+                        <!-- ANPR kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">🚔 ANPR – Kentekenherkenning</h3>
+                          <p class="mb-4">Scan en controleer kentekens automatisch.</p>
+                          <input 
+                            type="text" 
+                            id="anprKentekenInput" 
+                            placeholder="Voer kenteken in..." 
+                            class="mb-4 px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                          />
+                          <button 
+                            onclick="scanKenteken()" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Scan & Controleer
+                          </button>
+                            <p id="anprResult" class="text-sm min-h-[1.5rem]"></p>
+                        </div>
+
+                        <!-- C2000 kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">📡 C2000 – Communicatiesysteem</h3>
+                          <p class="mb-8">Landelijk communicatienetwerk voor hulpdiensten.</p>
+                          <button 
+                            onclick="alert('C2000 systeem openen')" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
+                        </div>
+
+                        <!-- BVH kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">🗃️ BVH – Basis Voorziening Handhaving</h3>
+                          <p class="mb-8">Politie-incidentregistratie en processen-verbaal.</p>
+                          <button 
+                            onclick="alert('BVH systeem openen')" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
+                        </div>
+
+                        <!-- RDW kaart -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">🚗 RDW Voertuiginformatie</h3>
+                          <p class="mb-8">Controle van voertuiggegevens, APK en eigendom.</p>
+                          <button 
+                            onclick="openRDW()" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
+                        </div>
+                        <!--🔍 CIOT – Onderzoek Telecommunicatie-->
+                            <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                              <h3 class="text-xl font-semibold mb-4">🔍 CIOT – Onderzoek Telecommunicatie</h3>
+                              <p class="mb-8">Toegang tot NAW-gegevens van telecomaanbieders.</p>
+                              <button
+                                onclick="openCIOT()"
+                                class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                              >
+                                Open
+                              </button>
+                            </div>
+                        <!--Liveopx voor systemen-ipat-->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 text-gray-300 flex flex-col">
+                          <h3 class="text-xl font-semibold mb-4">Liveopx Systeem</h3>
+                          <p class="mb-8">de info voor all hulpdiensten bij meldingen bijwerken</p>
+                          <button 
+                            onclick="openliveopxpopup()" 
+                            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+                          >
+                            Open
+                          </button>
+                    </div>  
+                  </div>
+              </div>
+            </div>
+                  <!-- Settings View -->
+                  <div id="settingsView" class="h-full hidden p-6 overflow-y-auto bg-gray-900 text-gray-200 font-sans">
+                    <div class="max-w-5xl mx-auto space-y-10">
+                      <h2 class="text-4xl font-bold tracking-tight text-white border-b border-gray-700 pb-4">
+                        Instellingen
+                      </h2>
+
+                      <!-- Section Component -->
+                      <div class="space-y-6">
+
+                        <!-- Community ID -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6">
+                          <h3 class="text-2xl font-semibold text-white mb-4">Community ID</h3>
+                          <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                            <input
+                              id="communityIdDisplay"
+                              type="text"
+                              readonly
+                              class="flex-1 bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-2 w-full"
+                              value="CommunityID wordt geladen..."
+                            />
+                            <button
+                              onclick="copyCommunityId()"
+                              class="bg-green-600 hover:bg-green-700 transition-all text-white px-4 py-2 rounded-lg"
+                            >
+                              Kopieer
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Kaart Upload -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6">
+                          <h3 class="text-2xl font-semibold text-white mb-4">Custom Kaart Upload (.png)</h3>
+                          <div class="flex flex-col md:flex-row items-center gap-4">
+                            <input
+                              type="file"
+                              id="mapImageInput"
+                              accept="image/png"
+                              class="text-sm text-gray-300 file:mr-4 file:bg-blue-600 file:text-white file:py-2 file:px-4 file:rounded hover:file:bg-blue-700"
+                            />
+                            <button
+                              onclick="uploadMapImage()"
+                              class="bg-blue-600 hover:bg-blue-700 transition-all text-white px-4 py-2 rounded-lg"
+                            >
+                              <i class="fas fa-upload mr-2"></i>Upload & Gebruik Kaart
+                            </button>
+                          </div>
+                          <p class="text-xs text-gray-400 mt-2">Upload een .png afbeelding die als kaart wordt weergegeven.</p>
+                        </div>
+
+                        <!-- API Configuratie -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6">
+                          <h3 class="text-2xl font-semibold text-white mb-6">API Configuratie</h3>
+
+                          <!-- API Key -->
+                          <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">Jouw API-sleutel</label>
+                            <div class="flex items-center">
+                              <input
+                                id="apiKey"
+                                type="text"
+                                readonly
+                                class="flex-1 bg-gray-700 border border-gray-600 rounded-l-lg px-4 py-2"
+                              />
+                              <button
+                                id="copyApiKey"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg"
+                              >
+                                <i class="fas fa-copy"></i>
+                              </button>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Deze sleutel is uniek voor jouw account. Deel deze niet met anderen.</p>
+                          </div>
+
+                          <!-- API URL -->
+                          <div class="mb-6">
+                            <label class="block text-sm font-medium mb-1">API URL</label>
+                            <div class="flex items-center">
+                              <input
+                                id="apiUrl"
+                                type="text"
+                                readonly
+                                class="flex-1 bg-gray-700 border border-gray-600 rounded-l-lg px-4 py-2"
+                              />
+                              <button
+                                id="copyApiUrl"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg"
+                              >
+                                <i class="fas fa-copy"></i>
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- Buttons -->
+                          <div class="flex flex-wrap gap-3">
+                            <button
+                              id="generateApiKey"
+                              class="bg-red-600 hover:bg-red-700 transition-all text-white px-4 py-2 rounded-lg"
+                            >
+                              <i class="fas fa-redo mr-2"></i>Nieuwe API-sleutel
+                            </button>
+                            <button
+                              id="testConnection"
+                              class="bg-green-600 hover:bg-green-700 transition-all text-white px-4 py-2 rounded-lg"
+                            >
+                              <i class="fas fa-plug mr-2"></i>Test verbinding
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Roblox Integratie -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6">
+                          <h3 class="text-2xl font-semibold text-white mb-4">Roblox Integratie</h3>
+                          <p class="text-gray-300 mb-4">
+                            Om het systeem te kunnen gebruiken en beheren voor je server, moet je de volgende plugin installeren:
+                          </p>
+                          <a
+                            href="https://www.roblox.com/library/140453599/HttpService"
+                            target="_blank"
+                            class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg"
+                          >
+                            Installeer HttpService Plugin
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+            </div>
+                  <!-- Helicopter Dashboard View -->
+                  <div id="helicopterDashboardView" class="h-full hidden p-6 flex flex-col space-y-6 bg-gray-900">
+
+                      <!-- Statistieken -->
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                          <div class="bg-gray-800 rounded-lg p-4 text-center">
+                              <h3 class="text-lg font-semibold text-gray-300 mb-2">🚁 Actieve Helikopters</h3>
+                              <div id="activeHelicoptersCount" class="text-4xl font-bold text-blue-400">0</div>
+                          </div>
+
+                          <div class="bg-gray-800 rounded-lg p-4 text-center">
+                              <h3 class="text-lg font-semibold text-gray-300 mb-2">🎯 Lopende Missies</h3>
+                              <div id="activeMissionsCount" class="text-4xl font-bold text-red-400">0</div>
+                          </div>
+
+                          <div class="bg-gray-800 rounded-lg p-4 text-center">
+                              <h3 class="text-lg font-semibold text-gray-300 mb-2">📍 Gevolgde Targets</h3>
+                              <div id="targetsTrackedCount" class="text-4xl font-bold text-yellow-400">0</div>
+                          </div>
+
+                      </div>
+
+                      <!-- Hoofdsectie -->
+                      <div class="flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6 overflow-hidden">
+
+                          <!-- Missies -->
+                          <div class="bg-gray-800 rounded-lg p-5 shadow flex flex-col overflow-hidden xl:col-span-1">
+                              <div class="flex justify-between items-center mb-4">
+                                  <h3 class="text-xl font-semibold text-white">🚨 Actieve Missies</h3>
+                                  <button onclick="openHelicopterpopup()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white font-semibold">
+                                      ➕ Start Missie 
+                                  </button>
+                              </div>
+                              <div id="activeMissionsList" class="flex-1 overflow-y-auto pr-2">
+                                  <p class="text-gray-500 text-sm italic">Nog geen actieve missies...</p>
+                              </div>
+                          </div>
+
+                          <!-- Kaart + Live Beeld -->
+                          <div class="flex flex-col xl:col-span-3 space-y-6">
+
+                              <!-- Grote Kaart -->
+                              <div class="bg-gray-800 rounded-lg p-5 flex flex-col h-[450px] xl:h-[550px] shadow">
+                                  <h3 class="text-xl font-semibold text-white mb-3">🗺️ Live Surveillance Kaart</h3>
+                                  <div id="helicopterMap" class="flex-1 rounded-lg bg-gray-700">
+                                      <!-- Hier komt de kaart -->
+                                  </div>
+                              </div>
+
+                              <!-- Live Camerabeeld -->
+                              <div class="bg-gray-800 rounded-lg p-5 flex flex-col h-[300px] xl:h-[400px] shadow">
+                                  <h3 class="text-xl font-semibold text-white mb-3">📡 Live Camerabeeld Helikopter</h3>
+                                  <div id="helicopterVideo" class="flex-1 bg-black rounded-lg flex items-center justify-center">
+                                      <p class="text-gray-500 italic">Wachten op livestream...</p>
+                                      <!-- Hier later <video> of <img> invoegen -->
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+        </div>
+    </div>
+
+<!-- Call Details Modal -->
+<div id="callDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden">
+    <div class="bg-gray-800 rounded-lg w-full max-w-2xl">
+        <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Melding details</h3>
+            <button id="closeCallDetails" class="text-gray-400 hover:text-gray-300">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400">Meldingstype</h4>
+                    <p id="callType" class="text-lg">-</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400">Tijdstip</h4>
+                    <p id="callTime" class="text-lg">-</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400">Locatie</h4>
+                    <p id="callLocation" class="text-lg">-</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400">Status</h4>
+                    <p id="callStatus" class="text-lg text-yellow-400">-</p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-400">Beschrijving</h4>
+                <p id="callDescription" class="bg-gray-700 p-3 rounded-lg">-</p>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-400">Speler informatie</h4>
+                <div id="callPlayerInfo" class="bg-gray-700 p-3 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <p id="callPlayerName" class="font-medium">-</p>
+                            <p id="callPlayerId" class="text-xs text-gray-400">UserID: -</p>
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span id="callCoordinates">Locatie: -</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-400">Toegewezen eenheden</h4>
+                <div id="assignedUnits" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <!-- Dynamisch ingeladen eenheden -->
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-2">
+                <button id="assignPoliceBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                    <i class="fas fa-shield-alt mr-2"></i>Politie
+                </button>
+                <button id="assignAmbulanceBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                    <i class="fas fa-ambulance mr-2"></i>Ambulance
+                </button>
+                <button id="assignFireBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded">
+                    <i class="fas fa-fire-extinguisher mr-2"></i>Brandweer
+                </button>
+                <button id="closeCallBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                    <i class="fas fa-check mr-2"></i>Afhandelen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kazerenomroep Modal -->
+<div id="kazerenomroepModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-gray-900 rounded-lg w-full max-w-md p-6 shadow-lg">
+    <h2 class="text-xl font-bold mb-4">Kazerenomroep versturen</h2>
+
+    <label class="block text-sm font-medium mb-1">Adres van melding</label>
+    <input id="kazerenAdres" type="text" placeholder="Type hier Het Adders in." class="w-full border p-2 rounded mb-3" />
+
+        <label class="block text-sm font-medium mb-1">Selecteer voertuig</label>
+    <select id="voertuigSelect" class="w-full border p-2 rounded mb-4">
+    <option value="">-- Kies voertuig --</option>
+    <option value="Politie">Politie</option>
+    <option value="Brandweer">Brandweer</option>
+    <option value="Ambulance">Ambulance</option>
+    <option value="Rijkswaterstaat">Rijkswaterstaat</option>
+    </select>
+
+    <label class="block text-sm font-medium mb-1">Informatie</label>
+    <textarea id="kazerenInfo" placeholder="Bijv. brandmelding bij woning" class="w-full border p-2 rounded mb-4"></textarea>
+
+    <div class="flex justify-end gap-2">
+      <button onclick="sluitKazerenModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Sluit</button>
+      <button onclick="verstuurKazerenomroep()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Verstuur</button>
+    </div>
+
+    <div id="kazerenFeedback" class="text-green-600 text-sm mt-3 hidden">✅ Verstuurd!</div>
+  </div>
+</div>
+
+<!-- amberAlaert Modal -->
+<div id="amberModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden" style="z-index: 10000;">
+  <div class="bg-gray-800 rounded-lg w-full max-w-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Start Amber Alert</h2>
+      <button onclick="closeAmberModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+
+    <label class="block text-sm font-medium mb-1">Naam van speler</label>
+    <input type="text" id="amberPlayerName" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Bijv. Jan Jansen">
+
+    <label class="block text-sm font-medium mb-1">UserID</label>
+    <input type="text" id="amberUserId" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Roblox UserId">
+
+    <label class="block text-sm font-medium mb-1">Locatie laatst gezien</label>
+    <input type="text" id="amberLocation" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3">
+
+    <label class="block text-sm font-medium mb-1">Beschrijving</label>
+    <textarea id="amberDescription" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" rows="3"></textarea>
+
+    <div class="flex justify-end space-x-2">
+      <button onclick="closeAmberModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
+      <button onclick="saveAmberAlert()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Start Alert</button>
+    </div>
+  </div>
+</div>
+
+<!--nlalertModal-->
+<div id="nlalertModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden" style="z-index: 10000;">
+  <div class="bg-gray-800 rounded-lg w-full max-w-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Start NL-Alert</h2>
+      <button onclick="closeNLAlertModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+
+    <label class="block text-sm font-medium mb-1">Titel</label>
+    <input type="text" id="nlalertTitle" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3">
+
+    <label class="block text-sm font-medium mb-1">Bericht</label>
+    <textarea id="nlalertMessage" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" rows="3"></textarea>
+
+    <label class="block text-sm font-medium mb-1">Locatie</label>
+    <input type="text" id="nlalertLocation" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3">
+
+    <div class="flex justify-end space-x-2">
+      <button onclick="closeNLAlertModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
+      <button onclick="saveNLAlert()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded">Verzend NL-Alert</button>
+    </div>
+  </div>
+</div>
+
+<!-- Luchtalarm Modal -->
+<div id="luchtalarmModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden" style="z-index: 10000;">
+  <div class="bg-gray-800 rounded-lg w-full max-w-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-white">Start Luchtalarm</h2>
+      <button onclick="closeLuchtalarmModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+
+    <label class="block text-sm font-medium mb-1 text-white">Geluidspatroon</label>
+    <select type="text" id="luchtalarmTitle" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3 text-white">
+      <option value="testalarm">1 Stil testalarm</option>
+      <option value="start">2 Start Alarm</option>  
+      <option value="stop">3 Stop Alarm</option> 
+    </select>
+
+    <label class="block text-sm font-medium mb-1 text-white">Locatie</label>
+    <select id="luchtalarmLocation" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3 text-white">
+      <option value="all">All Sirens</option>
+      <option value="603">Asd Adm. Helfrichstr (J)</option>
+      <option value="648">Asd Amstelveenseweg (S)</option>
+      <option value="609">Asd Apollolaan (K)</option>
+      <option value="634">Asd Australiëhavenweg (B)</option>
+      <option value="645">Asd Aziehavenweg (B)</option>
+      <option value="603">Asd Baarsjesweg (J)</option>
+    </select>
+
+    <div class="flex justify-end space-x-2">
+      <button onclick="closeLuchtalarmModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
+      <button onclick="confirmLuchtalarm('start')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Start Luchtalarm</button>
+      <button onclick="confirmLuchtalarm('stop')" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded">Stop Luchtalarm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bevestigings Pop-up -->
+<div id="confirmLuchtalarmPopup" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden" style="z-index: 10000;">
+  <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full text-center">
+    <p id="popupMessage" class="text-lg mb-4 font-semibold">Weet je het zeker?</p>
+    <div class="flex justify-center space-x-4">
+      <button onclick="sendLuchtalarm()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Ja</button>
+      <button onclick="closeConfirmLuchtalarmPopup()" class="bg-gray-400 hover:bg-gray-500 text-black px-4 py-2 rounded">Nee</button>
+    </div>
+  </div>
+</div>
+
+<!--p2000Modal -->
+<div id="p2000Modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden" style="z-index: 9999;">
+  <div class="bg-gray-800 rounded-lg w-full max-w-xl p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Start P2000 Alarm</h2>
+      <button onclick="closeP2000Modal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+
+    <label class="block text-sm font-medium mb-1">Straat + huisnummer</label>
+    <input type="text" id="p2000Adres" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Bijv. Dorpsstraat 15">
+
+    <label class="block text-sm font-medium mb-1">Voertuignummers (gescheiden door komma)</label>
+    <input type="text" id="p2000Voertuigen" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" placeholder="Bijv. 06-1234, 07-5678">
+
+    <label class="block text-sm font-medium mb-1">Wat is er aan de hand?</label>
+    <textarea id="p2000Situatie" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-3" rows="3" placeholder="Bijv. brand in woning, rookontwikkeling bij zolder"></textarea>
+
+    <label class="block text-sm font-medium mb-1">Selecteer post</label>
+    <select id="p2000PostSelect" multiple size="5" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-4">
+      <option value="">-- Kies een post --</option>
+    </select>
+    <div id="p2000PostCheckboxes" class="mb-4"></div>
+
+    <div class="flex justify-end space-x-2">
+      <button onclick="closeP2000Modal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
+      <button onclick="verstuurP2000Alarm()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded">Verstuur Alarm</button>
+    </div>
+  </div>
+</div>
+
+<!-- RDW Modal -->
+<div id="rdwModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+  <div class="bg-gray-900 rounded-lg shadow-lg max-w-lg w-full p-6 relative text-gray-100">
+    <button onclick="closeRDW()" class="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">🚗 RDW Voertuiginformatie</h3>
+    
+    <div class="space-y-3 text-sm">
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Kenteken</span>
+        <span>12-ABC-34</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Merk</span>
+        <span>Toyota</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Model</span>
+        <span>Corolla</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Type</span>
+        <span>Sedan</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Bouwjaar</span>
+        <span>2018</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Brandstof</span>
+        <span>Benzine</span>
+      </div>
+      <div class="flex justify-between border-b border-700 pb-1">
+        <span class="font-semibold">APK geldig tot</span>
+        <span>15-03-2025</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Eerste toelating</span>
+        <span>01-06-2018</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Eigenaar</span>
+        <span>Jan Jansen</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-700 pb-1">
+        <span class="font-semibold">Registratieplaats</span>
+        <span>Amsterdam</span>
+      </div>
+    </div>
+
+    <div class="mt-6 text-right">
+      <button onclick="closeRDW()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold">Sluit</button>
+    </div>
+  </div>
+</div>
+
+<!--CIOT Modal-->
+<div id="ciotPopup" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+
+  <!-- Popup container -->
+  <div class="bg-gray-900 rounded-xl shadow-xl max-w-xl w-full p-6 text-gray-300">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">🔍 CIOT – Onderzoek Telecommunicatie</h2>
+      <button onclick="closeCIOT()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+    </div>
+
+    <!-- Formulier voor zoekopdracht -->
+    <form id="ciotForm" class="space-y-4">
+
+      <div>
+        <label for="ciotName" class="block font-semibold mb-1">Naam Gezochte Persoon</label>
+        <input type="text" id="ciotName" name="ciotName" placeholder="Voornaam Achternaam" 
+          class="w-full rounded-md bg-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" />
+      </div>
+
+      <div>
+        <label for="ciotPhone" class="block font-semibold mb-1">Telefoonnummer(s)</label>
+        <input type="text" id="ciotPhone" name="ciotPhone" placeholder="06-12345678, 010-9876543" 
+          class="w-full rounded-md bg-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" />
+      </div>
+
+      <div>
+        <label for="ciotPeriod" class="block font-semibold mb-1">Tijdsperiode</label>
+        <input type="text" id="ciotPeriod" name="ciotPeriod" placeholder="Bijv. 01-06-2025 t/m 15-06-2025" 
+          class="w-full rounded-md bg-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" />
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg font-semibold">
+        Zoek
+      </button>
+    </form>
+
+    <!-- Resultaten sectie -->
+    <div id="ciotResults" class="mt-6 max-h-60 overflow-y-auto hidden">
+      <h3 class="text-lg font-semibold mb-2">Resultaten</h3>
+      <table class="w-full text-sm text-gray-300">
+        <thead>
+          <tr class="border-b border-gray-700">
+            <th class="text-left px-2 py-1">Telefoonnummer</th>
+            <th class="text-left px-2 py-1">Abonnee</th>
+            <th class="text-left px-2 py-1">Locatie</th>
+            <th class="text-left px-2 py-1">Datum/tijd</th>
+          </tr>
+        </thead>
+        <tbody id="ciotResultsBody">
+          <!-- Resultaten worden hier ingevuld -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- LiveopX Popup -->
+<div id="liveopxPopup" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
+  <div class="bg-gray-900 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 text-gray-300 flex flex-col">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold">LiveopX Meldkamer</h2>
+      <button onclick="closeliveopxpopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+    </div>
+
+    <!-- Update Typen -->
+    <div class="mb-6">
+      <label for="updateInput" class="block mb-2 font-semibold text-lg">Typ hier je meldkamer update:</label>
+      <textarea id="updateInput" rows="3" class="w-full rounded-lg bg-gray-800 text-gray-200 p-3 resize-none" placeholder="Typ hier een status, opmerking of briefing..."></textarea>
+      <button onclick="addUpdate()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold">
+        Update Versturen
+      </button>
+    </div>
+
+    <!-- Gekoppelde Eenheden -->
+    <div class="mb-6">
+      <h3 class="text-2xl font-semibold mb-3">Gekoppelde Eenheden</h3>
+      <ul id="linkedUnitsList" class="space-y-2 max-h-48 overflow-y-auto bg-gray-800 p-4 rounded-lg">
+        <!-- Dynamische lijst van gekoppelde eenheden -->
+      </ul>
+      <p id="noUnitsMsg" class="text-gray-500 italic">Er zijn momenteel geen eenheden gekoppeld.</p>
+    </div>
+
+    <!-- Eenheden Koppelen / Afkoppelen -->
+    <div>
+      <h3 class="text-2xl font-semibold mb-3">Beschikbare Eenheden</h3>
+      <ul id="availableUnitsList" class="space-y-2 max-h-64 overflow-y-auto bg-gray-800 p-4 rounded-lg">
+        <!-- Dynamische lijst van beschikbare eenheden met knoppen -->
+      </ul>
+      <p id="loadingUnitsMsg" class="text-gray-400 italic mt-2 hidden">Eenheden laden...</p>
+      <p id="errorUnitsMsg" class="text-red-500 italic mt-2 hidden">Eenheden laden mislukt.</p>
+    </div>
+
+  </div>
+</div>
+
+<div id="helicopterModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
+  <div class="bg-gray-900 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 text-gray-300 flex flex-col">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold">Helicopter Systeem</h2>
+      <button onclick="closehelicopterpopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+    </div>
+
+    <!-- Spelerselectie -->
+    <label class="text-sm font-semibold mb-1">Selecteer speler</label>
+    <select id="helicopterPlayerSelect" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 mb-4">
+      <option value="">-- Kies een speler --</option>
+    </select>
+
+    <!-- Reden invoer -->
+    <label class="text-sm font-semibold mb-1">Reden (optioneel)</label>
+    <textarea id="helicopterReason" rows="3" placeholder="Bijv. verdachte op de vlucht..." class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 mb-4"></textarea>
+
+    <!-- Actieknoppen -->
+    <div class="flex justify-end space-x-2">
+      <button onclick="closehelicopterpopup()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">Annuleer</button>
+      <button onclick="sendHelicopterCommand()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Stuur Helikopter</button>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script>
+        //firebase
+          const firebaseConfig = {
+      apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+      authDomain: "gmsnederland.firebaseapp.com",
+      projectId: "gmsnederland",
+      databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    // window.location.href = 'index.html'; // allen voor het testen uit
+  } else {
+    const serverId = localStorage.getItem("serverId");
+    const serverName = localStorage.getItem("serverName");
+
+    if (!serverId) {
+      alert("❌ Geen server geselecteerd. Ga naar instellingen en kies je server.");
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Controleer of serverId bestaat in Firebase
+    db.ref(`servers/${serverId}/Communityid`).once('value')
+      .then(snapshot => {
+        if (!snapshot.exists()) {
+          alert("❌ Deze server bestaat niet in het systeem.");
+          localStorage.removeItem("serverId");
+          window.location.href = 'index.html';
+        } else {
+          // Laad dashboard zoals normaal
+        }
+      })
+      .catch(err => {
+        console.error("❌ Fout bij controleren server:", err);
+        alert("Kon de server niet controleren. Probeer opnieuw.");
+        window.location.href = 'index.html';
+      });
+  }
+});
+  // end
+        // API Configuration
+        // https://gmsnederland-production.up.railway.app
+        const API_URL = 'https://gmsnederlandprojecteindencodebase.vercel.app';
+        const serverId = localStorage.getItem("serverId");
+        const API_BASE_URL = 'https://gmsnederlandprojecteindencodebase.vercel.app'; // Wijzig dit naar je backend URL
+        const API_KEY = 'UVg7JOX9vcOHRAQjm1KoxCB6'; // vervang dit met de juiste sleutel
+        let currentCallId = null;
+        let currentApiKey = localStorage.getItem('apiKey') || '';
+        
+        // Initialize maps
+        const dashboardMap = L.map('dashboardMap', {
+            crs: L.CRS.Simple,
+            minZoom: -5,
+            maxZoom: 5,
+            zoomSnap: 0.1
+        }).setView([0, 0], 0);
+        const mainMap = L.map('map', {
+          crs: L.CRS.Simple,
+          minZoom: -5,
+          maxZoom: 5
+        });
+
+        // Markers and data
+        let notifications = [];
+        let availableUnits = [];
+        let linkedUnits = [];
+        let emergencyMarkers = {};
+        let unitMarkers = {};
+        let calls = [];
+        let units = []; // Definieer 'units' array om fouten te voorkomen
+        let amberAlerts = []; // Definieer 'amberAlerts' array om fouten te voorkomen
+        let verdachteKentekens  = [];
+        let laatstVerzondenP2000 = null;
+        let customMapOverlay = null;
+        let actievePostId = null;
+        let mapUploaded = false; // Nieuwe vlag om bij te houden of de kaart is geüpload
+
+        // DOM Elements
+        const apiKeyInput = document.getElementById('apiKey');
+        const apiUrlInput = document.getElementById('apiUrl');
+        const exampleCode = document.getElementById('exampleCode');
+        
+        // Initialize API settings
+        apiKeyInput.value = currentApiKey;
+        apiUrlInput.value = API_BASE_URL;
+
+        // Navigation between views
+        document.getElementById('dashboardBtn').addEventListener('click', () => showView('dashboardView'));
+        document.getElementById('mapBtn').addEventListener('click', () => showView('mapView'));
+        document.getElementById('unitsBtn').addEventListener('click', () => showView('unitsView'));
+        document.getElementById('settingsBtn').addEventListener('click', () => showView('settingsView'));
+        document.getElementById('helicopterBtn').addEventListener('click', () => showView('helicopterDashboardView'));
+        document.getElementById('logoutBtn').addEventListener('click', logout); 
+
+        // Settings view buttons
+        document.getElementById('copyApiKey').addEventListener('click', copyApiKey);
+        document.getElementById('copyApiUrl').addEventListener('click', copyApiUrl);
+        document.getElementById('generateApiKey').addEventListener('click', generateApiKey);
+        document.getElementById('testConnection').addEventListener('click', testConnection);
+
+        // meldingen updates. 
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        const notificationsList = document.getElementById('notificationsList');
+        const notificationsCount = document.getElementById('notificationsCount');
+        const TRELLO_KEY = 'c8b549654645f01a3b76ebbab7b76195';
+        const TRELLO_TOKEN = 'ATTA6f98527b20b3ac401db70aa059ef80996f7a78c3b53854b5f06db098b27a072168F07732';
+        const BOARD_ID = 'vBcL9Trd';
+
+        let LIST_ID = null;
+
+        notificationsBtn.addEventListener('click', () => {
+          notificationsList.classList.toggle('visible');
+        });
+
+function updateTimeAndDate() {
+  const now = new Date();
+
+  // Haal uren en minuten los, zodat we de dubbele punt zelf kunnen regelen
+  const uren = now.getHours().toString().padStart(2, '0');
+  const minuten = now.getMinutes().toString().padStart(2, '0');
+
+  // Knipper-effect voor dubbele punt: aan bij even seconde, uit bij oneven
+  const toonDubbelePunt = now.getSeconds() % 2 === 0;
+  const dubbelePunt = toonDubbelePunt ? ':' : ' ';
+
+  // Bouw de tijdstring zelf
+  const time = `${uren}${dubbelePunt}${minuten}`;
+
+  // Datum updaten, kan elke minuut (of 10 sec) want datum verandert langzaam
+  const date = now.toLocaleDateString('nl-NL', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  document.getElementById("currentTime").textContent = time;
+  document.getElementById("currentDate").textContent = date;
+}
+
+// Elke seconde updaten voor knipperende dubbele punt
+setInterval(updateTimeAndDate, 1000);
+
+// Direct ook meteen uitvoeren
+updateTimeAndDate();
+
+        async function fetchListId() {
+          const url = `https://api.trello.com/1/boards/${BOARD_ID}/lists?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`;
+          const res = await fetch(url);
+          const lists = await res.json();
+          const medelingenList = lists.find(list => list.name.toLowerCase() === 'medelingen');
+          if (medelingenList) {
+            LIST_ID = medelingenList.id;
+            return LIST_ID;
+          } else {
+            console.error('Lijst "medelingen" niet gevonden op bord.');
+            return null;
+          }
+        }
+        // end meldingenupdates.
+
+        // Call management
+        document.getElementById('closeCallDetails').addEventListener('click', () => {
+            document.getElementById('callDetailsModal').classList.add('hidden');
+        });
+        document.getElementById('assignPoliceBtn').addEventListener('click', () => assignUnit('police'));
+        document.getElementById('assignAmbulanceBtn').addEventListener('click', () => assignUnit('ambulance'));
+        document.getElementById('assignFireBtn').addEventListener('click', () => assignUnit('fire'));
+        document.getElementById('closeCallBtn').addEventListener('click', () => sluitMelding(currentCallId));
+
+        // CIOT management
+          const dummyResults = [
+            { telefoon: '06-12345678', abonnee: 'Jan Jansen', locatie: 'Mast Rotterdam Zuid', datetime: '2025-06-20 14:35' },
+            { telefoon: '010-9876543', abonnee: 'Piet Pietersen', locatie: 'Mast Den Haag West', datetime: '2025-06-20 15:10' }
+          ];
+          document.getElementById('ciotForm').addEventListener('submit', function(e) {
+              e.preventDefault();
+
+              const name = document.getElementById('ciotName').value.trim();
+              const phone = document.getElementById('ciotPhone').value.trim();
+              const period = document.getElementById('ciotPeriod').value.trim();
+
+              if (!name && !phone) {
+                alert('Vul minimaal een naam of telefoonnummer in.');
+                return;
+              }
+
+              // Simuleer zoeken en resultaten tonen
+              showCIOTResults(dummyResults);
+            });
+
+        // liveopx management
+          const linkedUnitsList = document.getElementById('linkedUnitsList');
+          const availableUnitsList = document.getElementById('availableUnitsList');
+          const noUnitsMsg = document.getElementById('noUnitsMsg');
+          const loadingUnitsMsg = document.getElementById('loadingUnitsMsg');
+          const errorUnitsMsg = document.getElementById('errorUnitsMsg');
+
+        // popupmeldingen document
+        const openPopupBtn = document.getElementById('openNewCallPopupBtn');
+        const popup = document.getElementById('newCallPopup');
+        const closePopupBtn = document.getElementById('closeNewCallPopupBtn');
+        // const sendMeldingPopupbutton = document.getElementById('submitpopupmelding');
+        openPopupBtn.addEventListener('click', openPopup);
+        closePopupBtn.addEventListener('click', sluitpopup);
+        // sendMeldingPopupbutton.addEventListener('click', verstuurdmelding)
+          
+
+  // meldingenpopup
+  function sluitpopup() {
+    popup.classList.add('hidden');
+  }
+  function openPopup() {
+    popup.classList.remove('hidden');
+  }
+
+  //   function verstuurdmelding() {
+  // // 🔁 Uniek ID genereren
+  // const callId = db.ref().child('meldingen').push().key;
+
+  // // 🕒 Huidige tijd
+  // const timestamp = new Date().toISOString();
+
+  // // 📝 Data ophalen uit formulier
+  // const type = document.getElementById('typeSelect')?.value || 'Onbekend';
+  // const categorie = document.querySelector('input[name="categorie"]')?.value || 'Onbekend';
+  // const location = document.querySelector('input[name="location"]')?.value || 'Onbekend';
+  // const description = document.querySelector('textarea[name="description"]')?.value || 'Geen omschrijving';
+  // const betreft = document.querySelector('select[name="betreft"]')?.value || 'Onbekend';
+
+  // // Eventueel extra data toevoegen (bijv. ingelogde gebruiker, coords)
+  // const meldingData = {
+  //   id: callId,
+  //   type: type,
+  //   categorie: categorie,
+  //   location: location,
+  //   description: description,
+  //   betreft: betreft,
+  //   time: timestamp,
+  //   status: "nieuw",
+  //   speler: {
+  //     naam: "Onbekend", // Hier kun je eventueel de ingelogde naam zetten
+  //     userId: "Onbekend" // Of Roblox id koppelen als je die hebt
+  //   },
+  //   serverId: serverId || 'onbekend'
+  // };
+
+  // // 🔥 Verstuur naar Firebase
+  // db.ref(`meldingen/${callId}`).set(meldingData)
+  //   .then(() => {
+  //     console.log("✅ Melding opgeslagen:", meldingData);
+  //     showNotification("✅ Melding succesvol opgeslagen", "success");
+
+  //     // Formulier sluiten of resetten
+  //     document.getElementById('newCallPopup').classList.add('hidden');
+  //   })
+  //   .catch((error) => {
+  //     console.error("❌ Fout bij opslaan melding:", error);
+  //     showNotification("❌ Fout bij opslaan melding", "error");
+  //   });
+  // }
+
+  //end
+  // systemen meldingen.
+    async function fetchMedelingen() {
+    if (!LIST_ID) {
+      await fetchListId();
+    }
+    if (!LIST_ID) return;
+    const url = `https://api.trello.com/1/lists/${LIST_ID}/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error('Fout bij ophalen Trello kaarten:', await res.text());
+      return;
+    }
+    const cards = await res.json();
+    // Maak leeg
+    notificationsList.innerHTML = '';
+    cards.forEach(card => {
+      const li = document.createElement('li');
+      li.textContent = card.name;
+      li.title = card.desc || '';
+      li.onclick = () => window.open(card.url, '_blank');
+      notificationsList.appendChild(li);
+    });
+    notificationsCount.textContent = cards.length;
+  }
+    window.addEventListener('load', () => {
+    fetchMedelingen();
+  });
+    setInterval(fetchMedelingen, 5 * 60 * 1000);  
+
+    // Functions
+    function copyCommunityId() {
+    const communityId = localStorage.getItem('serverName'); // of welke key jij gebruikt voor CommunityID
+    if (!communityId) {
+        showNotification('Community ID veld niet gevonden.', 3000);
+        alert('Community ID niet gevonden in localStorage.');
+        return;
+    }
+
+    // Maak een tijdelijk textarea element aan om te kopiëren
+    const tempInput = document.createElement('textarea');
+    tempInput.value = communityId;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    tempInput.setSelectionRange(0, 99999); // Voor mobiel
+
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showNotification('Community ID gekopieerd', 3000);
+        // alert('Community ID gekopieerd naar klembord: ' + communityId);
+        } else {
+            showNotification('Kon Community ID niet kopiëren.', 3000)
+        alert('Kon Community ID niet kopiëren.');
+        }
+    } catch (err) {
+        alert('Fout bij kopiëren: ' + err.message, 3000);
+    }
+
+    document.body.removeChild(tempInput);
+    }
+
+    // luchtalarm Functions
+    let gekozenActie = 'start';
+
+    function openLuchtalarmModula() {
+      document.getElementById('luchtalarmModal').classList.remove('hidden');
+    }
+
+    function closeLuchtalarmModal() {
+      document.getElementById('luchtalarmModal').classList.add('hidden');
+    }
+
+    function confirmLuchtalarm(actie) {
+      gekozenActie = actie;
+      document.getElementById('popupMessage').innerText = actie === 'start'
+        ? 'Weet je zeker dat je het luchtalarm wilt STARTEN?'
+        : 'Weet je zeker dat je het luchtalarm wilt STOPPEN?';
+      document.getElementById('confirmLuchtalarmPopup').classList.remove('hidden');
+      closeLuchtalarmModal();
+    }
+
+    function closeConfirmLuchtalarmPopup() {
+      document.getElementById('confirmLuchtalarmPopup').classList.add('hidden');
+    }
+
+    function sendLuchtalarm() {
+      // Statisch ID 'all' meegeven
+      triggerLuchtalarm(gekozenActie, 'all');
+
+      closeConfirmLuchtalarmPopup();
+      closeLuchtalarmModal();
+    }
+    // database funtions
+
+    // helicopter popup
+    function openHelicopterpopup() {
+      document.getElementById('helicopterModal').classList.remove('hidden');
+    }
+    function closehelicopterpopup() {
+      document.getElementById('helicopterModal').classList.add('hidden');
+    }
+    
+    // RDW Popups
+  function openRDW() {
+  document.getElementById('rdwModal').classList.remove('hidden');
+}
+  function closeRDW() {
+  document.getElementById('rdwModal').classList.add('hidden');
+}
+    // begin CIOT Deel
+  function openCIOT() {
+  document.getElementById('ciotPopup').classList.remove('hidden');
+}
+  function closeCIOT() {
+  document.getElementById('ciotPopup').classList.add('hidden');
+}
+  function showCIOTResults(results) {
+    const tbody = document.getElementById('ciotResultsBody');
+    tbody.innerHTML = ''; // leegmaken
+
+    results.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.classList.add('border-b', 'border-gray-700');
+
+      tr.innerHTML = `
+        <td class="px-2 py-1">${r.telefoon}</td>
+        <td class="px-2 py-1">${r.abonnee}</td>
+        <td class="px-2 py-1">${r.locatie}</td>
+        <td class="px-2 py-1">${r.datetime}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('ciotResults').classList.remove('hidden');
+  }
+
+  function clearCIOTResults() {
+    document.getElementById('ciotResultsBody').innerHTML = '';
+    document.getElementById('ciotResults').classList.add('hidden');
+    document.getElementById('ciotForm').reset();
+  }
+ 
+  // liveopx deel
+    function openliveopxpopup() {
+      document.getElementById('liveopxPopup').classList.remove('hidden');
+      loadUnits();
+    }
+
+    function closeliveopxpopup() {
+      document.getElementById('liveopxPopup').classList.add('hidden');
+      // document.getElementById('updateInput').value = '';
+      availableUnits = [];
+      linkedUnits = [];
+      renderUnits();
+    }
+    // voor het laden van de eenheiden
+    function loadUnits() {
+      loadingUnitsMsg.classList.remove('hidden');
+      errorUnitsMsg.classList.add('hidden');
+      fetchUnits(serverId)
+        .then(units => {
+          availableUnits = units || [];
+          linkedUnits = [];
+          renderUnits();
+          loadingUnitsMsg.classList.add('hidden');
+        })
+        .catch(err => {
+          console.error("Eenden ophalen mislukt:", err);
+          errorUnitsMsg.classList.remove('hidden');
+          loadingUnitsMsg.classList.add('hidden');
+        })
+    }
+  // Eenheid koppelen
+  function linkUnit(unitId) {
+    const unit = availableUnits.find(u => u.id === unitId);
+    if (unit && !linkedUnits.find(u => u.id === unitId)) {
+      linkedUnits.push(unit);
+      renderUnits();
+    }
+  }
+
+  // Eenheid afkoppelen
+  function unlinkUnit(unitId) {
+    linkedUnits = linkedUnits.filter(u => u.id !== unitId);
+    renderUnits();
+  }
+
+  // Updates versturen (simulatie)
+  function addUpdate() {
+    const updateInput = document.getElementById('updateInput');
+    const text = updateInput.value.trim();
+    if (!text) {
+      alert('Typ een update voordat je deze verstuurt.');
+      return;
+    }
+    // Hier kun je een echte API call toevoegen om update door te sturen
+    alert('Update verzonden: ' + text);
+    updateInput.value = '';
+  }
+
+  // Units opnieuw renderen
+  function renderUnits() {
+    // Gekoppelde eenheden tonen
+    linkedUnitsList.innerHTML = '';
+    if (linkedUnits.length === 0) {
+      noUnitsMsg.style.display = 'block';
+    } else {
+      noUnitsMsg.style.display = 'none';
+      linkedUnits.forEach(unit => {
+        const li = document.createElement('li');
+        li.className = 'flex justify-between items-center bg-gray-700 p-2 rounded-md';
+        li.innerHTML = `
+          <span>${unit.name} <span class="text-sm text-gray-400">(${unit.type || 'Onbekend'})</span></span>
+          <button onclick="unlinkUnit('${unit.id}')" class="text-red-500 hover:text-red-700 font-bold px-3 py-1 rounded bg-gray-800">Afkoppelen</button>
+        `;
+        linkedUnitsList.appendChild(li);
+      });
+    }
+
+    // Beschikbare eenheden tonen (niet gekoppeld)
+    availableUnitsList.innerHTML = '';
+    availableUnits
+      .filter(unit => !linkedUnits.find(lu => lu.id === unit.id))
+      .forEach(unit => {
+        const li = document.createElement('li');
+        li.className = 'flex justify-between items-center bg-gray-700 p-2 rounded-md';
+        li.innerHTML = `
+          <span>${unit.name} <span class="text-sm text-gray-400">(${unit.type || 'Onbekend'})</span></span>
+          <button onclick="linkUnit('${unit.id}')" class="text-green-500 hover:text-green-700 font-bold px-3 py-1 rounded bg-gray-800">Koppelen</button>
+        `;
+        availableUnitsList.appendChild(li);
+      });
+  }
+function scanKenteken() {
+  const input = document.getElementById('anprKentekenInput').value.trim().toUpperCase();
+  const result = document.getElementById('anprResult');
+
+  if (!input) {
+    result.textContent = '⚠️ Geen kenteken ingevoerd.';
+    return;
+  }
+
+  if (verdachteKentekens.includes(input)) {
+    result.innerHTML = `🚨 Verdacht voertuig gedetecteerd: <strong>${input}</strong>`;
+    showNotification(`🚔 ANPR hit: ${input} is gemarkeerd als verdacht!`, 'error');
+
+    voegNieuweMeldingToe({
+      id: Date.now().toString(),
+      type: 'Verdacht voertuig',
+      location: 'Onbekend',
+      description: `ANPR detectie van kenteken: ${input}`,
+      playerName: 'Systeem',
+      userId: 0,
+      timestamp: new Date().toISOString(),
+      coordinates: { x: 100, y: 100, z: 0 }
+    });
+
+  } else {
+    result.textContent = `✅ Geen match voor kenteken: ${input}`;
+  }
+}
+
+function openP2000Modal() {
+  document.getElementById('p2000Modal').classList.remove('hidden');
+  laadPostenVoorP2000();
+}
+
+function closeP2000Modal() {
+  document.getElementById('p2000Modal').classList.add('hidden');
+}
+
+function laadPostenVoorP2000() {
+  const select = document.getElementById('p2000PostSelect');
+  if (!select) {
+    console.error("❌ Selectelement #p2000PostSelect niet gevonden!");
+    showNotification("Selectielijst voor posten ontbreekt!", "error");
+    return;
+  }
+
+  select.innerHTML = '<option value="">-- Kies een post --</option>';
+
+  fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Fout bij ophalen posten: ${res.status} ${res.statusText}`);
+      return res.json();
+    })
+    .then(posten => {
+      if (!Array.isArray(posten) || posten.length === 0) {
+        showNotification("⚠️ Geen posten beschikbaar!", "info");
+        return;
+      }
+
+      const uniekePosten = new Set();
+
+      posten.forEach(post => {
+        const uniekeId = post.id || post.name;
+        if (!uniekeId) return;
+
+        // Dubbele posten overslaan
+        if (uniekePosten.has(uniekeId)) {
+          console.warn(`⚠️ Dubbele post overgeslagen: ${uniekeId}`);
+          return;
+        }
+
+        if (post.type && post.type.toLowerCase() === "politie") {
+          console.log(`🚫 Politiepost overgeslagen: ${uniekeId}`);
+          return;
+        }
+
+        // Check op lat/lng
+        if (typeof post.lat !== "number" || typeof post.lng !== "number") {
+          console.warn("⛔ Post zonder lat/lng overgeslagen:", post);
+          return;
+        }
+
+        uniekePosten.add(uniekeId);
+
+        const option = document.createElement('option');
+        option.value = uniekeId;
+        option.textContent = post.name || `Post ${post.id}`;
+        select.appendChild(option);
+      });
+
+      console.log("✅ Posten geladen (uniek):", Array.from(uniekePosten));
+    })
+    .catch(err => {
+      console.error("❌ Fout bij ophalen posten:", err);
+      showNotification("Fout bij laden van posten", "error");
+    });
+}
+
+function genereerP2000Code(beschrijving) {
+  const tekst = beschrijving.toLowerCase();
+  const meldingen = [];
+
+  function bevatEenVan(woorden) {
+    return woorden.some(w => tekst.includes(w));
+  }
+
+  // Brandmeldingen
+  if (bevatEenVan(["brand", "brandmelding"])) {
+    if (bevatEenVan(["woning", "huis", "gebouw", "pand"])) {
+      meldingen.push({code: "P1 BR (Woningen)", categorie: "Brand"});
+    }
+    if (bevatEenVan(["auto", "voertuig", "bus", "truck"])) {
+      meldingen.push({code: "P1 BR (Voertuig)", categorie: "Brand"});
+    }
+    if (bevatEenVan(["bos", "natuur", "gras", "heide"])) {
+      meldingen.push({code: "P2 BR (Natuurbrand)", categorie: "Brand"});
+    }
+    if (bevatEenVan(["schuur", "loods", "schuurbrand"])) {
+      meldingen.push({code: "P1 BR (Schuur)", categorie: "Brand"});
+    }
+    if (bevatEenVan(["container", "vuilnisbak", "afval"])) {
+      meldingen.push({code: "P2 BR (Containerbrand)", categorie: "Brand"});
+    }
+    if (bevatEenVan(["fabriek", "industrie", "loods", "bedrijf"])) {
+      meldingen.push({code: "P1 BR (Industrie)", categorie: "Brand"});
+    }
+  }
+
+  // Ongevallen en trauma
+  if (bevatEenVan(["ongeval", "botsing", "aanrijding", "verkeersongeval"])) {
+    meldingen.push({code: "P1 Ongeval Wegverkeer", categorie: "Ongeval"});
+  }
+  if (bevatEenVan(["val"]) && bevatEenVan(["trap", "hoogte", "loods", "steiger"])) {
+    meldingen.push({code: "P1 Valincident", categorie: "Ongeval"});
+  }
+  if (bevatEenVan(["snijwond", "mes", "messteek", "steekwond"])) {
+    meldingen.push({code: "P1 Steekincident", categorie: "Ongeval"});
+  }
+  if (bevatEenVan(["schotwond", "wapen", "schieten"])) {
+    meldingen.push({code: "P1 Schietincident", categorie: "Ongeval"});
+  }
+
+  // Medische noodsituaties
+  if (bevatEenVan(["reanimatie", "hartstilstand", "bewusteloos", "noodmedische", "admeniet"])) {
+    meldingen.push({code: "P1 Reanimatie", categorie: "Medisch"});
+  }
+  if (bevatEenVan(["beroerte", "stroke", "hersenbloeding", "hartinfarct"])) {
+    meldingen.push({code: "P1 Medische Noodsituatie", categorie: "Medisch"});
+  }
+  if (bevatEenVan(["epilepsie", "stuipen", "convulsies"])) {
+    meldingen.push({code: "P1 Epileptisch aanval", categorie: "Medisch"});
+  }
+  if (bevatEenVan(["astma", "ademnood", "benauwd"])) {
+    meldingen.push({code: "P1 Ademnood", categorie: "Medisch"});
+  }
+  if (bevatEenVan(["baby", "zuigeling", "kind"]) && bevatEenVan(["nood", "niet ademen", "problemen"])) {
+    meldingen.push({code: "P1 Kindernood", categorie: "Medisch"});
+  }
+
+  // Gevaarlijke stoffen en milieu
+  if (bevatEenVan(["gas", "lekkage", "chemicaliën", "brandstof", "benzine", "diesel"])) {
+    meldingen.push({code: "P1 Gaslekkage", categorie: "Milieu"});
+  }
+  if (bevatEenVan(["explosie", "ontploffing"])) {
+    meldingen.push({code: "P1 Explosie", categorie: "Milieu"});
+  }
+  if (bevatEenVan(["storm", "wind", "hoosbui", "hagel", "ijzel"])) {
+    meldingen.push({code: "P2 Weersschade", categorie: "Milieu"});
+  }
+  if (bevatEenVan(["wateroverlast", "overstroming", "dijkdoorbraak"])) {
+    meldingen.push({code: "P2 Wateroverlast", categorie: "Milieu"});
+  }
+
+  // Politie en veiligheid
+  if (bevatEenVan(["inbraak", "diefstal", "overval", "overvalpoging"])) {
+    meldingen.push({code: "P3 Politie Incident", categorie: "Politie"});
+  }
+  if (bevatEenVan(["bedreiging", "geweld", "vechtpartij"])) {
+    meldingen.push({code: "P3 Geweldsincident", categorie: "Politie"});
+  }
+  if (bevatEenVan(["hulp", "verleend"])) {
+    meldingen.push({code: "P3 Algemene Hulpverlening", categorie: "Politie"});
+  }
+
+  // Geen melding gevonden
+  if (meldingen.length === 0) {
+    meldingen.push({code: "P1 Onbekende Melding", categorie: "Onbekend"});
+  }
+
+  return meldingen;
+}
+
+function verstuurP2000Alarm() {
+  const adres = document.getElementById('p2000Adres').value.trim();
+  const voertuigen = document.getElementById('p2000Voertuigen').value.trim();
+  const situatie = document.getElementById('p2000Situatie').value.trim();
+  const postSelect = document.getElementById('p2000PostSelect');
+  if (!postSelect) {
+    console.error("❌ Selectelement #p2000PostSelect bestaat niet!");
+    showNotification("Er is een probleem met het laden van de postenlijst.", "error");
+    return;
+  }
+  const geselecteerdePosten = Array.from(postSelect.selectedOptions).map(opt => opt.value);
+
+  if (geselecteerdePosten.length === 0) {
+    showNotification("❌ Geen post geselecteerd! Kies minstens één post.", "error");
+    return;
+  }
+
+  if (!adres || !voertuigen || !situatie || !geselecteerdePosten.length === 0) {
+    showNotification("❌ Vul alle velden in!", "error");
+    return;
+  }
+
+  const meldingCode = genereerP2000Code(situatie);
+  const volledigMelding = `${meldingCode} - ${adres}\nVoertuigen: ${voertuigen}\n${situatie}`;
+
+  if (volledigMelding === laatstVerzondenP2000) {
+    showNotification("ℹ️ Deze melding is al verzonden.", "info");
+    return;
+  }
+
+  laatstVerzondenP2000 = volledigMelding;
+
+  const payload = {
+    postId: geselecteerdePosten,
+    trigger: true,
+    omroep: true,
+    adres,
+    info: volledigMelding,
+    voertuig: voertuigen
+  };
+
+  console.log("📦 Payload die wordt verstuurd naar /api/apiposten/apialarmposten/alarm:", payload);
+
+fetch(`${API_URL}/api/apiposten/apialarmposten/alarm?serverId=${serverId}`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+})
+.then(async res => {
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = { message: await res.text() };
+  }
+  if (!res.ok) {
+    console.error("❌ Serverfout bij POST:", data);
+    throw new Error(data.message || "Onbekende fout");
+  }
+  console.log("✅ Serverresponse:", data);
+  showNotification("🚨 P2000 Alarm verstuurd!", "success");
+  closeP2000Modal();
+})
+.catch(err => {
+  console.error("❌ Fout bij verzenden van P2000:", err);
+  showNotification("❌ Fout bij verzenden: " + err.message, "error");
+});
+}
+
+function openNLAlertModal() {
+    document.getElementById('nlalertModal').classList.remove('hidden');
+}
+
+function closeNLAlertModal() {
+    document.getElementById('nlalertModal').classList.add('hidden');
+}
+
+function saveNLAlert() {
+  const title = document.getElementById('nlalertTitle').value.trim();
+  const message = document.getElementById('nlalertMessage').value.trim();
+  const location = document.getElementById('nlalertLocation').value.trim();
+  const timestamp = new Date().toISOString();
+
+  if (!title || !message || !location) {
+    showNotification("❌ Vul alle velden in voor NL-Alert!", "error");
+    return;
+  }
+
+  const alert = { title, message, location, timestamp };
+
+  fetch(`${API_URL}/api/apinlalert/nlalert?serverId=${serverId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(alert)
+  })
+  .then(res => res.json())
+  .then(data => {
+    showNotification("📢 NL-Alert verzonden!", "success");
+    closeNLAlertModal();
+  })
+  .catch(err => {
+    console.error("❌ Fout bij versturen NL-Alert:", err);
+    showNotification("Fout bij verzenden van NL-Alert", "error");
+  });
+}
+
+function openAmberModal() {
+  document.getElementById('amberModal').classList.remove('hidden');
+}
+
+function closeAmberModal() {
+  document.getElementById('amberModal').classList.add('hidden');
+}
+
+function saveAmberAlert() {
+  const name = document.getElementById('amberPlayerName').value.trim();
+  const userId = document.getElementById('amberUserId').value.trim();
+  const location = document.getElementById('amberLocation').value.trim();
+  const description = document.getElementById('amberDescription').value.trim();
+  const timestamp = new Date().toISOString();
+  const serverId = localStorage.getItem("serverId"); // ✅ ophalen uit localStorage
+
+  if (!name || !userId || !location || !description || !serverId) {
+    showNotification("❌ Vul alle velden in (inclusief geldige serverId)!", "error");
+    return;
+  }
+
+  const alert = { name, userId, location, description, timestamp, serverId };
+
+fetch(`${API_URL}/api/apiamber/amber?serverId=${encodeURIComponent(serverId)}`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(alert)
+})
+  .then(async res => {
+    if (!res.ok) {
+      const errorText = await res.text(); // lees foutresponse als tekst
+      throw new Error(`Serverfout (${res.status}): ${errorText}`);
+    }
+    return res.json();
+  })
+  .then(data => {
+    showNotification("📢 Amber Alert succesvol verstuurd!", "success");
+    closeAmberModal();
+    amberAlerts.push(alert);
+    updateAmberTable();
+  })
+  .catch(err => {
+    console.error("❌ Fout bij versturen Amber Alert:", err);
+    showNotification("Fout bij opslaan in backend", "error");
+  });
+}
+
+function updateAmberTable() {
+  const container = document.getElementById('amberTable');
+  container.innerHTML = '';
+
+  amberAlerts.forEach(alert => {
+    const userIdSafe = encodeURIComponent(alert.userId || '');
+    const imgSrc = userIdSafe
+      ? `https://www.roblox.com/headshot-thumbnail/image?userId=${userIdSafe}&width=100&height=100&format=png`
+      : 'https://placehold.co/100x100?text=No+Image';
+
+    const div = document.createElement('div');
+    div.className = 'bg-gray-700 p-3 rounded flex items-start gap-3';
+
+    div.innerHTML = `
+      <img src="${imgSrc}"
+           alt="Foto van ${alert.name}"
+           onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=No+Image';"
+           class="w-16 h-16 rounded-full border-2 border-red-500" />
+      <div>
+        <h4 class="font-bold text-red-400">${alert.name}</h4>
+        <p class="text-sm text-gray-300"><strong>Locatie:</strong> ${alert.location}</p>
+        <p class="text-sm text-gray-300"><strong>Beschrijving:</strong> ${alert.description}</p>
+        <p class="text-xs text-gray-400 mt-1">${new Date(alert.timestamp).toLocaleString('nl-NL')}</p>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function openKazerenModal(postId) {
+  actievePostId = postId;
+  document.getElementById('kazerenAdres').value = '';
+  document.getElementById('kazerenInfo').value = '';
+  document.getElementById('kazerenFeedback').classList.add('hidden');
+  document.getElementById('kazerenomroepModal').classList.remove('hidden');
+}
+
+function sluitKazerenModal() {
+  document.getElementById('kazerenomroepModal').classList.add('hidden');
+}
+
+// Functie om Roblox X, Y coördinaten om te zetten naar Leaflet Lat, Lng coördinaten
+function robloxToLeafletCoords(robloxX, robloxY) {
+    if (!window.customMapSize) {
+        console.warn("⚠️ Geen kaartgrootte bekend. Gebruik standaardwaarden.");
+        // Dit zijn de bounds van de kaart [0,0] tot [height, width]
+        // Als er geen customMapSize is, kunnen we geen accurate conversie doen.
+        // We kunnen een fallback bieden, bijvoorbeeld door aan te nemen dat de kaart 1000x1000 is.
+        const defaultMapWidth = 1000;
+        const defaultMapHeight = 1000;
+        const defaultRobloxMinX = -512;
+        const defaultRobloxMaxX = 512;
+        const defaultRobloxMinY = -256; // Roblox Y is vaak de hoogte-as, dus dit is de 'diepte'
+        const defaultRobloxMaxY = 256;
+
+        const leafletX = ((robloxX - defaultRobloxMinX) / (defaultRobloxMaxX - defaultRobloxMinX)) * defaultMapWidth;
+        const leafletY = defaultMapHeight - ((robloxY - defaultRobloxMinY) / (defaultRobloxMaxY - defaultRobloxMinY)) * defaultMapHeight;
+        return [leafletY, leafletX]; // Leaflet verwacht [lat, lng] of [y, x] voor CRS.Simple
+    }
+
+    const { width: mapWidth, height: mapHeight } = window.customMapSize;
+
+    // Deze waarden moeten overeenkomen met de Roblox wereldgrenzen die de kaart representeert.
+    // Pas deze aan op basis van hoe jouw Roblox wereld is ingesteld.
+    // Bijvoorbeeld, als je kaart een gebied van -500 tot 500 op de X-as en -250 tot 250 op de Y-as van Roblox beslaat.
+    const robloxMinX = -512; // Voorbeeld: minimale X-coördinaat in Roblox die op de kaart past
+    const robloxMaxX = 512;  // Voorbeeld: maximale X-coördinaat in Roblox die op de kaart past
+    const robloxMinY = -256; // Voorbeeld: minimale Y-coördinaat in Roblox die op de kaart past (vaak de 'diepte' of 'breedte')
+    const robloxMaxY = 256;  // Voorbeeld: maximale Y-coördinaat in Roblox die op de kaart past
+
+    // Lineaire interpolatie om Roblox coördinaten om te zetten naar Leaflet pixel coördinaten
+    const leafletX = ((robloxX - robloxMinX) / (robloxMaxX - robloxMinX)) * mapWidth;
+    // Leaflet Y-as is omgekeerd (0 bovenaan), dus we moeten de Y-coördinaat omkeren
+    const leafletY = mapHeight - ((robloxY - robloxMinY) / (robloxMaxY - robloxMinY)) * mapHeight;
+
+    return [leafletY, leafletX]; // Leaflet verwacht [y, x] voor CRS.Simple
+}
+
+
+    // ✅ Kaart uploaden en tonen
+    function uploadMapImage() {
+      const input = document.getElementById('mapImageInput');
+      const file = input.files[0];
+
+      if (!file || file.type !== 'image/png') {
+        showNotification('❌ Upload een geldige PNG-afbeelding!', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageUrl = e.target.result;
+
+        const img = new Image();
+        img.onload = function() {
+          const width = img.width;
+          const height = img.height;
+          const bounds = [[0, 0], [height, width]];
+
+          // 📐 Sla grootte op
+          window.customMapSize = { width, height };
+
+          // ♻️ Oude overlay verwijderen
+          if (customMapOverlay) {
+            mainMap.removeLayer(customMapOverlay);
+            dashboardMap.removeLayer(customMapOverlay);
+          }
+
+          // ✅ Nieuwe overlay toevoegen
+          customMapOverlay = L.imageOverlay(imageUrl, bounds).addTo(mainMap);
+          L.imageOverlay(imageUrl, bounds).addTo(dashboardMap);
+
+          // 🔒 Beperk en zoom
+          mainMap.setMaxBounds(bounds);
+          dashboardMap.setMaxBounds(bounds);
+          mainMap.fitBounds(bounds);
+          dashboardMap.fitBounds(bounds);
+
+          mapUploaded = true; // Stel de vlag in op true
+          showNotification('📌 Kaart succesvol geladen!', 'success');
+
+          // Laad alle markers opnieuw nadat de kaart is geüpload
+          fetchEmergencyReports();
+          fetchUnits(serverId); // Zorg dat serverId beschikbaar is
+          fetchPosten();
+        };
+
+        img.src = imageUrl;
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+        function showView(viewId) {
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('mapView').classList.add('hidden');
+            document.getElementById('unitsView').classList.add('hidden');
+            document.getElementById('settingsView').classList.add('hidden');
+            document.getElementById('helicopterDashboardView').classList.add('hidden');
+            
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            const buttons = document.querySelectorAll('#dashboardBtn, #mapBtn, #unitsBtn, #settingsBtn, #helicopterBtn');
+            buttons.forEach(btn => {
+                btn.classList.remove('text-blue-400', 'bg-gray-700');
+                btn.classList.add('text-gray-400', 'hover:text-blue-400');
+            });
+            
+            if (viewId === 'dashboardView') {
+                document.getElementById('dashboardBtn').classList.add('text-blue-400', 'bg-gray-700');
+            } else if (viewId === 'mapView') {
+                document.getElementById('mapBtn').classList.add('text-blue-400', 'bg-gray-700');
+                setTimeout(() => mainMap.invalidateSize(), 100);
+            } else if (viewId === 'unitsView') {
+                document.getElementById('unitsBtn').classList.add('text-blue-400', 'bg-gray-700');
+            } else if (viewId === 'settingsView') {
+                document.getElementById('settingsBtn').classList.add('text-blue-400', 'bg-gray-700');
+            } else if (viewId === 'helicopterDashboardView') {
+                document.getElementById('helicopterBtn').classList.add('text-blue-400', 'bg-gray-700');
+            }
+        }
+
+        function copyApiKey() {
+            navigator.clipboard.writeText(apiKeyInput.value).then(() => {
+                showNotification('API-sleutel gekopieerd!');
+            });
+        }
+
+        function copyApiUrl() {
+            navigator.clipboard.writeText(apiUrlInput.value).then(() => {
+                showNotification('API URL gekopieerd!');
+            });
+        }
+
+        function generateApiKey() {
+            const newKey = 'gms_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            currentApiKey = newKey;
+            apiKeyInput.value = newKey;
+            localStorage.setItem('apiKey', newKey);
+            // updateExampleCode();
+            showNotification('Nieuwe API-sleutel gegenereerd!');
+        }
+        
+        async function testConnection() {
+        const statusEl = document.getElementById('connectionStatus');
+        const statustext = document.getElementById('onlinestatus');
+        const endpoints = [
+            '/',
+            `/api/apiamber/amber?serverId=${serverId}`,
+            `/api/apinlalert/nlalert?serverId=${serverId}`,
+            `/api/apimeldingen/meldingen?serverId=${serverId}`,
+            `/api/apiposten/posten?serverId=${serverId}`,
+            `/api/apiposten/apialarmposten/alarm?serverId=${serverId}`,
+            `/api/apiuntis/units?serverId=${serverId}`,
+            `/api/apiluchtalarm/palen?serverId=${serverId}`,
+            `/api/apiluchtalarm/apiluchtalarmacties/actie?serverId=${serverId}`
+        ];
+
+        let allOk = true;
+
+        for (const endpoint of endpoints) {
+            try {
+            const res = await fetch(`${API_URL}${endpoint}`, {
+                headers: {
+                'Authorization': `Bearer ${currentApiKey}`
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error(`❌ ${endpoint} gaf status ${res.status}`);
+            }
+            } catch (err) {
+            console.error(`Fout bij endpoint ${endpoint}:`, err.message);
+            showNotification(`Fout bij ${endpoint}: ${err.message}`, 'error');
+            allOk = false;
+            }
+        }
+
+        if (allOk) {
+            showNotification('✅ Alle API-endpoints zijn bereikbaar!', 'success');
+            statusEl.classList.remove('bg-red-500');
+            statustext.textContent = 'Online';
+            statusEl.classList.add('bg-green-500');
+        } else {
+            showNotification('❌ Sommige API-endpoints zijn niet bereikbaar!', 'error');
+            statusEl.classList.remove('bg-green-500');
+            statustext.textContent = 'Offline';
+            statusEl.classList.add('bg-red-500');
+        }
+        }
+
+        function updateUnits() {
+    const unitsContainer = document.getElementById('unitsContainer');
+    // unitsContainer.innerHTML = ''; // Commented out to prevent clearing if not needed for this view
+
+    units.forEach(unit => {
+        const unitCard = document.createElement('div');
+        unitCard.className = 'bg-gray-800 rounded-lg p-4';
+
+        let statusColor = 'bg-blue-900';
+        let statusText = 'text-blue-300';
+        if (unit.status === 'assigned') {
+            statusColor = 'bg-yellow-900';
+            statusText = 'text-yellow-300';
+        } else if (unit.status === 'busy') {
+            statusColor = 'bg-red-900';
+            statusText = 'text-red-300';
+        } else if (unit.status === 'unavailable') {
+            statusColor = 'bg-gray-700';
+            statusText = 'text-gray-300';
+        }
+
+        let iconColor = 'bg-blue-500';
+        if (unit.type === 'ambulance') iconColor = 'bg-green-500';
+        if (unit.type === 'fire') iconColor = 'bg-yellow-500';
+
+        unitCard.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <h3 class="font-bold">${getUnitTypeName(unit.type)} ${unit.id}</h3>
+                    <div class="text-sm ${unit.type === 'police' ? 'text-blue-400' : unit.type === 'ambulance' ? 'text-green-400' : 'text-yellow-400'}">
+                        ${unit.id}
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="text-blue-400 hover:text-blue-300" onclick="editUnit('${unit.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="text-red-400 hover:text-red-300" onclick="deleteUnit('${unit.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="text-sm mb-2">
+                <div class="flex items-center mb-1">
+                    <i class="fas fa-user mr-2 text-gray-400"></i>
+                    <span>${unit.driver}</span>
+                </div>
+                <div class="flex items-center mb-1">
+                    <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
+                    <span>${unit.location.lat.toFixed(4)}, ${unit.location.lng.toFixed(4)}</span>
+                </div>
+            </div>
+            <div class="mt-3 flex justify-between items-center">
+                <span class="${statusColor} ${statusText} text-xs px-2 py-1 rounded">${getStatusName(unit.status)}</span>
+                <button class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm" onclick="showUnitDetails('${unit.id}')">
+                    Details
+                </button>
+            </div>
+            <div class="mt-2">
+                ${maakUnitBadge(unit)}
+            </div>
+        `;
+
+        // unitsContainer.appendChild(unitCard); // Commented out as this is for the unitsView, not general update
+    });
+
+    document.getElementById('activeUnitsCount').textContent = units.length;
+}
+
+        function maakUnitBadge(unit) {
+            let kleur = 'bg-green-600'; // beschikbaar
+            if (unit.status === 'busy') kleur = 'bg-yellow-500';     // bezet
+            if (unit.status === 'unavailable') kleur = 'bg-gray-600'; // buitendienst
+
+            let dienstIcoon = '<i class="fas fa-question-circle"></i>';
+            if (unit.type === 'police') dienstIcoon = '<i class="fas fa-shield-alt"></i>';
+            if (unit.type === 'ambulance') dienstIcoon = '<i class="fas fa-ambulance"></i>';
+            if (unit.type === 'fire') dienstIcoon = '<i class="fas fa-fire-extinguisher"></i>';
+
+            const dienstNaam = getUnitTypeName(unit.type);
+
+            return `
+            <div class="flex items-center gap-3 px-3 py-1 rounded-full shadow text-white ${kleur}">
+                <i class="fas fa-car"></i>
+                <span class="font-semibold">${unit.driver}</span>
+                <span class="text-sm opacity-90">${dienstNaam}</span>
+                ${dienstIcoon}
+            </div>
+            `;
+        }
+
+        function getUnitTypeName(type) {
+            switch(type) {
+                case 'police': return 'Politie';
+                case 'ambulance': return 'Ambulance';
+                case 'fire': return 'Brandweer';
+                default: return 'Eenheid';
+            }
+        }
+
+        function getStatusName(status) {
+            switch(status) {
+                case 'available': return 'Beschikbaar';
+                case 'assigned': return 'Toegewezen';
+                case 'busy': return 'Ingeschakeld';
+                default: return status;
+            }
+        }
+
+        function addUnitMarker(unit) {
+            if (!mapUploaded) {
+                console.warn("Kaart is nog niet geüpload, kan geen unit marker toevoegen.");
+                return;
+            }
+            if (!unit.location || unit.location.lat == null || unit.location.lng == null) return;
+
+            let iconClass = 'fa-car text-blue-500';
+            if (unit.type === 'ambulance') iconClass = 'fa-ambulance text-green-500';
+            if (unit.type === 'fire') iconClass = 'fa-fire-extinguisher text-yellow-500';
+
+            const customIcon = L.divIcon({
+                html: `<div class="text-xl"><i class="fas ${iconClass}"></i></div>`,
+                className: '', // geen Leaflet standaard stijl
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            // Gebruik robloxToLeafletCoords voor de conversie
+            const [y, x] = robloxToLeafletCoords(unit.location.lng, unit.location.lat); // Let op: Roblox X is vaak lng, Y is lat
+
+            const marker = L.marker([y, x], {
+                icon: customIcon
+            }).addTo(mainMap);
+
+            if (unit.type === 'police') {
+                marker.addTo(dashboardMap);
+            }
+
+            unitMarkers[unit.id] = marker;
+
+            marker.bindPopup(`
+                <b>${getUnitTypeName(unit.type)} ${unit.id}</b><br>
+                Bestuurder: ${unit.driver}<br>
+                Status: ${getStatusName(unit.status)}
+            `);
+        }
+
+        function updateCalls() {
+    const recentCalls = document.getElementById('recentCalls');
+    const callList = document.getElementById('callList');
+
+    recentCalls.innerHTML = '';
+    callList.innerHTML = '';
+
+    calls.forEach(call => {
+        const callItem = document.createElement('div');
+        callItem.className = 'bg-gray-800 p-4 rounded shadow mb-2';
+        callItem.setAttribute('data-call-id', call.id); // Zet id als attribuut voor selectie
+
+        callItem.innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="font-semibold">112 - ${call.type}</span><br>
+                    <span class="text-sm text-gray-400">${call.location}</span>
+                </div>
+                <div class="text-sm text-gray-400">${formatTime(call.timestamp)}</div>
+            </div>
+            <div class="mt-2">
+                ${call.status === 'new'
+                    ? `<button class="bg-blue-600 text-white px-3 py-1 rounded" onclick="acceptCall('${call.id}')">Accepteer</button>`
+                    : `<span class="text-green-400 font-semibold">Geaccepteerd</span>`
+                }
+                <button class="ml-2 text-white underline" onclick="showCallDetails('${call.id}')">Details</button>
+            </div>
+        `;
+
+        if (call.status === 'new') {
+            recentCalls.appendChild(callItem);
+        } else if (call.status === 'accepted') {
+            callList.appendChild(callItem);
+        }
+    });
+
+    document.getElementById('activeCallsCount').textContent = calls.filter(c => c.status !== 'closed').length;
+}
+
+        function acceptCall(callId) {
+    const call = calls.find(c => String(c.id) === String(callId));
+    if (!call || call.status !== 'new') {
+        console.warn("⚠️ Geen geldige melding gevonden of status is niet 'new':", callId);
+        return;
+    }
+
+    // ✅ Lokaal updaten
+    call.status = 'accepted';
+    console.log(`📞 Melding ${callId} lokaal geaccepteerd.`);
+    updateCalls();
+
+    // Direct DOM-element van melding pakken in recentCalls
+    const callElement = document.querySelector(`#recentCalls .bg-gray-800[data-call-id="${callId}"]`);
+    if (callElement) {
+        // Verwijder uit recentCalls
+        callElement.remove();
+
+        // Pas status in DOM aan (voor accepted)
+        callElement.querySelector('.mt-2').innerHTML = `
+            <span class="text-green-400 font-semibold">Geaccepteerd</span>
+            <button class="ml-2 text-white underline" onclick="showCallDetails('${callId}')">Details</button>
+        `;
+
+        // Voeg toe aan callList
+        document.getElementById('callList').appendChild(callElement);
+    }
+
+    const marker = emergencyMarkers[callId];
+    if (marker) {
+        console.log(`📍 Marker gevonden voor ${callId}:`, marker);
+        try {
+            const yellowIcon = new L.Icon({
+                iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x-yellow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                shadowSize: [41, 41]
+            });
+            marker.setIcon(yellowIcon);
+        } catch (error) {
+            console.error("❌ Fout bij het instellen van de marker stijl:", error);
+        }
+    } else {
+        console.warn(`⚠️ Marker voor melding ${callId} niet gevonden.`);
+        return; // Stop hier als marker ontbreekt
+    }
+
+    // 🌐 PATCH naar backend
+    const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`;
+    console.log("🔗 PATCH URL:", url);
+    console.log("📦 PATCH payload:", JSON.stringify({ status: 'accepted' }));
+    fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentApiKey}` // Als je een API key gebruikt
+        },
+        body: JSON.stringify({ status: 'accepted' })
+    })
+    .then(res => {
+        console.log(`🌐 PATCH response status: ${res.status}`);
+        if (!res.ok) throw new Error(`PATCH mislukt met status ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        console.log(`✅ PATCH geslaagd voor melding ${callId}:`, data);
+        showNotification(`📞 Melding ${callId} geaccepteerd (via backend)`, 'success');
+    })
+    .catch(err => {
+        console.error('❌ Fout bij PATCH melding:', err);
+        showNotification('⚠️ Fout bij backend-update, lokaal geaccepteerd', 'error');
+    });
+}
+
+        function updateCallList() {
+    const callListContainer = document.getElementById('callListContainer');
+    callListContainer.innerHTML = ''; // Maak de container leeg
+
+    callList.forEach(call => {
+        const callElement = document.createElement('div');
+        callElement.classList.add('call-item');
+        callElement.innerHTML = `
+            <p><strong>Type:</strong> ${call.type}</p>
+            <p><strong>Locatie:</strong> ${call.location}</p>
+            <p><strong>Beschrijving:</strong> ${call.description}</p>
+            <button class="button meerinfo ..." onclick="meerInfo('${call.timestamp}')" data-id="${call.timestamp}">Meer info</button>
+        `;
+        callListContainer.appendChild(callElement);
+    });
+}
+
+        function updateRecentCalls() {
+    const recentCallsContainer = document.getElementById('recentCallsContainer');
+    recentCallsContainer.innerHTML = ''; // Maak de container leeg
+
+    recentCalls.forEach(call => {
+        const callElement = document.createElement('div');
+        callElement.classList.add('call-item');
+        callElement.innerHTML = `
+            <p><strong>Type:</strong> ${call.type}</p>
+            <p><strong>Locatie:</strong> ${call.location}</p>
+            <p><strong>Beschrijving:</strong> ${call.description}</p>
+            <button class="btn btn-accept" onclick="acceptMelding('${call.timestamp}')">Accepteer</button>
+        `;
+        recentCallsContainer.appendChild(callElement);
+    });
+}
+
+        function showCallDetails(callId) {
+            const call = calls.find(c => String(c.id) === String(callId));
+            if (!call) return;
+                    
+            currentCallId = callId;
+                    
+            document.getElementById('callType').textContent = call.type;
+            document.getElementById('callTime').textContent = formatTime(call.timestamp, true);
+            document.getElementById('callLocation').textContent = call.location;
+            document.getElementById('callStatus').textContent = getCallStatusName(call.status);
+            document.getElementById('callDescription').textContent = call.description || 'Geen beschrijving beschikbaar';
+            document.getElementById('callPlayerName').textContent = call.playerName || 'Onbekend';
+            document.getElementById('callPlayerId').textContent = `UserID: ${call.userId || 'Onbekend'}`;
+            document.getElementById('callCoordinates').textContent = `Locatie: X: ${call.coordinates?.x || 0}, Y: ${call.coordinates?.y || 0}, Z: ${call.coordinates?.z || 0}`;
+                    
+            // Update assigned units
+            const assignedUnitsContainer = document.getElementById('assignedUnits');
+            assignedUnitsContainer.innerHTML = '';
+                    
+            const assignedUnits = units.filter(u => u.assignedCall === callId);
+            assignedUnits.forEach(unit => {
+                const unitElement = document.createElement('div');
+                unitElement.className = 'bg-gray-700 p-2 rounded flex items-center';
+                        
+                let iconColor = 'bg-blue-500';
+                if (unit.type === 'ambulance') iconColor = 'bg-green-500';
+                if (unit.type === 'fire') iconColor = 'bg-yellow-500';
+                        
+                unitElement.innerHTML = `
+                    <div class="w-6 h-6 ${iconColor} rounded-full mr-2"></div>
+                    <div>
+                        <p class="font-medium">${unit.id}</p>
+                        <p class="text-xs text-gray-400">${unit.driver}</p>
+                    </div>
+                `;
+                        
+                assignedUnitsContainer.appendChild(unitElement);
+            });
+                    
+            // Zoom to call location on map
+            if (call.coordinates && mapUploaded) { // Controleer of kaart is geüpload
+                const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+
+                // Eerst naar locatie zoomen
+                mainMap.setView([y, x], 13);
+
+                // Wacht tot de kaart klaar is en plaats marker
+                mainMap.whenReady(() => {
+                    if (window.lastCallMarker) {
+                        mainMap.removeLayer(window.lastCallMarker);
+                    }
+
+                    window.lastCallMarker = L.circleMarker([y, x], {
+                        radius: 8,
+                        color: 'red',
+                        fillOpacity: 0.8
+                    }).addTo(mainMap);
+                });
+            }
+                    
+            document.getElementById('callDetailsModal').classList.remove('hidden');
+        }
+
+        function getCallStatusName(status) {
+            switch(status) {
+                case 'new': return 'Nieuw';
+                case 'accepted': return 'Geaccepteerd';
+                case 'assigned': return 'Toegewezen';
+                case 'closed': return 'Afgehandeld';
+                default: return status;
+            }
+        }
+
+        function assignUnit(unitType) {
+            if (!currentCallId) return;
+            
+            // Find available unit of the requested type
+            const availableUnit = units.find(u => u.type === unitType && u.status === 'available');
+            if (!availableUnit) {
+                showNotification(`Geen beschikbare ${getUnitTypeName(unitType)} eenheid!`, 'error');
+                return;
+            }
+            
+            // Assign unit to call
+            availableUnit.status = 'assigned';
+            availableUnit.assignedCall = currentCallId;
+            
+            // Update call status
+            const call = calls.find(c => c.id === currentCallId);
+            if (call) {
+                call.status = 'assigned';
+            }
+            
+            // Update UI
+            updateUnits();
+            updateCalls();
+            
+            // Update marker
+            if (unitMarkers[availableUnit.id]) {
+                unitMarkers[availableUnit.id].setStyle({color: '#f59e0b'}); // Yellow for assigned
+            }
+            
+            showNotification(`${getUnitTypeName(unitType)} eenheid ${availableUnit.id} toegewezen!`);
+        }
+
+        // function closeCall() {
+        //     if (!currentCallId) return;
+            
+        //     // Find call and mark as closed
+        //     const call = calls.find(c => String(c.id) === String(currentCallId));
+        //     if (call) {
+        //         call.status = 'closed';
+        //     }
+            
+        //     // Free up assigned units
+        //     units.forEach(unit => {
+        //         if (unit.assignedCall === currentCallId) {
+        //             unit.status = 'available';
+        //             unit.assignedCall = null;
+                    
+        //             // Update marker
+        //             if (unitMarkers[unit.id]) {
+        //                 let color = '#3b82f6'; // Blue for police
+        //                 if (unit.type === 'ambulance') color = '#10b981'; // Green for ambulance
+        //                 if (unit.type === 'fire') color = '#f59e0b'; // Orange for fire
+                        
+        //                 unitMarkers[unit.id].setStyle({color: color});
+        //             }
+        //         }
+        //     });
+            
+        //     // Update UI
+        //     // updateUnits();
+        //     updateCalls();
+            
+        //     // Remove emergency marker
+        //     if (emergencyMarkers[currentCallId]) {
+        //         mainMap.removeLayer(emergencyMarkers[currentCallId]);
+        //         dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
+        //         delete emergencyMarkers[currentCallId];
+        //     }
+            
+        //     showNotification(`Melding ${currentCallId} afgehandeld!`);
+        //     document.getElementById('callDetailsModal').classList.add('hidden');
+        // }
+
+        function sluitMelding(callId) {
+          if (!callId) {
+            console.warn("Geen callId meegegeven aan sluitMelding");
+            return;
+          }
+
+          // 1. Lokale status update (call gesloten)
+          const callIndex = calls.findIndex(c => c.id === callId);
+          if (callIndex === -1) {
+            console.warn(`⚠️ Geen melding gevonden met id ${callId}`);
+            return;
+          }
+          calls[callIndex].status = 'closed';
+
+          // 2. Marker verwijderen
+          if (emergencyMarkers[callId]) {
+            console.log("Verwijder marker:", emergencyMarkers[currentCallId]);
+            mainMap.removeLayer(emergencyMarkers[currentCallId]);
+            if (emergencyMarkers[currentCallId]) {
+              mainMap.removeLayer(emergencyMarkers[currentCallId]);
+              dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
+              delete emergencyMarkers[currentCallId];
+            } else {
+              console.warn(`⚠️ Geen marker gevonden voor callId: ${currentCallId}`);
+            }
+            delete emergencyMarkers[currentCallId];
+            } else {
+              console.warn(`Geen marker gevonden voor callId ${currentCallId}`);
+          }
+
+          // 3. Units vrijmaken (optioneel, als je dat wil)
+          units.forEach(unit => {
+            if (unit.assignedCall === callId) {
+              unit.status = 'available';
+              unit.assignedCall = null;
+
+              if (unitMarkers[unit.id]) {
+                let color = '#3b82f6'; // Politie blauw
+                if (unit.type === 'ambulance') color = '#10b981'; // Groen
+                if (unit.type === 'fire') color = '#f59e0b'; // Oranje
+
+                unitMarkers[unit.id].setStyle({ color });
+              }
+            }
+          });
+
+          // 4. UI updaten
+          updateCalls();
+
+          // 5. Verwijder call uit Firebase realtime database via backend-API
+          fetch(`${API_URL}/api/apimeldingen/meldingen?serverId=${serverId}&callId=${callId}`, {
+            method: 'DELETE'
+          })
+            .then(res => {
+              if (!res.ok) throw new Error(`Backend verwijderen mislukt met status ${res.status}`);
+              return res.json();
+            })
+            .then(data => {
+              console.log(`✅ Melding ${callId} succesvol verwijderd uit Firebase`, data);
+              showNotification(`Melding ${callId} afgehandeld en verwijderd`, 'success');
+              // sluit popup
+              document.getElementById('callDetailsModal').classList.add('hidden');
+            })
+            .catch(err => {
+              console.error(`❌ Fout bij verwijderen melding ${callId}:`, err);
+              showNotification(`Fout bij verwijderen melding ${callId}`, 'error');
+            });
+        }
+
+        function formatTime(timestamp, full = false) {
+            if (!timestamp) return 'Onbekend';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+            
+            if (full) {
+                return date.toLocaleTimeString('nl-NL') + ' - ' + date.toLocaleDateString('nl-NL');
+            }
+            
+            if (diffInMinutes < 1) return 'Nu';
+            if (diffInMinutes < 60) return `${diffInMinutes} min geleden`;
+            if (diffInMinutes < 24 * 60) return `${Math.floor(diffInMinutes / 60)} uur geleden`;
+            return `${Math.floor(diffInMinutes / (60 * 24))} dagen geleden`;
+        }
+
+        function voegNieuweMeldingToe(call) {
+
+            // Toon visuele notificatie
+            showNotification("📟 Nieuwe melding ontvangen!", "info");
+
+             // ✅ Geluid afspelen bij nieuwe melding
+            const audio = document.getElementById('notificationSound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => {
+                    console.warn("🔇 Kon geluid niet afspelen (gebruikersinteractie nodig)", e);
+                });
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg ${
+                type === 'error' ? 'bg-red-600' : 
+                type === 'success' ? 'bg-green-600' : 'bg-blue-600'
+            } text-white`;
+
+            notification.style.zIndex = 9999; // <-- BELANGRIJK: zet hem bovenop alles
+
+
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem('apiKey');
+            window.location.href = 'index.html';
+        }
+
+let vorigeMeldingenTimestamps = [];
+let bekendeMeldingen = new Set();
+
+function fetchEmergencyReports() {
+  if (!mapUploaded) {
+    console.log("Kaart is nog niet geüpload, meldingen worden niet geladen.");
+    return;
+  }
+
+  const url = `${API_URL}/api/apimeldingen/meldingen?serverId=${encodeURIComponent(serverId)}`;
+  // console.log("🌐 Ophalen meldingen van:", url);
+
+  fetch(url)
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(errData => {
+          console.error("Fout bij ophalen meldingen:", errData);
+          throw new Error(`Server gaf fout: ${res.status} - ${JSON.stringify(errData)}`);
+        });
+      }
+      return res.json();
+    })
+    .then(data => {
+      console.log("Ontvangen meldingen:", data);
+
+      const meldingenArray = Object.entries(data).map(([id, melding]) => ({
+        id, // <-- Firebase key als callId
+        ...melding,
+      }));
+
+      Object.values(emergencyMarkers).forEach(marker => {
+        if (marker) {
+          mainMap.removeLayer(marker);
+          dashboardMap.removeLayer(marker);
+        }
+      });
+
+      emergencyMarkers = {};
+      calls = [];
+
+      meldingenArray.forEach(melding => {
+      calls.push(melding); // voeg alle meldingen toe aan de lijst
+
+      if (
+        melding.status === 'new' &&
+        !bekendeMeldingen.has(melding.timestamp)
+      ) {
+        bekendeMeldingen.add(melding.timestamp);
+
+        if (
+          melding.coordinates &&
+          typeof melding.coordinates.x === 'number' &&
+          typeof melding.coordinates.y === 'number'
+        ) {
+          const [y, x] = robloxToLeafletCoords(melding.coordinates.x, melding.coordinates.y);
+          const icon = L.divIcon({
+            className: '',
+            html: `
+              <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+                <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${melding.userId}&width=100&height=100&format=png"
+                    onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                    style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+              </div>
+            `,
+            iconSize: [32, 42],
+            iconAnchor: [16, 42]
+          });
+
+          const marker = L.marker([y, x], { icon }).addTo(mainMap).addTo(dashboardMap);
+          marker.bindPopup(`
+            <b>${melding.type}</b><br>
+            Locatie: ${melding.location}<br>
+            Speler: ${melding.playerName}<br>
+            Beschrijving: ${melding.description}
+          `);
+
+          emergencyMarkers[melding.id] = marker;
+        } else {
+          console.warn(`⚠️ Melding ${melding.id} heeft ongeldige coördinaten:`, melding.coordinates);
+        }
+      }
+    });
+
+      updateCalls();
+    })
+    .catch(err => {
+      console.error("❌ Fout bij ophalen meldingen:", err.message);
+      showNotification("Fout bij ophalen meldingen: " + err.message, "error");
+    });
+}
+
+// Voeg dit toe aan je JS-bestand (na initialisatie van maps)
+function fetchUnits(serverId) {
+  if (!serverId) {
+    console.error("❌ serverId is verplicht om units op te halen");
+    return;
+  }
+
+  fetch(`${API_URL}/api/apiuntis/units?serverId=${encodeURIComponent(serverId)}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`
+    }
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error(`Server gaf status ${res.status}`);
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!Array.isArray(data)) {
+      console.warn("⚠️ Verwachte array van units, kreeg:", data);
+      return;
+    }
+
+    // Verwijder oude markers
+    Object.values(unitMarkers).forEach(marker => {
+      if (marker && typeof marker.remove === 'function') {
+        try {
+          marker.remove();
+        } catch (e) {
+          console.warn("❌ Fout bij verwijderen van marker:", e);
+        }
+      }
+    });
+    unitMarkers = {};
+
+    // Voeg nieuwe markers toe
+    data.forEach(unit => {
+      const marker = createMarker(unit);
+      if (marker) {
+        const maps = [mainMap].filter(Boolean);
+        maps.forEach(map => marker.addTo(map));
+        unitMarkers[unit.id] = marker;
+      }
+    });
+  })
+  .catch(err => {
+    console.error("❌ Eenheden ophalen mislukt:", err);
+  });
+}
+
+function createMarker(unit, map) { // Accept map as a parameter
+  const { id, location, type, driver } = unit;
+
+  if (!location || typeof location.lat !== 'number' || typeof location.lng !== 'number') {
+    console.warn(`⚠️ Unit ${id} mist geldige locatie`);
+    return null;
+  }
+
+  const emoji = {
+    politie: '🚓',
+    ambulance: '🚑',
+    brandweer: '🚒'
+  };
+
+  const icon = emoji[type.toLowerCase()] || '🚗';
+  const naam = driver || 'Onbekend';
+  const label = `${icon} | ${naam}`;
+
+  const popupHtml = `
+    ${icon} <b>${type.toUpperCase()}</b><br>
+    👤 Bestuurder: ${naam}<br>
+    🆔 Eenheid ID: ${id}
+  `;
+
+  const divIcon = L.divIcon({
+    className: 'unit-label',
+    html: `<div style="
+      background: white;
+      border: 1px solid #999;
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: black;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      white-space: nowrap;
+    ">${label}</div>`,
+    iconSize: [100, 24],
+    iconAnchor: [50, 12]
+  });
+
+  // Gebruik robloxToLeafletCoords voor de conversie
+  const [y, x] = robloxToLeafletCoords(location.lng, location.lat); // Let op: Roblox X is vaak lng, Y is lat
+
+  const marker = L.marker([y, x], {
+    icon: divIcon
+  }).bindPopup(popupHtml);
+
+  return marker;
+}
+
+// Haal eenheden elke 5 seconden op
+setInterval(() => {
+  const currentServerId = localStorage.getItem("serverId");
+  fetchUnits(currentServerId);
+}, 1000);
+
+// Je callList en recentCalls arrays moeten correct gedefinieerd zijn
+let recentCalls = [];  // Dit is waar je de recente meldingen opslaat
+let callList = [];     // Dit is waar de geaccepteerde meldingen naar toe gaan
+
+function accepteerMelding(timestamp) {
+    const ts = Number(timestamp);
+    const index = calls.findIndex(m => Number(m.timestamp) === ts);
+    if (index === -1) {
+        console.error("❌ Melding niet gevonden in calls!");
+        return;
+    }
+
+    const call = calls[index];
+
+    // Verwijder visueel uit recentCalls
+    const recentContainer = document.getElementById('recentCalls');
+    const meldingen = recentContainer.querySelectorAll('.melding');
+    meldingen.forEach(el => {
+        const btn = el.querySelector('button.accepteer');
+        if (btn && btn.getAttribute('onclick')?.includes(timestamp)) {
+            el.remove();
+        }
+    });
+
+    // Als al geaccepteerd of afgehandeld: verwijder alleen, doe niets meer
+    if (call.status !== 'new') {
+        console.log(`🔄 Melding ${timestamp} was al geaccepteerd (${call.status})`);
+        return;
+    }
+
+    // Zet status op geaccepteerd
+    call.status = 'accepted';
+
+    // Voeg toe aan callList
+    const callListContainer = document.getElementById('callList');
+    const div = document.createElement('div');
+    div.className = 'bg-gray-800 p-4 rounded shadow mb-3 melding';
+
+    div.innerHTML = `
+        <div class="bg-white-200 p-4 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-white">${call.type}</h3>
+            <p class="text-white-500 text-sm mb-2.5 mt-1">
+                <strong class="text-white-400">Locatie:</strong> ${call.location}
+            </p>
+            <p class="text-white-500 text-sm mb-2.5 mt-1">
+                <strong class="text-white-400">Speler:</strong> ${call.playerName}
+            </p>
+            <div class="buttons mt-2">
+                <button class="button meerinfo bg-gray-600 text-white p-2 rounded hover:bg-gray-700" onclick="meerInfo('${call.timestamp}')" data-id="${call.timestamp}">Meer info</button>
+                <button class="button sluit bg-red-600 text-white p-2 rounded hover:bg-red-700" onclick="sluitMelding('${call.timestamp}')">Afhandelen</button>
+            </div>
+        </div>
+    `;
+    callListContainer.appendChild(div);
+}
+
+function loadMeldingenToCallList() {
+    // Ophalen van meldingen uit localStorage
+    const meldingen = JSON.parse(localStorage.getItem('meldingen'));
+
+    if (meldingen) {
+        const callListContainer = document.getElementById('callList');
+        callListContainer.innerHTML = ''; // opschonen
+
+        calls.forEach(call => {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-800 p-4 rounded shadow mb-4'; // Basis styling voor de melding
+
+            div.innerHTML = `
+                <div class="bg-white-200 p-4 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold text-white">${call.type}</h3>
+                    <p class="text-white-500 text-sm mb-2.5 mt-1">
+                        <strong class="text-white-400">Locatie:</strong> ${call.location}
+                    </p>
+                    <p class="text-white-500 text-sm mb-2.5 mt-1">
+                        <strong class="text-white-400">Speler:</strong> ${call.playerName}
+                    </p>
+                    <div class="buttons mt-2">
+                        <button class="button accepteer bg-blue-500 text-white p-2 rounded hover:bg-blue-600" onclick="accepteerMelding('${call.timestamp}')">Accepteer</button>
+                        <button class="button meerinfo bg-gray-600 text-white p-2 rounded hover:bg-gray-700" data-id="${call.timestamp}">Meer info</button>
+                    </div>
+                </div>
+            `;
+
+            callListContainer.appendChild(div);
+        });
+    } else {
+        console.error("❌ Geen meldingen gevonden in localStorage.");
+    }
+}
+
+// Functie om de inhoud van recentCalls en callList te legen
+function clearCalls() {
+    const recentCalls = document.getElementById('recentCalls');
+    const callList = document.getElementById('callList');
+    
+    // Leeg de containers
+    recentCalls.innerHTML = '';
+    callList.innerHTML = '';
+}
+
+// Functie om noodmeldingen weer te geven op de kaart
+function displayEmergencyReports(reports) {
+    if (!mapUploaded) { // Controleer of de kaart is geüpload
+        console.log("Kaart is nog niet geüpload, emergency reports worden niet weergegeven.");
+        return;
+    }
+
+    // Verwijder oude markers
+    Object.values(emergencyMarkers).forEach(marker => {
+      if (marker) {
+        dashboardMap.removeLayer(marker);
+      }
+    });
+    emergencyMarkers = {};
+    calls = [];
+
+    reports.forEach(report => {
+        const call = {
+            id: report.timestamp || crypto.randomUUID(),
+            type: report.type || 'Onbekend',
+            playerName: report.playerName || 'Onbekend',
+            location: report.location || 'Onbekende locatie',
+            coordinates: report.coordinates || { x: 0, y: 0 }, // Standaard naar 0,0 als niet aanwezig
+            timestamp: report.timestamp || Date.now(),
+            status: 'new',
+            description: report.description || '',
+            headshot: report.headshot || `https://www.roblox.com/headshot-thumbnail/image?userId=${report.userId}&width=150&height=150&format=png`
+        };
+
+        calls.push(call); // Voeg de call toe aan de globale calls array
+
+        // 🔴 Voeg marker toe
+        if (call.coordinates && typeof call.coordinates.x === 'number' && typeof call.coordinates.y === 'number') {
+            const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y);
+            
+            // Controleer of de coördinaten geldig zijn
+            if (y < -90 || y > 90 || x < -180 || x > 180) {
+                console.warn(`⚠️ Ongeldige coördinaten voor melding ${call.id}: [${y}, ${x}]`);
+                return; // Stop hier als de coördinaten ongeldig zijn
+            }
+
+            const icon = L.divIcon({
+                className: '',
+                html: `
+                    <div style="position: relative; transform: translate(-50%, -50%); text-align: center;">
+                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${call.userId}&width=100&height=100&format=png"
+                            onerror="this.onerror=null;this.src='https://via.placeholder.com/32';"
+                            style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ef4444;" />
+                        <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #ef4444; margin: auto;"></div>
+                    </div>
+                `,
+                iconSize: [32, 42],
+                iconAnchor: [16, 42]
+            });
+
+            // Maak de marker aan
+            const marker = L.marker([y, x], { icon }).addTo(dashboardMap);
+            emergencyMarkers[call.id] = marker; // Zorg ervoor dat je de marker opslaat met de juiste ID
+        } else {
+            console.warn(`⚠️ Melding ${call.id} heeft ongeldige coördinaten:`, call.coordinates);
+        }
+    });
+
+    updateCalls();
+
+    // Calculate average response time (simulated)
+    if (calls.length > 0) {
+        const avgTime = Math.floor(Math.random() * 5) + 1;
+        document.getElementById('avgResponseTime').textContent = `${avgTime}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
+    }
+}
+
+function zoomToCall(callId) {
+    const call = calls.find(c => c.id === callId);
+    if (!call) {
+        console.error("❌ Melding niet gevonden!");
+        return;
+    }
+    if (!mapUploaded) { // Controleer of de kaart is geüpload
+        console.log("Kaart is nog niet geüpload, kan niet zoomen naar melding.");
+        return;
+    }
+
+    const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+
+  mainMap.setView([y, x], 17); // Zoom in op locatie
+  if (emergencyMarkers[call.id]) {
+    emergencyMarkers[call.id].openPopup();
+  } else {
+    console.warn('⚠️ Marker voor melding ${call.id} niet gevonden.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Selecteer de 'Meer info' knoppen
+    const meerInfoButtons = document.querySelectorAll('meerinfo');
+    meerInfoButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            const callId = event.target.getAttribute('data-id');
+            meerInfo(callId);
+        });
+    });
+
+    // CommunityID inladen en tonen
+    const communityId = localStorage.getItem('serverName'); // key voor CommunityID
+    const inputField = document.getElementById('communityIdDisplay');
+
+    if (communityId && inputField) {
+        inputField.value = communityId;
+    } else if (inputField) {
+        inputField.value = "CommunityID niet gevonden.";
+    }
+});
+
+// is voor het geluid de activeren. 
+
+// Gebruik UUID voor unieke ID's per melding
+function generateUUID() {
+    return crypto.randomUUID();
+}
+
+let acceptedCalls = [];
+
+// Voorbeeldfunctie om een melding toe te voegen
+function addMelding(meldingData) {
+    const call = {
+        id: generateUUID(),
+        type: meldingData.type || 'Onbekend',
+        timestamp: Date.now(),
+        location: meldingData.location || 'Onbekend',
+        description: meldingData.description || 'Geen beschrijving',
+        playerName: meldingData.playerName || 'Onbekende speler',
+        playerId: meldingData.playerId || '???',
+        coordinates: meldingData.coordinates || { x: 0, y: 0 },
+        status: 'open'
+    };
+
+    recentCalls.push(call);
+    renderRecentCalls();
+}
+
+// Render recentCalls in de lijst
+function renderRecentCalls() {
+    const container = document.getElementById('recentCallsList');
+    container.innerHTML = '';
+
+    recentCalls.forEach(call => {
+        const div = document.createElement('div');
+        div.classList.add('melding-item');
+        div.innerHTML = `
+            <p>${call.type} - ${new Date(call.timestamp).toLocaleTimeString()}</p>
+            <button onclick="meerInfo('${call.id}')">Meer info</button>
+            <button onclick="accepteerMelding('${call.id}')">Accepteer</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Functie om meer informatie over een melding te tonen
+function meerInfo(callId) {
+    const call = calls.find(c => String(c.timestamp) === String(callId));
+    if (!call) {
+        console.error("❌ Melding niet gevonden!");
+        return;
+    }
+
+    // Vul de modal met gegevens
+    document.getElementById('callType').textContent = call.type || '-';
+    document.getElementById('callTime').textContent = new Date(call.timestamp).toLocaleString();
+    document.getElementById('callLocation').textContent = call.location || '-';
+    document.getElementById('callStatus').textContent = call.status || '-';
+    document.getElementById('callDescription').textContent = call.description || '-';
+    document.getElementById('callPlayerName').textContent = call.playerName || '-';
+    document.getElementById('callPlayerId').textContent = 'UserID: ' + (call.playerId || '-');
+    document.getElementById('callCoordinates').textContent = call.coordinates
+        ? `Locatie: ${call.coordinates.x}, ${call.coordinates.y}`
+        : 'Locatie: -';
+
+    // 🔍 Zoom naar locatie op de kaart (indien beschikbaar)
+    if (call.coordinates && mapUploaded) { // Controleer of kaart is geüpload
+        const [y, x] = robloxToLeafletCoords(call.coordinates.x, call.coordinates.y); // Gebruik robloxToLeafletCoords
+        mainMap.setView([y, x], 16);
+        if (emergencyMarkers[call.id]) {
+            emergencyMarkers[call.id].openPopup();
+        }
+    }
+
+    // Toon de modal
+    document.getElementById('callDetailsModal').classList.remove('hidden');
+}
+
+// Functie om een melding toe te voegen aan recentCalls
+        function addNewCall(call) {
+    console.log("Nieuwe melding toegevoegd:", call);
+    recentCalls.push(call);
+    console.log("recentCalls na toevoegen:", recentCalls);
+}
+
+        function renderAcceptedCalls() {
+    const container = document.getElementById('acceptedCallsList');
+    if (!container) return;
+    container.innerHTML = '';
+
+    acceptedCalls.forEach(call => {
+        const div = document.createElement('div');
+        div.classList.add('accepted-melding');
+        div.innerHTML = `
+            <p>${call.type} - ${new Date(call.timestamp).toLocaleTimeString()}</p>
+        `;
+        container.appendChild(div);
+    });
+}
+
+        // Sluit modal
+        document.getElementById('closeCallDetails').addEventListener('click', () => {
+            document.getElementById('callDetailsModal').classList.add('hidden');
+        });
+
+        // Voorbeeldmelding
+        let newCall = {
+    timestamp: Date.now(), // Unieke tijdstempel
+    // Andere gegevens van de melding
+};
+
+        // Voeg de melding toe aan recentCalls
+        addNewCall(newCall);
+
+        // Initialize
+        showView('dashboardView');
+
+        // fetchEmergencyReports(); // Verwijderd, wordt nu aangeroepen na kaart upload
+        setInterval(fetchEmergencyReports, 5000); // Vernieuw elke 5 seconden
+
+        
+        // Make functions available globally for button clicks
+        window.acceptCall = acceptCall;
+        window.showCallDetails = showCallDetails;
+        window.meerInfo = meerInfo;
+        window.editUnit = (unitId) => {
+            // Implement edit functionality
+            showNotification(`Bewerk eenheid ${unitId}`);
+        };
+        
+        window.deleteUnit = (unitId) => {
+            if (confirm(`Weet je zeker dat je eenheid ${unitId} wilt verwijderen?`)) {
+                units = units.filter(u => u.id !== unitId);
+                if (unitMarkers[unitId]) {
+                    mainMap.removeLayer(unitMarkers[unitId]);
+                    dashboardMap.removeLayer(unitMarkers[unitId]);
+                    delete unitMarkers[unitId];
+                }
+                updateUnits();
+                showNotification(`Eenheid ${unitId} verwijderd`);
+            }
+        };
+        
+        window.showUnitDetails = (unitId) => {
+            const unit = units.find(u => u.id === unitId);
+            if (unit) {
+                alert(`Details voor ${unit.id}\nBestuurder: ${unit.driver}\nStatus: ${getStatusName(unit.status)}\nLocatie: ${unit.location.lat.toFixed(4)}, ${unit.location.lng.toFixed(4)}`);
+            }
+        };
+
+    
+// Alleen ophalen van straatnamen via de API
+function fetchStraatnamen() {
+  if (!mapUploaded) {
+    console.log("⏳ Kaart is nog niet geüpload, straatnamen worden niet geladen.");
+    return;
+  }
+
+  fetch(`${API_URL}/api/apiluchtalarm/palen?serverId=${encodeURIComponent(serverId)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Network response was not ok (${res.status})`);
+      return res.json();
+    })
+    .then(data => {
+      if (!data || typeof data !== "object") {
+        console.warn("⚠️ Ongeldige data ontvangen:", data);
+        return;
+      }
+
+      const straatnamen = data.straatnamen;
+      if (Array.isArray(straatnamen)) {
+        window.beschikbareStraatnamen = straatnamen;
+        console.log("📄 Straatnamen succesvol geladen:", straatnamen);
+        // Je kunt hier bijvoorbeeld een dropdown vullen met straatnamen
+      } else {
+        console.warn("⚠️ Geen straatnamen-array ontvangen:", straatnamen);
+      }
+    })
+    .catch(err => {
+      console.error("❌ Fout bij ophalen van straatnamen:", err);
+    });
+}
+
+const postMarkers = {};
+
+function triggerLuchtalarm(actie, id) {
+  fetch(`${API_URL}/api/apiluchtalarm/apiluchtalarmacties/actie`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actie, id })  // ✅ nu goed
+  })
+  .then(res => res.json())
+  .then(data => {
+    showNotification("Luchtalarm", data.message || 'Actie uitgevoerd');
+  })
+  .catch(err => {
+    console.error('Fout bij luchtalarm trigger:', err);
+    showNotification("Luchtalarm", '⚠️ Fout bij uitvoeren actie');
+  });
+}
+
+function listenToStatusUpdates(serverId) {
+  const statusenRef = db.ref(`servers/${serverId}/posten`);
+
+  statusenRef.on('child_changed', (snapshot) => {
+    const updatedPost = snapshot.val();
+    if (!updatedPost || !updatedPost.name || !updatedPost.statusen) return;
+
+    const marker = postMarkers[updatedPost.name];
+    if (!marker) return;
+
+    const popupEl = marker.getPopup().getElement();
+    if (!popupEl) return;
+
+    const statusContainer = popupEl.querySelector(`#status-container-${updatedPost.name}`);
+    if (!statusContainer) return;
+
+    updatedPost.statusen.forEach(s => {
+      const line = statusContainer.querySelector(`div[data-status-name="${s.name}"]`);
+      
+      if (line) {
+        const span = line.querySelector('span');
+        if (span) {
+          span.style.color = s.state ? 'red' : 'green';
+          span.textContent = s.state ? 'bezet' : 'vrij';
+        }
+      }
+
+      // Geen nieuwe elementen toevoegen als ze niet bestaan
+    });
+  });
+}
+
+function genereerPopupVoorPost(post) {
+  return `
+    <div style="min-width:150px">
+      <strong>${post.name}</strong><br>
+      ${post.statusen.map(s => `
+        <div>
+          ${s.name}: <span style="color:${s.state ? "red" : "green"}">${s.state ? "bezet" : "vrij"}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function fetchPosten() {
+  if (!mapUploaded) {
+    console.log("Kaart is nog niet geüpload, posten worden niet geladen.");
+    return;
+  }
+
+  // 🔄 Mapping van type → bijbehorend logo
+  const typeToIconUrl = {
+    ambulance: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Star_of_life2.svg/800px-Star_of_life2.svg.png",
+    brandweer: "https://dbdzm869oupei.cloudfront.net/img/sticker/preview/82436.png",
+    politie: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Patch_of_the_Dutch_Police.svg/640px-Patch_of_the_Dutch_Police.svg.png"
+    // Voeg hier extra types toe zoals ziekenhuis, reddingsbrigade etc.
+  };
+
+  fetch(`${API_URL}/api/apiposten/posten?serverId=${serverId}`)
+    .then(res => res.json())
+    .then(posten => {
+      if (!posten || typeof posten !== 'object') {
+        console.warn("❌ Ongeldige data ontvangen voor posten:", posten);
+        return;
+      }
+
+      const postArray = Array.isArray(posten)
+        ? posten
+        : Object.entries(posten).map(([id, post]) => ({ id, ...post }));
+
+      postArray.forEach(post => {
+        const { name, type = "default", statusen = [] } = post;
+        const [y, x] = robloxToLeafletCoords(post.lng, post.lat);
+
+        const iconUrl = typeToIconUrl[type.toLowerCase()] || "https://cdn-icons-png.flaticon.com/512/565/565547.png"; // 🔁 fallback icoon
+
+        const typeColors = {
+          ambulance: "#fde047", // geel
+          brandweer: "#ef4444", // rood
+          politie: "#3b82f6",   // blauw
+        };
+
+        const bgColor = typeColors[type.toLowerCase()] || "#9ca3af"; // standaard: grijs
+
+        const icon = L.divIcon({
+          className: '',
+          html: `
+            <div style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              transform: translate(-50%, -100%);
+              font-family: sans-serif;
+            ">
+              <div style="
+                background-color: ${bgColor};
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid white;
+              ">
+                <img src="${iconUrl}" style="width: 22px; height: 22px;" />
+              </div>
+              <div style="
+                width: 0;
+                height: 0;
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 10px solid ${bgColor};
+                margin-top: -1px;
+              "></div>
+            </div>
+          `,
+          iconSize: [40, 50],
+          iconAnchor: [21, 54] // 📌 Zorgt dat popup mooi erboven staat
+        });
+
+        const popup = genereerPopupVoorPost(post);
+
+        const marker = L.marker([y, x], { icon }).addTo(mainMap)
+          .bindPopup(popup, { 
+            autoPan: true, 
+            offset: L.point(-2, -79) });
+
+        postMarkers[post.name] = marker;
+
+        marker.on('popupopen', () => {
+          setTimeout(() => {
+            const btn = document.getElementById(`alarm-${name}`);
+            if (btn) {
+              btn.addEventListener('click', () => {
+                fetch(`${API_URL}/api/apiposten/alarm`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ postId: name, trigger: true })
+                })
+                  .then(res => res.json())
+                  .then(data => console.log('🚨 Alarm getriggerd:', data))
+                  .catch(err => console.error('❌ Fout bij alarm:', err));
+              });
+            }
+          }, 200);
+        });
+      });
+      setTimeout(() => {
+        listenToStatusUpdates(serverId);
+        fetchPosten();
+        console.log("Wacht 2 seconden klaar");
+      }, 2000);
+    })
+    .catch(err => console.error("❌ Fout bij ophalen posten:", err));
+}
+     // Voorbeeld veilige verwijdering van markers
+    function clearMarkers() {
+      markers.forEach(marker => {
+        if (marker && mainMap.hasLayer(marker)) {
+          mainMap.removeLayer(marker);
+        }
+      });
+    }
+
+</script>
+<audio id="notificationSound" src="melding.mp3" preload="auto"></audio>
+</body>
+</html>
