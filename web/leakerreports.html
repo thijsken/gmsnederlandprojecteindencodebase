@@ -49,10 +49,12 @@
         <table class="w-full table-auto text-sm">
           <thead class="bg-gray-100">
             <tr>
-              <th class="p-3 text-left">Gebruiker</th>
-              <th class="p-3 text-left">Beschrijving</th>
-              <th class="p-3 text-left">Status</th>
-              <th class="p-3 text-center">Actie</th>
+              <th class="px-4 py-2 border">Gebruiker</th>
+              <th class="px-4 py-2 border">Beschrijving</th>
+              <th class="px-4 py-2 border">Status</th>
+              <th class="px-4 py-2 border">Actie</th>
+              <th class="px-4 py-2 border">Is nog</th>
+              <th class="px-4 py-2 border">Meer info</th>
             </tr>
           </thead>
           <tbody id="reportsList"></tbody>
@@ -80,12 +82,6 @@
       </h2>
       <div id="popupContent" class="space-y-2 text-sm"></div>
       <div class="flex justify-end mt-6 space-x-2">
-        <button
-          onclick="closePopup()"
-          class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg"
-        >
-          Sluiten
-        </button>
       </div>
     </div>
   </div>
@@ -103,23 +99,34 @@
 
     const db = firebase.database();
     const auth = firebase.auth();
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        // Gebruiker is ingelogd
-        fetchReports();
-        // Logout knop functionaliteit (als je dat wilt)
-        document.getElementById("logoutBtn").addEventListener("click", () => {
-          auth.signOut().then(() => {
-            window.location.href = "admindeel.html";
-          });
-        });
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      // Gebruiker is ingelogd
+      fetchReports();
 
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          auth.signOut()
+            .then(() => {
+              window.location.href = "inlogadmindeel.html";
+            })
+            .catch(error => {
+              console.error("Fout bij uitloggen:", error);
+              alert("Er is iets misgegaan bij het uitloggen.");
+            });
+        });
       } else {
-        // Niet ingelogd: stuur naar loginpagina
-        window.location.href = "admindeel.html";
+        console.warn("Logout knop niet gevonden!");
       }
-    });
-    
+
+    } else {
+      // Niet ingelogd: stuur naar loginpagina
+      window.location.href = "inlogadmindeel.html";
+    }
+  });
+
     const reportsList = document.getElementById("reportsList");
     const searchInput = document.getElementById("searchHistory");
 
@@ -169,7 +176,7 @@
       reportsList.innerHTML = "";
       if (reportsArray.length === 0) {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="4" class="p-3 text-center text-gray-500">Geen rapporten gevonden.</td>`;
+        tr.innerHTML = `<td colspan="6" class="p-3 text-center text-gray-500 italic bg-gray-50 border-t border-gray-200">Geen rapporten gevonden.</td>`;
         reportsList.appendChild(tr);
         return;
       }
@@ -184,16 +191,13 @@
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td class="p-3 font-medium">${m.gebruiker || "Onbekend"}</td>
-          <td class="p-3 font-mono text-xs">${m.discordId || "-"}</td>
-          <td class="p-3 font-mono text-xs">${m.robloxNaam || "-"}</td>
-          <td class="p-3">${m.reden || "-"}</td>
-          <td class="p-3">
-            <span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">
-              ${m.status || "-"}
-            </span>
+          <td class="px-4 py-2 border">${m.robloxNaam || "-"}</td>
+          <td class="px-4 py-2 border">${m.reden ||  "-"}</td>
+          <td class="px-4 py-2 border">${m.status || "-"}</td>
+          <td class="px-4 py-2 border">${m.reden || "-"}</td>
+          <td class="px-4 py-2 border"><span class="px-2 py-1 rounded-lg text-xs font-semibold ${statusColor}">${m.status || "-"}</span></td>
           </td>
-          <td class="p-3 text-center">
+          <td class="px-4 py-2 border">
             <button
               onclick="openPopup('${id}')"
               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold"
@@ -215,31 +219,40 @@
       const popupContent = document.getElementById("popupContent");
       popupContent.innerHTML = `
         <p><strong>Gebruiker:</strong> ${m.gebruiker || "Onbekend"}</p>
-        <p><strong>E-mail:</strong> ${m.email || "-"}</p>
         <p><strong>Discord ID:</strong> ${m.discordId || "-"}</p>
         <p><strong>Roblox Naam:</strong> ${m.robloxNaam || "-"}</p>
         <p><strong>Server ID:</strong> ${m.serverId || "Onbekend"}</p>
-        <p><strong>Game Naam:</strong> ${m.gameName || "Onbekend"}</p>
-        <p><strong>Trello Card ID:</strong> ${m.trelloCardId || "-"}</p>
-        <p><strong>Trello Card Naam:</strong> ${m.trelloCardName || "-"}</p>
-        <p><strong>Aankoopdatum (timestamp):</strong> ${formatTimestamp(m.timestamp)}</p>
+        <p><strong>Game Naam:</strong> ${m.gameId ? `<a href="https://www.roblox.com/games/${m.gameId}" target="_blank" style="color:blue;text-decoration:underline;">${m.gameName || "Onbekend"}</a>` : m.gameName || "Onbekend"}</p>
+        <p><strong>Aankoopdatum en tijd:</strong> ${formatTimestamp(m.timestamp)}</p>
         <p><strong>Reden Rapport:</strong> ${m.reden || "-"}</p>
         <p><strong>Status:</strong> ${m.status || "-"}</p>
         <p><strong>Bezwaar:</strong> ${m.bezwaar || "-"}</p>
         <p><strong>Behandeld door:</strong> ${m.behandeldDoor || "-"}</p>
+
+        <div class="flex justify-between mt-4">
+          <div class="flex space-x-2">
+            <button
+              onclick="confirmActie('blokkeren', '${id}')"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm"
+            >
+              Blokkeren
+            </button>
+            <button
+              onclick="confirmActie('afgehandeld', '${id}')"
+              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+            >
+              Markeer Afgehandeld
+            </button>
+          </div>
+
           <button
-            onclick="confirmActie('blokkeren', '${id}')"
-            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm"
+            onclick="closePopup()"
+            class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg"
           >
-            Blokkeren
-          </button>
-          <button
-            onclick="confirmActie('afgehandeld', '${id}')"
-            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
-          >
-            Markeer Afgehandeld
+            Sluiten
           </button>
         </div>
+      </div>
       `;
       document.getElementById("popup").classList.remove("hidden");
     }
