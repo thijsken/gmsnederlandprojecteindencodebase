@@ -1,12 +1,12 @@
 // alarmcodes.js
 window.alarmcodes = [
   // 🔥 Brandmeldingen
-  { woorden: ["brand", "brandalarm", "brandmelding", "woning", "huis", "gebouw", "pand"], code: "P1 BR (Woning)" },
-  { woorden: ["brand", "brandmelding", "auto", "voertuig", "bus", "truck"], code: "P1 BR (Voertuig)" },
-  { woorden: ["brand", "brandmelding", "bos", "natuur", "gras", "heide"], code: "P2 BR (Natuurbrand)" },
-  { woorden: ["brand", "brandmelding", "schuur", "loods", "schuurbrand"], code: "P1 BR (Schuur)" },
-  { woorden: ["brand", "brandmelding", "container", "vuilnisbak", "afvalbak", "afval", "afvalcontainer"], code: "P1 BR (Containerbrand)" },
-  { woorden: ["brand", "brandmelding", "fabriek", "industrie", "industrieterrein", "bedrijfspand", "bedrijf", "bedrijfsterrein", "industriegebied"], code: "P1 BR (Industrie)" },
+  { woorden: [ "brandalarm", "brandmelding", "woning", "huis", "gebouw", "pand"], code: "P1 BR (Woning)" },
+  { woorden: [ "brandmelding", "auto", "voertuig", "bus", "truck"], code: "P1 BR (Voertuig)" },
+  { woorden: [ "brandmelding", "bos", "natuur", "gras", "heide"], code: "P2 BR (Natuurbrand)" },
+  { woorden: [ "brandmelding", "schuur", "loods", "schuurbrand"], code: "P1 BR (Schuur)" },
+  { woorden: [ "brandmelding", "container", "vuilnisbak", "afvalbak", "afval", "afvalcontainer"], code: "P1 BR (Containerbrand)" },
+  { woorden: [ "brandmelding", "fabriek", "industrie", "industrieterrein", "bedrijfspand", "bedrijf", "bedrijfsterrein", "industriegebied"], code: "P1 BR (Industrie)" },
 
   // 🚗 Ongevallen en trauma
   { woorden: ["ongeval", "trauma", "botsing", "aanrijding", "verkeersongeval", "auto", "voertuig", "bus", "truck", "motor", "brommer", "fatbike", "tram", "trein"], code: "P1 HV (Ongeval Wegverkeer)" },
