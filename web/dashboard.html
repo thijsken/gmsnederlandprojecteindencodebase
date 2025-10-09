@@ -2923,8 +2923,10 @@ function fetchEmergencyReports() {
       }));
 
       Object.values(emergencyMarkers).forEach(marker => {
-        if (marker) {
+        if (marker && mainMap.hasLayer(marker)) {
           mainMap.removeLayer(marker);
+        }
+        if (marker && dashboardMap.hasLayer(marker)) {
           dashboardMap.removeLayer(marker);
         }
       });
