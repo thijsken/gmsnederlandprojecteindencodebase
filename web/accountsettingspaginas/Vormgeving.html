@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../favicon.ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>GMS Nederland - Vormgeving</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+    .btn-primary { background: linear-gradient(to right, #1a56db, #0d3e8f); }
+    .btn-primary:hover { background: linear-gradient(to right, #0d3e8f, #1a56db); }
+        .high-contrast { background-color: black !important;color: white !important; }
+    .high-contrast a { color: yellow !important; }
+  </style>
+      <script src="../instellingen/accessibility.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+      <div class="p-6 flex items-center space-x-3 border-b border-blue-700">
+        <img src="../logogmsnederland.png" class="w-10 h-10" alt="Logo" />
+        <div>
+          <h2 class="text-xl font-family">GMS Nederland</h2>
+          <span class="text-xs">Vormgevingsinstellingen</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="../profilesettings.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-id-card mr-3"></i> Account Instellingen</a>
+        <a href="Security.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-shield-alt mr-3"></i> Security</a>
+        <a href="Talen.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fa fa-language mr-3"></i> Talen</a>
+        <a href="toegankelijkheid.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-child mr-3"></i> Toegankelijkheid</a>
+        <a href="Vormgeving.html" class="flex items-center px-3 py-2 rounded-lg bg-blue-800"><i class="fas fa-palette	 mr-3"></i> Vormgeving</a>
+        <a href="unlockproducten.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-lock-open mr-3"></i> Unlock Producten</a>
+        <a href="overgmsnederland.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-info-circle mr-3"></i> Over | GMSNederland</a>
+      </nav>
+      <div class="p-4 border-t border-blue-700">
+        <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
+          <i class="fa fa-arrow-left mr-2"></i> Terug
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      <h1 class="text-2xl font-bold mb-6">Vormgevingsinstellingen</h1>
+
+      <section class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto space-y-6">
+        <h2 class="text-xl font-semibold mb-4">Pas uw website-ervaring aan</h2>
+        
+        <form id="themeSettingsForm" class="space-y-6">
+          <div>
+            <label class="block mb-1 text-sm font-medium">Kleurenschema</label>
+            <select id="colorScheme" class="w-full px-4 py-2 border rounded-lg">
+              <option value="licht" selected>Licht</option>
+              <option value="donker">Donker</option>
+              <option value="systeem">Systeem voorkeur</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium">Lettertype</label>
+            <select id="fontFamily" class="w-full px-4 py-2 border rounded-lg">
+              <option value="poppins" selected>Poppins</option>
+              <option value="arial">Arial</option>
+              <option value="times">Times New Roman</option>
+            </select>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <button type="submit" class="btn-primary px-6 py-2 text-white rounded-lg">
+              Opslaan
+            </button>
+            <button type="button" id="resetThemeBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg">
+              Herstel Standaard
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+    authDomain: "gmsnederland.firebaseapp.com",
+    databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "gmsnederland"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const form = document.getElementById("themeSettingsForm");
+  const resetBtn = document.getElementById("resetThemeBtn");
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "../index.html"; // niet ingelogd
+      return;
+    }
+
+    // 🔹 Pad naar de settings in Firebase
+    const settingsRef = db.ref("users/" + user.uid + "/settings");
+
+    // 🔹 Instellingen laden bij openen
+    settingsRef.once("value").then(snapshot => {
+      const prefs = snapshot.val();
+      if (prefs) {
+        if (prefs.thema) document.getElementById("colorScheme").value = prefs.thema;
+        if (prefs.font) document.getElementById("fontFamily").value = prefs.font;
+      }
+    });
+
+    // 🔹 Opslaan van instellingen (alleen updaten, niets verwijderen)
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const theme = document.getElementById("colorScheme").value;
+      const font = document.getElementById("fontFamily").value;
+
+      settingsRef.update({
+        thema: theme,
+        font: font
+      }).then(() => alert("Instellingen opgeslagen!"));
+    });
+
+    // 🔹 Reset naar standaard (ook alleen update)
+    resetBtn.addEventListener("click", () => {
+      settingsRef.update({
+        thema: "licht",
+        font: "poppins"
+      }).then(() => {
+        document.getElementById("colorScheme").value = "licht";
+        document.getElementById("fontFamily").value = "poppins";
+        alert("Standaardinstellingen hersteld!");
+      });
+    });
+  });
+
+  // Uitloggen
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    auth.signOut().then(() => window.location.href = "../index.html");
+  });
+</script>
+
+</body>
+</html>

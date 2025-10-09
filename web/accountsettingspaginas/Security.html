@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../favicon.ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>GMS Nederland - Security Instellingen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+    .btn-primary { background: linear-gradient(to right, #1a56db, #0d3e8f); }
+    .btn-primary:hover { background: linear-gradient(to right, #0d3e8f, #1a56db); }
+        .high-contrast { background-color: black !important;color: white !important; }
+    .high-contrast a { color: yellow !important; }
+  </style>
+    <script src="../instellingen/accessibility.js"></script>
+    <script src="../instellingen/language.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+      <div class="p-6 flex items-center space-x-3 border-b border-blue-700">
+        <img src="../logogmsnederland.png" class="w-10 h-10" alt="Logo" />
+        <div>
+          <h2 class="text-xl font-family">GMS Nederland</h2>
+          <span class="text-xs">Security Instellingen</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="../profilesettings.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-id-card mr-3"></i> Account Instellingen</a>
+        <a href="Security.html" class="flex items-center px-3 py-2 rounded-lg bg-blue-800"><i class="fas fa-shield-alt mr-3"></i> Security</a>
+        <a href="../accountsettingspaginas/Talen.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fa fa-language mr-3"></i> Talen</a>
+        <a href="toegankelijkheid.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-child mr-3"></i> Toegankelijkheid</a>
+        <a href="Vormgeving.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-palette mr-3"></i> Vormgeving</a>
+        <a href="unlockproducten.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-lock-open mr-3"></i> Unlock Producten</a>
+        <a href="overgmsnederland.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-info-circle mr-3"></i> Over | GMSNederland</a>
+      </nav>
+      <div class="p-4 border-t border-blue-700">
+        <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
+          <i class="fa fa-arrow-left mr-2"></i> Terug
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      <h1 class="text-2xl font-bold mb-6">Security Instellingen</h1>
+
+      <!-- Wachtwoord wijzigen -->
+      <section class="bg-white p-6 rounded-xl shadow max-w-6xl mx-auto space-y-6">
+        <div>
+          <h2 class="text-xl font-semibold mb-4">Wachtwoord wijzigen</h2>
+          <form id="securityForm" class="space-y-4">
+            <div>
+              <label class="block mb-1 text-sm font-medium">Huidig wachtwoord</label>
+              <input type="password" id="huidigwachtwoord" placeholder="Huidig wachtwoord" class="w-full px-4 py-2 border rounded-lg" required />
+            </div>
+            <div>
+              <label class="block mb-1 text-sm font-medium">Nieuw wachtwoord</label>
+              <input type="password" id="nieuwwachtwoord" placeholder="Nieuw wachtwoord" class="w-full px-4 py-2 border rounded-lg" required />
+            </div>
+            <div>
+              <label class="block mb-1 text-sm font-medium">Bevestig wachtwoord</label>
+              <input type="password" id="bevestigwachtwoord" placeholder="Bevestig wachtwoord" class="w-full px-4 py-2 border rounded-lg" required />
+            </div>
+            <button type="submit" class="btn-primary px-6 py-2 text-white rounded-lg">
+              Wachtwoord wijzigen
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Wachtwoord Reset -->
+      <section class="bg-white p-6 rounded-xl shadow max-w-6xl mx-auto space-y-6">
+        <div>
+          <h2 class="text-xl font-semibold mb-4">Wachtwoord Reset</h2>
+          <p class="mb-4 text-sm text-gray-600">Klik hieronder om een reset-link naar je e-mail te sturen.</p>
+          <button id="resetBtn" class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2 rounded-lg">
+            Reset link versturen
+          </button>
+        </div>
+      </section>
+
+      <!-- Tweestapsverificatie -->
+      <section class="bg-white p-6 rounded-xl shadow max-w-6xl mx-auto space-y-6">
+        <div>
+          <h2 class="text-xl font-semibold mb-4">Tweestapsverificatie</h2>
+          <p class="mb-4 text-sm text-gray-600">Extra beveiliging via 2FA (in ontwikkeling).</p>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+            Tweestapsverificatie activeren
+          </button>
+        </div>
+      </section>
+
+      <!-- Apparaatbeheer -->
+      <section class="bg-white p-6 rounded-xl shadow max-w-6xl mx-auto space-y-6">
+        <div>
+          <h2 class="text-xl font-semibold mb-4">Apparaatbeheer</h2>
+          <p class="mb-4 text-sm text-gray-600">Bekijk apparaten die toegang hebben tot je account (placeholder).</p>
+          <button class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2 rounded-lg">
+            Apparaten beheren
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script>
+
+          const ACCESS_KEY = "accessibilitySettings";
+                const LANG_KEY = "userLanguage";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+      authDomain: "gmsnederland.firebaseapp.com",
+      projectId: "gmsnederland",
+      databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+  
+    // Uitloggen
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      auth.signOut().then(() => window.location.href = '../index.html');
+    });
+
+    // Wachtwoord wijzigen
+    document.getElementById('securityForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const currentPass = document.getElementById("huidigwachtwoord").value;
+      const newPass = document.getElementById("nieuwwachtwoord").value;
+      const confirmPass = document.getElementById("bevestigwachtwoord").value;
+
+      if (newPass !== confirmPass) return alert("Wachtwoorden komen niet overeen.");
+      if (newPass.length < 6) return alert("Wachtwoord moet minimaal 6 tekens bevatten.");
+
+      const user = auth.currentUser;
+      const cred = firebase.auth.EmailAuthProvider.credential(user.email, currentPass);
+
+      user.reauthenticateWithCredential(cred).then(() => {
+        return user.updatePassword(newPass);
+      }).then(() => {
+        alert("Wachtwoord succesvol gewijzigd!");
+        document.getElementById("securityForm").reset();
+      }).catch(err => alert("Fout: " + err.message));
+    });
+
+    // Reset link sturen
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      const user = auth.currentUser;
+      if (!user) return alert("Geen gebruiker ingelogd.");
+      auth.sendPasswordResetEmail(user.email)
+        .then(() => alert("Reset link is verzonden naar: " + user.email))
+        .catch(err => alert("Fout: " + err.message));
+    });
+
+    
+  </script>
+</body>
+</html>

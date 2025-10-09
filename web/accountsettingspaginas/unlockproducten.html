@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../favicon.ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>GMS Nederland - Unlock Producten</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+    .btn-primary { background: linear-gradient(to right, #1a56db, #0d3e8f); }
+    .btn-primary:hover { background: linear-gradient(to right, #0d3e8f, #1a56db); }
+    .high-contrast { background-color: black !important;color: white !important; }
+    .high-contrast a { color: yellow !important; }
+  </style>
+  <script src="../instellingen/accessibility.js"></script>
+  <!-- Firebase SDK's -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, get, set, push, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+        authDomain: "gmsnederland.firebaseapp.com",
+        projectId: "gmsnederland",
+        databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+      };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  const purchasesList = document.getElementById("purchasesList");
+  const actionArea = document.getElementById("actionArea");
+
+  let currentUserId = null;
+
+  function renderPurchases(purchases) {
+    purchasesList.innerHTML = "";
+
+    if (!purchases || Object.keys(purchases).length === 0) {
+      purchasesList.innerHTML = "<p>Je hebt nog geen producten gekocht.</p>";
+    } else {
+      const sorted = Object.values(purchases).sort((a, b) => a.datum - b.datum);
+
+      sorted.forEach((product) => {
+        const item = document.createElement("div");
+        item.classList.add("border", "p-4", "rounded", "shadow-sm", "flex", "justify-between", "items-center");
+        item.innerHTML = `
+          <div>
+            <h3 class="font-semibold text-lg">${product.naam}</h3>
+            <p>Kosten: €${product.prijs}</p>
+            <p>Aankoopdatum: ${new Date(product.datum).toLocaleDateString()}</p>
+          </div>
+          <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" data-id="${product.id}">
+            Opzeggen
+          </button>
+        `;
+        purchasesList.appendChild(item);
+      });
+
+      // Opzeggen events
+      document.querySelectorAll("button[data-id]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          if (confirm("Weet je zeker dat je dit pakket wilt opzeggen?")) {
+            if (confirm("Dit is definitief. Wil je doorgaan?")) {
+              cancelPurchase(id);
+            }
+          }
+        });
+      });
+    }
+
+    // Altijd knop naar betaalpagina tonen
+    actionArea.innerHTML = `
+      <a href="../koop.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded block text-center">
+        Nieuw pakket kopen
+      </a>
+    `;
+  }
+
+  async function cancelPurchase(id) {
+    if (!currentUserId) return;
+    await remove(ref(db, `users/${currentUserId}/gekocht/${id}`));
+    loadPurchases();
+  }
+
+  async function loadPurchases() {
+    if (!currentUserId) return;
+    const snap = await get(ref(db, `users/${currentUserId}/gekocht`));
+    renderPurchases(snap.val());
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUserId = user.uid;
+      loadPurchases();
+    } else {
+      purchasesList.innerHTML = "<p>Log in om je aankopen te zien.</p>";
+      actionArea.innerHTML = "";
+    }
+  });
+</script>
+
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+      <div class="p-6 flex items-center space-x-3 border-b border-blue-700">
+        <img src="../logogmsnederland.png" class="w-10 h-10" alt="Logo" />
+        <div>
+          <h2 class="text-xl font-family">GMS Nederland</h2>
+          <span class="text-xs">Unlock Producten</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="../profilesettings.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-id-card mr-3"></i> Account Instellingen</a>
+        <a href="Security.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-shield-alt mr-3"></i> Security</a>
+        <a href="Talen.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fa fa-language mr-3"></i> Talen</a>
+        <a href="toegankelijkheid.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-child mr-3"></i> Toegankelijkheid</a>
+        <a href="Vormgeving.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-palette	 mr-3"></i> Vormgeving</a>
+        <a href="unlockproducten.html" class="flex items-center px-3 py-2 rounded-lg bg-blue-800"><i class="fas fa-lock-open mr-3"></i> Unlock Producten</a>
+        <a href="overgmsnederland.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-info-circle mr-3"></i> Over | GMSNederland</a>
+      </nav>
+      <div class="p-4 border-t border-blue-700">
+        <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
+          <i class="fa fa-arrow-left mr-2"></i> Terug
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      <h1 class="text-2xl font-bold mb-6">Unlock Producten</h1>
+
+      <section class="bg-white p-6 rounded-xl shadow max-w-6xl mx-auto space-y-6">
+        <h2 class="text-xl font-semibold mb-4">Mijn Aankopen & Beheer</h2>
+
+        <div id="purchasesList" class="space-y-4">
+          <p>Laden...</p>
+        </div>
+
+        <div id="actionArea" class="mt-6"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

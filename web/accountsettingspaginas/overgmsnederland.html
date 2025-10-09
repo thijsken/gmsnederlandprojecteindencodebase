@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../favicon.ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>GMS Nederland - Over</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+    .btn-primary { background: linear-gradient(to right, #1a56db, #0d3e8f); }
+    .btn-primary:hover { background: linear-gradient(to right, #0d3e8f, #1a56db); }
+            .high-contrast { background-color: black !important;color: white !important; }
+    .high-contrast a { color: yellow !important; }
+  </style>
+          <script src="../instellingen/accessibility.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+      <div class="p-6 flex items-center space-x-3 border-b border-blue-700">
+        <img src="../logogmsnederland.png" class="w-10 h-10" alt="Logo" />
+        <div>
+          <h2 class="text-xl font-family">GMS Nederland</h2>
+          <span class="text-xs">Over GMSNederland</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="../profilesettings.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-id-card mr-3"></i> Account Instellingen</a>
+        <a href="Security.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-shield-alt mr-3"></i> Security</a>
+        <a href="Talen.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fa fa-language mr-3"></i> Talen</a>
+        <a href="toegankelijkheid.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-child mr-3"></i> Toegankelijkheid</a>
+        <a href="Vormgeving.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-palette	 mr-3"></i> Vormgeving</a>
+        <a href="unlockproducten.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-lock-open mr-3"></i> Unlock Producten</a>
+        <a href="overgmsnederland.html" class="flex items-center px-3 py-2 rounded-lg bg-blue-800"><i class="fas fa-info-circle mr-3"></i> Over | GMSNederland</a>
+      </nav>
+      <div class="p-4 border-t border-blue-700">
+        <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
+          <i class="fa fa-arrow-left mr-2"></i> Terug
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      <h1 class="text-2xl font-bold mb-6">Over GMS Nederland</h1>
+
+      <section class="bg-white p-6 rounded-xl shadow max-w-4xl mx-auto space-y-6">
+        <h2 class="text-xl font-semibold">Wat is GMS Nederland?</h2>
+        <p class="text-gray-700">GMS Nederland is een innovatief platform dat zich richt op het leveren van kwalitatieve diensten en producten aan onze gebruikers. We streven ernaar om een gebruiksvriendelijke ervaring te bieden, waarbij privacy, toegankelijkheid en vormgeving centraal staan.</p>
+
+        <h2 class="text-xl font-semibold">Privacybeleid</h2>
+        <p class="text-gray-700">Uw privacy is belangrijk voor ons. Wij verzamelen alleen gegevens die nodig zijn om onze diensten te verbeteren. Deze informatie wordt nooit gedeeld zonder uw toestemming. Lees ons volledige <a href="../regels/privacybeleid.html" class="text-blue-600 underline">Privacybeleid</a>.</p>
+
+        <h2 class="text-xl font-semibold">Gebruiksvoorwaarden</h2>
+        <p class="text-gray-700">Door gebruik te maken van onze diensten gaat u akkoord met onze <a href="../regels/gebruikersvoorwaarden.html" class="text-blue-600 underline">Gebruiksvoorwaarden</a>. Deze voorwaarden leggen uit hoe onze diensten werken en wat u van ons kunt verwachten.</p>
+
+        <h2 class="text-xl font-semibold">Contact</h2>
+        <p class="text-gray-700">Heeft u vragen of feedback? U kunt altijd contact met ons opnemen via <a href="mailto:gmsnederlandsupport@gmail.com" class="text-blue-600 underline">gmsnederlandsupport@gmail.com</a>, onze <a href="https://discord.gg/q7Evwfb6" target="_blank" class="text-blue-600 underline">Discord-server</a> of ons <a href="../paginas/contact.html" class="text-blue-600 underline">contactformulier</a>.</p>
+
+        <h2 class="text-xl font-semibold">Ons Missie</h2>
+        <p class="text-gray-700">Onze missie is om hoogwaardige, toegankelijke en gebruiksvriendelijke diensten te leveren die aansluiten bij de behoeften van onze gebruikers.</p>
+
+        <div class="mt-8">
+          <button class="btn-primary px-6 py-2 text-white rounded-lg">
+            Meer Over Ons
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

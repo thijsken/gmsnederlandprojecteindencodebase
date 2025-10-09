@@ -128,13 +128,12 @@
                           <!-- Notificaties komen hier -->
                         </ul>
                       </div>
-                      <!--is voor het account van mensen-->
-                      <button class="flex items-center space-x-2 bg-transparent hover:bg-blue-100 rounded px-2 py-1 transition" onclick="alert('Klik gedetecteerd!')">
-                          <div class="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
-                              <i class="fas fa-user"></i>
-                          </div>
-                            <span class="font-medium text-black">Meldkamer</span>
-                      </button>
+                      <button class="flex items-center space-x-2 bg-transparent hover:bg-blue-100 rounded px-2 py-1 transition" onclick="openProfileSettings()">
+                        <div class="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="font-medium text-black">Meldkamer</span>
+                    </button>
                 </div>
             </div>
 
@@ -674,8 +673,93 @@
                             Installeer HttpService Plugin
                           </a>
                         </div>
-                      </div>
-                    </div>
+                        <!-- Scenario's & Oefeningen -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6">
+                          <h3 class="text-2xl font-semibold text-white mb-4">Scenario's & Oefeningen</h3>
+                          
+                          <!-- Scenario's aan/uit -->
+                          <div class="flex items-center mb-4">
+                            <label for="enableScenarios" class="mr-3 font-medium">Scenario's inschakelen</label>
+                            <input
+                              id="enableScenarios"
+                              type="checkbox"
+                              class="w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                            />
+                          </div>
+
+                          <!-- Real-life tijden -->
+                          <div class="mb-4">
+                            <label for="scenarioTime" class="block text-sm font-medium mb-1">Scenario Starttijd (Real life)</label>
+                            <input
+                              id="scenarioTime"
+                              type="datetime-local"
+                              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white"
+                            />
+                          </div>
+
+                          <div>
+                            <label for="scenarioDuration" class="block text-sm font-medium mb-1">Scenario Duur (in minuten)</label>
+                            <input
+                              id="scenarioDuration"
+                              type="number"
+                              min="5"
+                              value="30"
+                              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white"
+                            />
+                          </div>
+
+                          <button
+                            onclick="startScenario()"
+                            class="mt-4 bg-green-600 hover:bg-green-700 transition-all text-white px-4 py-2 rounded-lg"
+                          >
+                            Start Scenario
+                          </button>
+
+                          <p id="scenarioStatus" class="mt-3 text-sm text-gray-300"></p>
+                        </div>
+
+                        <!-- Rollenbeheer -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6">
+                          <h3 class="text-2xl font-semibold text-white mb-4">Rollenbeheer</h3>
+                          <p class="text-gray-300 mb-4">Bepaal welke permissies elke rol heeft in dit systeem.</p>
+
+                          <!-- Rollen invoer -->
+                          <div class="flex flex-col md:flex-row items-center gap-3 mb-6">
+                            <input
+                              id="roleName"
+                              type="text"
+                              placeholder="Rolnaam (bijv. Politie)"
+                              class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white"
+                            />
+                            <select id="rolePermission" class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                              <option value="read">Alleen bekijken</option>
+                              <option value="dispatch">Meldkamer rechten</option>
+                              <option value="cowner">Mede Beheerder</option>
+                              <option value="admin">Beheerder</option>
+                            </select>
+                            <button
+                              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                              onclick="addRole()"
+                            >
+                              Voeg toe
+                            </button>
+                          </div>
+
+                          <!-- Opgeslagen rollen -->
+                          <div>
+                            <h4 class="text-lg font-semibold text-white mb-2">Huidige rollen</h4>
+                            <ul id="savedRoles" class="list-disc list-inside text-gray-300 space-y-1"></ul>
+                          </div>
+                        </div>
+
+                        <!-- Spelerbeheer -->
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 mt-10">
+                          <h3 class="text-2xl font-semibold text-white mb-4">Spelerbeheer</h3>
+                          <p class="text-gray-300 mb-4">Alleen zichtbaar voor gebruikers met <span class="font-bold">beheerpermissies</span>.</p>
+
+                          <div id="playersContainer" class="space-y-4"></div>
+                        </div>
+                        
             </div>
                   <!-- Helicopter Dashboard View -->
                   <div id="helicopterDashboardView" class="h-full hidden p-6 flex flex-col space-y-6 bg-gray-900">
@@ -968,7 +1052,6 @@
     <select id="p2000PostSelect" multiple size="5" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-4">
       <option value="">-- Kies een post --</option>
     </select>
-    <div id="p2000PostCheckboxes" class="mb-4"></div>
 
     <div class="flex justify-end space-x-2">
       <button onclick="closeP2000Modal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Annuleer</button>
@@ -1164,7 +1247,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-    <script>
+
+<script src="./instellingen/alarmcodes.js"></script>
+
+<script>
         //firebase
           const firebaseConfig = {
       apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
@@ -1338,6 +1424,13 @@ updateTimeAndDate();
         document.getElementById('assignFireBtn').addEventListener('click', () => assignUnit('fire'));
         document.getElementById('closeCallBtn').addEventListener('click', () => sluitMelding(currentCallId));
 
+
+        //rollen
+
+        window.addEventListener("DOMContentLoaded", () => {
+          renderRoles();
+          loadScenario();
+        })
         // CIOT management
           const dummyResults = [
             { telefoon: '06-12345678', abonnee: 'Jan Jansen', locatie: 'Mast Rotterdam Zuid', datetime: '2025-06-20 14:35' },
@@ -1376,10 +1469,110 @@ updateTimeAndDate();
         // sendMeldingPopupbutton.addEventListener('click', verstuurdmelding)
           
 
+        // settings account
+        function openProfileSettings() {
+          const serverId = localStorage.getItem("serverId");
+          const serverName = localStorage.getItem("serverName");
+
+          if (!serverId) {
+            alert("❌ Geen server geselecteerd. Ga naar instellingen en kies je server.");
+            return;
+          }
+
+          localStorage.setItem("profileServerId", serverId);
+          localStorage.setItem("profileServerName", serverName);
+
+          window.location.href = "profilesettings.html";
+        }
+
   // meldingenpopup
+  function startScenario() {
+    const enabled = document.getElementById("enableScenarios").checked;
+    const startTime = document.getElementById("scenarioTime").value;
+    const duration = document.getElementById("scenarioDuration").value;
+    const statusEl = document.getElementById("scenarioStatus");
+
+    if (!enabled) {
+      statusEl.innerText = "Scenario's zijn niet ingeschakeld";
+      return;
+    }
+
+    if (!startTime) {
+      statusEl.innerText = "Kies een starttijd.";
+      return;
+    }
+
+    const scenarioData = {
+      enabled,
+      startTime,
+      duration,
+      startedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem("actuveScenario", JSON.stringify(scenarioData));
+
+    statusEl.innerText = `Scenario gestart op ${new Date(startTime).toLocaleDateString()} voor ${duration} minuten.`;
+  }
+
+  function loadScenario() {
+    const saved = localStorage.getItem("activeScenario");
+    if (saved) {
+      const scenario = JSON.parse(saved);
+      document.getElementById("enableScenarios").checked = scenario.enabled;
+      document.getElementById("scenarioTime").value = scenario.startTime;
+      document.getElementById("scenarioDuration").value = scenario.duration;
+      document.getElementById("scenarioStatus").innerText =
+        `Actief scenario sinds ${new Date(scenario.startTime).toLocaleString()} (${scenario.duration} min)`;
+    }
+  }
+
+  //Rollenbeheer
+
+  function addRole() {
+    const name = document.getElementById("roleName").value.trim();
+    const permission = document.getElementById("rolePermission").value;
+
+    if (!name) {
+      alert("Vul een rolnaam in!");
+      return;
+    }
+
+    const role = { name, permission };
+    let roles = JSON.parse(localStorage.getItem("roles")) || [];
+    roles.push(role);
+    localStorage.setItem("roles", JSON.stringify(roles));
+
+    document.getElementById("roleName").value = "";
+    renderRoles();
+  }
+
+  function removeRole(index) {
+    let roles = JSON.parse(localStorage.getItem("roles")) || [];
+    roles.splice(index, 1);
+    localStorage.setItem("roles", JSON.stringify(roles));
+    renderRoles();
+  }
+
+  function renderRoles() {
+    const list = document.getElementById("savedRoles");
+    list.innerHTML = "";
+    let roles = JSON.parse(localStorage.getItem("roles")) || [];
+
+    roles.forEach((role, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+      <span class="font-medium">${role.name}</span> -
+      <span class="italic">${role.permission}</span>
+      <button onclick="removeRole(${i})" class="ml-3 text-red-500 hover:text-red-700">Verwijder</button>
+      `;
+      list.appendChild(li);
+    });
+  }
+
   function sluitpopup() {
     popup.classList.add('hidden');
   }
+
   function openPopup() {
     popup.classList.remove('hidden');
   }
@@ -1763,99 +1956,27 @@ function laadPostenVoorP2000() {
     });
 }
 
-function genereerP2000Code(beschrijving) {
-  const tekst = beschrijving.toLowerCase();
-  const meldingen = [];
+  function genereerP2000Code(beschrijving) {
+      const tekst = beschrijving.toLowerCase();
+      const codes = [];
 
-  function bevatEenVan(woorden) {
-    return woorden.some(w => tekst.includes(w));
-  }
+      const bevatEenVan = (woorden) => woorden.some(w => tekst.includes(w));
 
-  // Brandmeldingen
-  if (bevatEenVan(["brand", "brandmelding"])) {
-    if (bevatEenVan(["woning", "huis", "gebouw", "pand"])) {
-      meldingen.push({code: "P1 BR (Woningen)", categorie: "Brand"});
+      // Loop door alle codes uit alarmcodes.js
+      for (const entry of alarmcodes) {
+        if (bevatEenVan(entry.woorden)) {
+          codes.push(entry.code);
+        }
+      }
+
+      // Geen match gevonden
+      if (codes.length === 0) {
+        codes.push("P1 Onbekende Melding");
+      }
+
+      // Dubbele codes verwijderen
+      return [...new Set(codes)];
     }
-    if (bevatEenVan(["auto", "voertuig", "bus", "truck"])) {
-      meldingen.push({code: "P1 BR (Voertuig)", categorie: "Brand"});
-    }
-    if (bevatEenVan(["bos", "natuur", "gras", "heide"])) {
-      meldingen.push({code: "P2 BR (Natuurbrand)", categorie: "Brand"});
-    }
-    if (bevatEenVan(["schuur", "loods", "schuurbrand"])) {
-      meldingen.push({code: "P1 BR (Schuur)", categorie: "Brand"});
-    }
-    if (bevatEenVan(["container", "vuilnisbak", "afval"])) {
-      meldingen.push({code: "P2 BR (Containerbrand)", categorie: "Brand"});
-    }
-    if (bevatEenVan(["fabriek", "industrie", "loods", "bedrijf"])) {
-      meldingen.push({code: "P1 BR (Industrie)", categorie: "Brand"});
-    }
-  }
-
-  // Ongevallen en trauma
-  if (bevatEenVan(["ongeval", "botsing", "aanrijding", "verkeersongeval"])) {
-    meldingen.push({code: "P1 Ongeval Wegverkeer", categorie: "Ongeval"});
-  }
-  if (bevatEenVan(["val"]) && bevatEenVan(["trap", "hoogte", "loods", "steiger"])) {
-    meldingen.push({code: "P1 Valincident", categorie: "Ongeval"});
-  }
-  if (bevatEenVan(["snijwond", "mes", "messteek", "steekwond"])) {
-    meldingen.push({code: "P1 Steekincident", categorie: "Ongeval"});
-  }
-  if (bevatEenVan(["schotwond", "wapen", "schieten"])) {
-    meldingen.push({code: "P1 Schietincident", categorie: "Ongeval"});
-  }
-
-  // Medische noodsituaties
-  if (bevatEenVan(["reanimatie", "hartstilstand", "bewusteloos", "noodmedische", "admeniet"])) {
-    meldingen.push({code: "P1 Reanimatie", categorie: "Medisch"});
-  }
-  if (bevatEenVan(["beroerte", "stroke", "hersenbloeding", "hartinfarct"])) {
-    meldingen.push({code: "P1 Medische Noodsituatie", categorie: "Medisch"});
-  }
-  if (bevatEenVan(["epilepsie", "stuipen", "convulsies"])) {
-    meldingen.push({code: "P1 Epileptisch aanval", categorie: "Medisch"});
-  }
-  if (bevatEenVan(["astma", "ademnood", "benauwd"])) {
-    meldingen.push({code: "P1 Ademnood", categorie: "Medisch"});
-  }
-  if (bevatEenVan(["baby", "zuigeling", "kind"]) && bevatEenVan(["nood", "niet ademen", "problemen"])) {
-    meldingen.push({code: "P1 Kindernood", categorie: "Medisch"});
-  }
-
-  // Gevaarlijke stoffen en milieu
-  if (bevatEenVan(["gas", "lekkage", "chemicaliën", "brandstof", "benzine", "diesel"])) {
-    meldingen.push({code: "P1 Gaslekkage", categorie: "Milieu"});
-  }
-  if (bevatEenVan(["explosie", "ontploffing"])) {
-    meldingen.push({code: "P1 Explosie", categorie: "Milieu"});
-  }
-  if (bevatEenVan(["storm", "wind", "hoosbui", "hagel", "ijzel"])) {
-    meldingen.push({code: "P2 Weersschade", categorie: "Milieu"});
-  }
-  if (bevatEenVan(["wateroverlast", "overstroming", "dijkdoorbraak"])) {
-    meldingen.push({code: "P2 Wateroverlast", categorie: "Milieu"});
-  }
-
-  // Politie en veiligheid
-  if (bevatEenVan(["inbraak", "diefstal", "overval", "overvalpoging"])) {
-    meldingen.push({code: "P3 Politie Incident", categorie: "Politie"});
-  }
-  if (bevatEenVan(["bedreiging", "geweld", "vechtpartij"])) {
-    meldingen.push({code: "P3 Geweldsincident", categorie: "Politie"});
-  }
-  if (bevatEenVan(["hulp", "verleend"])) {
-    meldingen.push({code: "P3 Algemene Hulpverlening", categorie: "Politie"});
-  }
-
-  // Geen melding gevonden
-  if (meldingen.length === 0) {
-    meldingen.push({code: "P1 Onbekende Melding", categorie: "Onbekend"});
-  }
-
-  return meldingen;
-}
 
 function verstuurP2000Alarm() {
   const adres = document.getElementById('p2000Adres').value.trim();
@@ -1874,7 +1995,7 @@ function verstuurP2000Alarm() {
     return;
   }
 
-  if (!adres || !voertuigen || !situatie || !geselecteerdePosten.length === 0) {
+  if (!adres || !voertuigen || !situatie || !postId) {
     showNotification("❌ Vul alle velden in!", "error");
     return;
   }

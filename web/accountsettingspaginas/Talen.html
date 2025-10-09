@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../favicon.ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>GMS Nederland - Talen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+    .btn-primary { background: linear-gradient(to right, #1a56db, #0d3e8f); }
+    .btn-primary:hover { background: linear-gradient(to right, #0d3e8f, #1a56db); }
+    .high-contrast { background-color: black !important;color: white !important; }
+    .high-contrast a { color: yellow !important; }
+  </style>
+    <script src="../instellingen/accessibility.js"></script>
+
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+      <div class="p-6 flex items-center space-x-3 border-b border-blue-700">
+        <img src="../logogmsnederland.png" class="w-10 h-10" alt="Logo" />
+        <div>
+          <h2 class="text-xl font-family">GMS Nederland</h2>
+          <span class="text-xs">Taal Instellingen</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="../profilesettings.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-id-card mr-3"></i> Account Instellingen</a>
+        <a href="Security.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-shield-alt mr-3"></i> Security</a>
+        <a href="Talen.html" class="flex items-center px-3 py-2 rounded-lg bg-blue-800"><i class="fa fa-language mr-3"></i> Talen</a>
+        <a href="toegankelijkheid.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-child mr-3"></i> Toegankelijkheid</a>
+        <a href="Vormgeving.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-palette mr-3"></i> Vormgeving</a>
+        <a href="unlockproducten.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-lock-open mr-3"></i> Unlock Producten</a>
+        <a href="overgmsnederland.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-info-circle mr-3"></i> Over | GMSNederland</a>
+      </nav>
+      <div class="p-4 border-t border-blue-700">
+        <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
+          <i class="fa fa-arrow-left mr-2"></i> Terug
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      <h1 class="text-2xl font-bold mb-6" id="pageTitle">Taal Instellingen</h1>
+
+      <section class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto">
+        <h2 class="text-xl font-semibold mb-4" id="chooseTitle">Kies uw taal</h2>
+        <form id="languageSettingsForm" class="space-y-6">
+          <div>
+            <label class="block mb-1 text-sm font-medium" id="languageLabel">Selecteer Taal</label>
+            <select id="languageSelect" class="w-full px-4 py-2 border rounded-lg">
+              <option value="nl">Nederlands</option>
+              <option value="en">Engels</option>
+              <option value="de">Duits</option>
+              <option value="fr">Frans</option>
+              <option value="es">Spaans</option>
+            </select>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <button type="submit" id="saveLanguageBtn" class="btn-primary px-6 py-2 text-white rounded-lg">
+              Opslaan
+            </button>
+            <button type="button" id="resetLanguageBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg">
+              Herstel Standaard
+            </button>
+          </div>
+          <p id="statusMessage" class="text-green-600 font-semibold hidden mt-2"></p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+        authDomain: "gmsnederland.firebaseapp.com",
+        projectId: "gmsnederland",
+        databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+      };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  const languageSelect = document.getElementById("languageSelect");
+  const saveBtn = document.getElementById("saveLanguageBtn");
+  const resetBtn = document.getElementById("resetLanguageBtn");
+  const statusMessage = document.getElementById("statusMessage");
+
+  const LANG_KEY = "userLanguage";
+
+  const translations = {
+    nl: { pageTitle:"Taal Instellingen", chooseTitle:"Kies uw taal", label:"Selecteer Taal", saveBtn:"Opslaan", resetBtn:"Herstel Standaard", saved:"✅ Taal opgeslagen!" },
+    en: { pageTitle:"Language Settings", chooseTitle:"Choose your language", label:"Select Language", saveBtn:"Save", resetBtn:"Reset Default", saved:"✅ Language saved!" },
+    de: { pageTitle:"Spracheinstellungen", chooseTitle:"Wählen Sie Ihre Sprache", label:"Sprache auswählen", saveBtn:"Speichern", resetBtn:"Standard wiederherstellen", saved:"✅ Sprache gespeichert!" },
+    fr: { pageTitle:"Paramètres de langue", chooseTitle:"Choisissez votre langue", label:"Sélectionnez la langue", saveBtn:"Enregistrer", resetBtn:"Restaurer par défaut", saved:"✅ Langue enregistrée!" },
+    es: { pageTitle:"Configuración de idioma", chooseTitle:"Elija su idioma", label:"Seleccionar idioma", saveBtn:"Guardar", resetBtn:"Restablecer", saved:"✅ Idioma guardado!" }
+  };
+
+  let currentUserId = null;
+
+  // --- Vertalen ---
+  function translatePage(lang) {
+    const t = translations[lang] || translations.nl;
+    document.getElementById("pageTitle").textContent = t.pageTitle;
+    document.getElementById("chooseTitle").textContent = t.chooseTitle;
+    document.getElementById("languageLabel").textContent = t.label;
+    saveBtn.textContent = t.saveBtn;
+    resetBtn.textContent = t.resetBtn;
+    statusMessage.textContent = t.saved;
+  }
+
+  // --- Instellingen laden uit DB ---
+  async function loadSettings() {
+    if (!currentUserId) return;
+    const snap = await get(ref(db, `users/${currentUserId}/settings/language`));
+    let lang = "nl";
+    if (snap.exists()) {
+      lang = snap.val();
+    } else {
+      // fallback naar localStorage
+      lang = localStorage.getItem(LANG_KEY) || "nl";
+    }
+    languageSelect.value = lang;
+    translatePage(lang);
+  }
+
+  // --- Opslaan naar DB ---
+  async function saveSettings(lang) {
+    if (!currentUserId) return;
+    await set(ref(db, `users/${currentUserId}/settings/language`), lang);
+    localStorage.setItem(LANG_KEY, lang);
+    translatePage(lang);
+    statusMessage.classList.remove("hidden");
+    setTimeout(() => statusMessage.classList.add("hidden"), 2000);
+  }
+
+  // --- Reset ---
+  async function resetSettings() {
+    await saveSettings("nl");
+    languageSelect.value = "nl";
+  }
+
+  // --- Event Listeners ---
+  document.getElementById("languageSettingsForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    saveSettings(languageSelect.value);
+  });
+
+  resetBtn.addEventListener("click", resetSettings);
+
+  // --- Firebase auth check ---
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUserId = user.uid;
+      loadSettings();
+    } else {
+      // als geen user ingelogd -> alleen localStorage gebruiken
+      const lang = localStorage.getItem(LANG_KEY) || "nl";
+      languageSelect.value = lang;
+      translatePage(lang);
+    }
+  });
+</script>
+</body>
+</html>

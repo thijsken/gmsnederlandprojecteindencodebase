@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>GMS Nederland - Account Instellingen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+    .btn-primary { background: linear-gradient(to right, #1a56db, #0d3e8f); }
+    .btn-primary:hover { background: linear-gradient(to right, #0d3e8f, #1a56db); }
+    .high-contrast {
+    background-color: black !important;
+    color: white !important;
+    }
+    .high-contrast a {
+      color: yellow !important;
+    }
+  </style>
+  <script src="./instellingen/accessibility.js"></script>
+  <script src="./instellingen/language.js"></script>
+</head>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+      <div class="p-6 flex items-center space-x-3 border-b border-blue-700">
+        <img src="logogmsnederland.png" class="w-10 h-10" alt="Logo" />
+        <div>
+          <h2 class="text-xl font-family">GMS Nederland</h2>
+          <span class="text-xs">Account Instellingen</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="profilesettings.html" class="flex items-center px-3 py-2 rounded-lg bg-blue-800"><i class="fas fa-id-card mr-3"></i> Account Instellingen</a>
+        <a href="./accountsettingspaginas/Security.html"class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-shield-alt mr-3"></i> Security</a>
+        <a href="./accountsettingspaginas/Talen.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fa fa-language mr-3"></i> Talen</a>
+        <a href="./accountsettingspaginas/toegankelijkheid.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-child mr-3"></i> Toegankelijkheid</a>
+        <a href="./accountsettingspaginas/Vormgeving.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-palette	 mr-3"></i> Vormgeving</a>
+        <a href="./accountsettingspaginas/unlockproducten.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-lock-open mr-3"></i> Unlock Producten</a>
+        <a href="./accountsettingspaginas/overgmsnederland.html" class="flex items-center px-3 py-2 rounded-lg bg-black-800"><i class="fas fa-info-circle mr-3"></i> Over | GMSNederland</a>
+      </nav>
+      <div class="p-4 border-t border-blue-700">
+        <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
+          <i class="fa fa-arrow-left mr-2"></i> Terug
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      <h1 class="text-2xl font-bold mb-6">Account Instellingen</h1>
+
+      <section class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto">
+        <h2 class="text-xl font-semibold mb-4">Persoonlijke Gegevens</h2>
+        <form id="accountSettingsForm" class="space-y-6">
+          <div>
+            <label class="block mb-1 text-sm font-medium">Naam</label>
+            <input type="text" id="name" placeholder="Uw naam" class="w-full px-4 py-2 border rounded-lg" required />
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium">E-mailadres</label>
+            <input type="email" id="email" placeholder="voorbeeld@email.com" class="w-full px-4 py-2 border rounded-lg" required />
+          </div>
+
+          <div class="flex justify-between items-center">
+            <button type="submit" class="btn-primary px-6 py-2 text-white rounded-lg">
+              Wijzigingen opslaan
+            </button>
+            <button type="button" id="deleteAccountBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg">
+              Account Verwijderen
+            </button>
+          </div>
+        </form>
+      </section>
+      <!--Discord_Data-->
+      <section class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto">
+        <h2 class="text-xl font-semibold mb-4">Discord Account Gegevens</h2>
+        <form id="accountSettingsForm" class="space-y-6">
+          <div>
+            <label class="block mb-1 text-sm font-medium">Naam</label>
+            <input type="text" id="name" placeholder="Uw naam" class="w-full px-4 py-2 border rounded-lg" required />
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium">Discord_ID</label>
+            <input type="email" id="email" placeholder="voorbeeld:1394666865548202205" class="w-full px-4 py-2 border rounded-lg" required />
+          </div>
+
+          <div class="flex justify-between items-center">
+            <button type="submit" class="btn-primary px-6 py-2 text-white rounded-lg">
+              Wijzigingen opslaan
+            </button>
+          </div>
+        </form>
+      </section>
+      <!--Danger_Zone-->
+      <section class="bg-red-50 border border-red-300 p-6 rounded-xl shadow max-w-3xl mx-auto">
+        <h2 class="text-xl font-semibold mb-4 text-red-700">⚠ Danger Zone — Account Verwijderen</h2>
+        <p class="text-red-600 mb-4">Waarschuwing: hiermee verwijdert u permanent uw account en alle bijbehorende gegevens. Deze actie kan niet ongedaan worden gemaakt.</p>
+
+        <form id="accountSettingsForm" class="space-y-6">
+          <div>
+            <label class="block mb-1 text-sm font-medium text-red-700">Naam</label>
+            <input type="text" id="name" placeholder="Uw naam" class="w-full px-4 py-2 border border-red-300 rounded-lg bg-red-50" required />
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium text-red-700">Discord_ID</label>
+            <input type="text" id="discordId" placeholder="voorbeeld: 1394666865548202205" class="w-full px-4 py-2 border border-red-300 rounded-lg bg-red-50" required />
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <input type="checkbox" id="confirmDelete" class="accent-red-600" required />
+            <label for="confirmDelete" class="text-red-700 text-sm">Ik begrijp dat dit alle gegevens permanent verwijdert</label>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <button type="submit" id="deleteButton" class="bg-red-600 hover:bg-red-700 px-6 py-2 text-white rounded-lg font-semibold">
+              Verwijder Account
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <script>
+
+      const ACCESS_KEY = "accessibilitySettings";
+            const LANG_KEY = "userLanguage";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB3MW2_0OjAJOAAg2TWgnaYYiSMDdNWVv8",
+        authDomain: "gmsnederland.firebaseapp.com",
+        projectId: "gmsnederland",
+        databaseURL: "https://gmsnederland-default-rtdb.europe-west1.firebasedatabase.app"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.database();
+        
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+          window.location.href = 'index.html'; // Pas dit aan naar de gewenste pagina
+        });
+
+              // Data laden bij inloggen
+        auth.onAuthStateChanged(user => {
+          if (!user) {
+            window.location.href = "index.html";
+          } else {
+            const uid = user.uid;
+            db.ref("users/" + uid).once("value").then(snapshot => {
+              const data = snapshot.val() || {};
+              document.getElementById("name").value = data.name || "";
+              document.getElementById("email").value = data.email || user.email || "";
+              document.getElementById("discordId").value = data.discordId || "";
+            });
+          }
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+          // Vul de velden vanuit localStorage
+          if(localStorage.getItem("settings")) {
+            const settings = JSON.parse(localStorage.getItem("settings"));
+            document.getElementById("name").value = settings.name || "";
+            document.getElementById("email").value = settings.email || "";
+            document.getElementById("discordName").value = settings.discordName || "";
+            document.getElementById("discordId").value = settings.discordId || "";
+          }
+
+          // Opslaan voor Persoonlijke Gegevens
+          document.getElementById("accountSettingsForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            saveSettings();
+            alert("Persoonlijke gegevens opgeslagen!");
+          });
+
+          function saveSettings() {
+            const settings = {
+              name: document.getElementById("name").value,
+              email: document.getElementById("email").value,
+              discordName: document.getElementById("discordName").value,
+              discordId: document.getElementById("discordId").value
+            };
+            localStorage.setItem("settings", JSON.stringify(settings));
+          }
+        });
+        
+        document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+          if (confirm('Weet u zeker dat u uw account wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.')) {
+            // Voeg hier de logica toe om het account te verwijderen
+            alert('Uw account is verwijderd.');
+          }
+        });
+
+        document.getElementById('deleteButton').addEventListener('click', function(event) {
+          event.preventDefault();
+          const confirmDelete = document.getElementById('confirmDelete').checked;
+          if (confirmDelete) {
+            // Voeg hier de logica toe om het account te verwijderen
+            alert('Uw account is permanent verwijderd.');
+          } else {
+            alert('U moet bevestigen dat u begrijpt dat dit alle gegevens permanent verwijdert.');
+          }
+        });
+
+      </script>
+    </main>
+  </div>
+</body>
+</html>
