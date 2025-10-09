@@ -1995,7 +1995,7 @@ function verstuurP2000Alarm() {
     return;
   }
 
-  if (!adres || !voertuigen || !situatie || !postId) {
+  if (!adres || !voertuigen || !situatie || !geselecteerdePosten.length === 0) {
     showNotification("❌ Vul alle velden in!", "error");
     return;
   }
