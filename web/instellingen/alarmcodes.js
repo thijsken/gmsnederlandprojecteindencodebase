@@ -14,7 +14,6 @@ window.alarmcodes = [
   { woorden: ["ongeval", "trauma", "botsing", "aanrijding", "verkeersongeval", "auto", "voertuig", "motor", "brommer", "fatbike", "tram", "trein"], code: "P1 HV (Ongeval Wegverkeer)" },
   { woorden: ["val", "trap", "hoogte", "loods", "steiger", "dak", "gebouw", "pand", "hoogteval", "val van hoogte"], code: "P1 HV (Val van hoogte)" },
   { woorden: ["snijwond", "mes", "glas", "messteek", "steekwond"], code: "P1 Steekincident" },
-  { woorden: ["hart", "hartstilstand", "hartaanval", "reanimatie", "reanimeren", "bewusteloos", "flauwte", "flauwvallen"], code: "P1 Reanimatie" },
   { woorden: ["schotwond", "wapen", "schieten"], code: "P1 Schietincident" },
 
   // 🏥 Medische noodsituaties
