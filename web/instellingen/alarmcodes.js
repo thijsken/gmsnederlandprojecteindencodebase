@@ -1,7 +1,8 @@
 // alarmcodes.js
 window.alarmcodes = [
   // 🔥 Brandmeldingen
-  { woorden: [ "brandalarm", "brandmelding", "woning", "huis", "gebouw", "pand"], code: "P1 BR (Woning)" },
+  { woorden: [ "brandalarm" ], code: "P1 BR (OMS)" },
+  { woorden: [ "brandmelding", "woning", "huis", "gebouw", "pand"], code: "P1 BR (Woning)" },
   { woorden: [ "brandmelding", "auto", "voertuig", "bus", "truck"], code: "P1 BR (Voertuig)" },
   { woorden: [ "brandmelding", "bos", "natuur", "gras", "heide"], code: "P2 BR (Natuurbrand)" },
   { woorden: [ "brandmelding", "schuur", "loods", "schuurbrand"], code: "P1 BR (Schuur)" },
@@ -9,14 +10,14 @@ window.alarmcodes = [
   { woorden: [ "brandmelding", "fabriek", "industrie", "industrieterrein", "bedrijfspand", "bedrijf", "bedrijfsterrein", "industriegebied"], code: "P1 BR (Industrie)" },
 
   // 🚗 Ongevallen en trauma
-  { woorden: ["ongeval", "trauma", "botsing", "aanrijding", "verkeersongeval", "auto", "voertuig", "bus", "truck", "motor", "brommer", "fatbike", "tram", "trein"], code: "P1 HV (Ongeval Wegverkeer)" },
+  { woorden: ["ongeval", "trauma", "botsing", "aanrijding", "verkeersongeval", "auto", "voertuig", "motor", "brommer", "fatbike", "tram", "trein"], code: "P1 HV (Ongeval Wegverkeer)" },
   { woorden: ["val", "trap", "hoogte", "loods", "steiger", "dak", "gebouw", "pand", "hoogteval", "val van hoogte"], code: "P1 HV (Val van hoogte)" },
   { woorden: ["snijwond", "mes", "glas", "messteek", "steekwond"], code: "P1 Steekincident" },
   { woorden: ["hart", "hartstilstand", "hartaanval", "reanimatie", "reanimeren", "bewusteloos", "flauwte", "flauwvallen"], code: "P1 Reanimatie" },
   { woorden: ["schotwond", "wapen", "schieten"], code: "P1 Schietincident" },
 
   // 🏥 Medische noodsituaties
-  { woorden: ["reanimatie", "hartstilstand", "bewusteloos", "noodmedische", "admeniet"], code: "P1 Reanimatie" },
+  { woorden: ["reanimatie", "hartstilstand", "bewusteloos", "flauwvallen", "admeniet", "flauwte", "reanimeren", "hart"], code: "P1 Reanimatie" },
   { woorden: ["beroerte", "hartaanval", "hartstilstand", "bewusteloos", "stroke", "hersenbloeding", "hartinfarct"], code: "P1 Medische Noodsituatie" },
   { woorden: ["epilepsie", "aanval", "stuip", "stuipen", "epileptische aanval", "convulsies"], code: "P1 Epileptische aanval" },
   { woorden: ["astma", "aanval", "benauwdheid", "ademhalingsproblemen", "kortademigheid", "benauwd"], code: "P1 Ademnood" },

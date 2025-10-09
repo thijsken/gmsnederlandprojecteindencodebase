@@ -1417,7 +1417,7 @@ updateTimeAndDate();
 
         // Call management
         document.getElementById('closeCallDetails').addEventListener('click', () => {
-            document.getElementById('callDetailsModal').classList.add('hidden');
+        document.getElementById('callDetailsModal').classList.add('hidden');
         });
         document.getElementById('assignPoliceBtn').addEventListener('click', () => assignUnit('police'));
         document.getElementById('assignAmbulanceBtn').addEventListener('click', () => assignUnit('ambulance'));
@@ -2765,47 +2765,6 @@ function robloxToLeafletCoords(robloxX, robloxY) {
             
             showNotification(`${getUnitTypeName(unitType)} eenheid ${availableUnit.id} toegewezen!`);
         }
-
-        // function closeCall() {
-        //     if (!currentCallId) return;
-            
-        //     // Find call and mark as closed
-        //     const call = calls.find(c => String(c.id) === String(currentCallId));
-        //     if (call) {
-        //         call.status = 'closed';
-        //     }
-            
-        //     // Free up assigned units
-        //     units.forEach(unit => {
-        //         if (unit.assignedCall === currentCallId) {
-        //             unit.status = 'available';
-        //             unit.assignedCall = null;
-                    
-        //             // Update marker
-        //             if (unitMarkers[unit.id]) {
-        //                 let color = '#3b82f6'; // Blue for police
-        //                 if (unit.type === 'ambulance') color = '#10b981'; // Green for ambulance
-        //                 if (unit.type === 'fire') color = '#f59e0b'; // Orange for fire
-                        
-        //                 unitMarkers[unit.id].setStyle({color: color});
-        //             }
-        //         }
-        //     });
-            
-        //     // Update UI
-        //     // updateUnits();
-        //     updateCalls();
-            
-        //     // Remove emergency marker
-        //     if (emergencyMarkers[currentCallId]) {
-        //         mainMap.removeLayer(emergencyMarkers[currentCallId]);
-        //         dashboardMap.removeLayer(emergencyMarkers[currentCallId]);
-        //         delete emergencyMarkers[currentCallId];
-        //     }
-            
-        //     showNotification(`Melding ${currentCallId} afgehandeld!`);
-        //     document.getElementById('callDetailsModal').classList.add('hidden');
-        // }
 
         function sluitMelding(callId) {
           if (!callId) {
