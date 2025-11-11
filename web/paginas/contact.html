@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Contactpagina van GMS_Nederland. Neem contact met ons op voor vragen of ondersteuning.">
@@ -107,27 +108,28 @@
 <main>
     <section>
         <h2>📬 Contactformulier</h2>
-        <form action="mailto:gmsnederlandsupport@gmail.com" method="post" enctype="text/plain">
+        <form id="contactForm">
             <input type="text" name="naam" placeholder="Je naam" required>
             <input type="email" name="email" placeholder="Je e-mail" required>
+            <input type="title" name="waar gaat het over?" placeholder="geef een omschrijving waar het over gaat" required>
             <textarea name="bericht" placeholder="Je bericht..." required></textarea>
             <button type="submit">Verstuur bericht</button>
         </form>
     </section>
 
-    <section>
+    <!-- <section>
         <h2>📧 Contactinformatie</h2>
         <p>Je kunt ons ook direct bereiken via:</p>
         <ul>
             <li>Email: <a href="mailto:gmsnederlandsupport@gmail.com">gmsnederlandsupport@gmail.com</a></li>
         </ul>
-    </section>
+    </section> -->
 
     <section>
         <h2>💬 Discord</h2>
         <p>Sluit je aan bij onze community en stel vragen via Discord:</p>
         <ul>
-            <li><a href="https://discord.gg/q7Evwfb6" target="_blank">Join onze Discord server</a></li>
+            <li><a href="https://discord.gg/m89jCSV3qv" target="_blank">Join onze Discord server</a></li>
         </ul>
     </section>
 
@@ -146,5 +148,33 @@
     &copy; 2025 GMS_Nederland | Alle rechten voorbehouden
 </footer>
 
+<script>
+    (function(){
+        emailjs.init("tSmtlSY8dLQ2XMhgE");
+    })();
+
+    document.getElementById("contactForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const params = {
+            naam: this.naam.value,
+            email: this.email.value,
+            title: this.title.value,
+            bericht: this.bericht.value
+        };
+
+        emailjs.send("service_rr0z55l", "template_so7y2s5", params) // support
+         .then(() => {
+            emailjs.send("service_rr0z55l", "template_pohswap", params) // klant
+            .then(() => {
+                alert("Bericht verzonden en bevestiging verstuurd!");
+                this.reset();
+            })
+            .catch(() => alert("Fout bij het verzenden van de bevestigingsmail."));
+         })
+         .catch(() => alert("Fout bij versturen van bericht."));
+    });
+
+</script>
 </body>
 </html>
